@@ -440,10 +440,9 @@ export default class Index<Model extends object, Data extends object = {}> {
 
     let nestedBuilder: Index<PopulateModel, any> | undefined = undefined;
 
-    const parsedPopulateQuery = Index._parsePopulation<
-      Model,
-      PopulateModel
-    >(populateQuery);
+    const parsedPopulateQuery = Index._parsePopulation<Model, PopulateModel>(
+      populateQuery
+    );
 
     const singlePopulateQuery = parsedPopulateQuery[0];
 
@@ -677,10 +676,7 @@ export default class Index<Model extends object, Data extends object = {}> {
   ): StrapiSort<ModelInput> | StrapiSort<ModelInput>[] {
     if (this._isSortArray(sortQuery)) {
       if (this._isArrayOfKeys(sortQuery)) {
-        return Index._createSortObjectArray<ModelInput>(
-          sortQuery,
-          defaultSort
-        );
+        return Index._createSortObjectArray<ModelInput>(sortQuery, defaultSort);
       } else {
         return sortQuery;
       }

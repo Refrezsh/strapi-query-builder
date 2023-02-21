@@ -126,7 +126,7 @@ describe("Filters - one level", () => {
     const fnAttr = type.replace("$", "");
 
     const query = new SQBuilder().filters(attribute)[fnAttr](value);
-    const builtQuery = new SQBuilder().joinFilters(query).build()
+    const builtQuery = new SQBuilder().joinFilters(query).build();
 
     expect(builtQuery).toEqual(getResult(type));
   });

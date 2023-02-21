@@ -8,10 +8,10 @@
   "scripts": {
     "rename": "node -e \"require('fs').rename('lib/esm/index.js', 'lib/esm/index.mjs', function(err) { if (err) console.log(err);})\"",
     "clean": "rimraf lib",
-    "prettier": "npx prettier --write",
+    "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\"",
     "build:esm": "tsc -p ./tsconfig.esm.json && copyfiles -f src/sq-builder-types.d.ts lib/esm && npm run rename",
     "build:cjs": "tsc -p ./tsconfig.cjs.json && copyfiles -f src/sq-builder-types.d.ts lib/cjs",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run pretty",
     "prepack": "npm run build",
     "test": "npm run build && jest",
     "speed": "node tests/performanceTest.js",

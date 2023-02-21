@@ -18,13 +18,17 @@ describe("Sorting query", () => {
   });
 
   it("Object", () => {
-    const builtQuery = new SQBuilder().sort({ key: oneKey, type: "asc" }).build();
+    const builtQuery = new SQBuilder()
+      .sort({ key: oneKey, type: "asc" })
+      .build();
 
     expect(builtQuery).toEqual(getOneSort(oneKey));
   });
 
   it("Order", () => {
-    const builtQuery = new SQBuilder().sort({ key: oneKey, type: "desc" }).build();
+    const builtQuery = new SQBuilder()
+      .sort({ key: oneKey, type: "desc" })
+      .build();
 
     expect(builtQuery).not.toEqual(getOneSort(oneKey));
   });
