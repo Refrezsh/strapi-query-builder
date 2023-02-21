@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc builder/sq-builder.ts",
-    "test": "jest"
+    "test": "jest",
+    "test-speed": "tsc test/performanceTest.ts && node test/performanceTest.js"
   },
   "keywords": [],
   "author": "Igor",
