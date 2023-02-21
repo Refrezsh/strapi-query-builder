@@ -120,4 +120,14 @@ describe("Filters - one level", () => {
       expect(builtQuery).toEqual(getTwoResults(attr, true));
     }
   });
+
+  it("Merge filters", () => {
+    const type = attributeFilters[0];
+    const fnAttr = type.replace("$", "");
+
+    const query = new SQBuilder().filters(attribute)[fnAttr](value);
+    const builtQuery = new SQBuilder().joinFilters(query).build()
+
+    expect(builtQuery).toEqual(getResult(type));
+  });
 });
