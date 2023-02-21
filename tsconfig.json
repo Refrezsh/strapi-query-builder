@@ -4,10 +4,12 @@
     "esModuleInterop": true,
     "target": "es2019",
     "moduleResolution": "node",
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": "dist",
     "allowJs": true,
-    "removeComments": true
+    "removeComments": true,
+    "skipLibCheck": true,
+    "noEmit": true
   },
   "lib": ["es2015"]
 }
