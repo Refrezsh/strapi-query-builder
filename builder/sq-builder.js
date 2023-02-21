@@ -833,7 +833,7 @@ var SQBuilder = /** @class */ (function () {
         }
         var withNegate = function (data) {
             var _a;
-            return negateRoot ? (_a = {}, _a["not"] = data, _a) : data;
+            return negateRoot ? (_a = {}, _a["$not"] = data, _a) : data;
         };
         if (this._isMoreThanOneFilter(parsedFilters)) {
             return withNegate((_a = {},

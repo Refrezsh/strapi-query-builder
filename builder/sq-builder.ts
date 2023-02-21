@@ -1135,7 +1135,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     const withNegate = <T>(data: T): any => {
-      return negateRoot ? { ["not"]: data } : data;
+      return negateRoot ? { ["$not"]: data } : data;
     };
 
     if (this._isMoreThanOneFilter(parsedFilters)) {

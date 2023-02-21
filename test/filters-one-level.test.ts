@@ -24,18 +24,40 @@ export const attributeFilters = [
   "$notNull",
 ];
 
-const getResult = (type) => ({ filters: { attribute: { [type]: value } } });
-const getTwoResults = (type) => ({
-  filters: {
-    $and: [{ attribute: { [type]: value } }, { attribute: { [type]: value } }],
-  },
-});
+const getResult = (type, negate = false) =>
+  negate
+    ? { filters: { attribute: { $not: { [type]: value } } } }
+    : { filters: { attribute: { [type]: value } } };
+
+const getTwoResults = (type, negateRoot = false) =>
+  negateRoot
+    ? {
+        filters: {
+          $not: {
+            $and: [
+              { attribute: { [type]: value } },
+              { attribute: { [type]: value } },
+            ],
+          },
+        },
+      }
+    : {
+        filters: {
+          $and: [
+            { attribute: { [type]: value } },
+            { attribute: { [type]: value } },
+          ],
+        },
+      };
 
 describe("Filters - one level", () => {
   it("Attributes", () => {
     for (const atr of attributeFilters) {
       const fnAttr = atr.replace("$", "");
-      const builtQuery = new SQBuilder().filters(attribute)[fnAttr](value).build();
+      const builtQuery = new SQBuilder()
+        .filters(attribute)
+        [fnAttr](value)
+        .build();
 
       expect(builtQuery).toEqual(getResult(atr));
     }
@@ -67,6 +89,35 @@ describe("Filters - one level", () => {
         .build();
 
       expect(builtQuery).toEqual(getTwoResults(attr));
+    }
+  });
+
+  it("Attribute negation", () => {
+    for (const atr of attributeFilters) {
+      const fnAttr = atr.replace("$", "");
+      const builtQuery = new SQBuilder()
+        .filters(attribute)
+        .not()
+        [fnAttr](value)
+        .build();
+
+      expect(builtQuery).toEqual(getResult(atr, true));
+    }
+  });
+
+  it("Root negation", () => {
+    for (const attr of attributeFilters) {
+      const fnAttr = attr.replace("$", "");
+      const builtQuery = new SQBuilder()
+        .not()
+        .and()
+        .filters(attribute)
+        [fnAttr](value)
+        .filters(attribute)
+        [fnAttr](value)
+        .build();
+
+      expect(builtQuery).toEqual(getTwoResults(attr, true));
     }
   });
 });

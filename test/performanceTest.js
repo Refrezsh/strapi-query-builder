@@ -91,4 +91,4 @@ var meanAssigmentTime = queryAssigmentSum / times;
 var meanBuildTime = queryBuildingSum / times;
 console.log("Average query assign: ".concat(meanAssigmentTime, "ms"));
 console.log("Average query build: ".concat(meanBuildTime, "ms"));
-console.log("Average query performance: ".concat(meanBuildTime + meanBuildTime, "ms"));
+console.log("Average query performance: ".concat(meanAssigmentTime + meanBuildTime, "ms"));
