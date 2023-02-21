@@ -35,35 +35,38 @@ describe("Filters - one level", () => {
   it("Attributes", () => {
     for (const atr of attributeFilters) {
       const fnAttr = atr.replace("$", "");
-      const query = new SQBuilder().filters(attribute)[fnAttr](value).build();
-      expect(query).toEqual(getResult(atr));
+      const builtQuery = new SQBuilder().filters(attribute)[fnAttr](value).build();
+
+      expect(builtQuery).toEqual(getResult(atr));
     }
   });
 
   it("Attributes duplicates", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
-      const query = new SQBuilder()
+      const builtQuery = new SQBuilder()
         .filters(attribute)
         [fnAttr](value)
         [fnAttr](value)
         [fnAttr](value)
         .build();
-      expect(query).toEqual(getResult(attr));
+
+      expect(builtQuery).toEqual(getResult(attr));
     }
   });
 
   it("Two attributes with same key", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
-      const query = new SQBuilder()
+      const builtQuery = new SQBuilder()
         .and()
         .filters(attribute)
         [fnAttr](value)
         .filters(attribute)
         [fnAttr](value)
         .build();
-      expect(query).toEqual(getTwoResults(attr));
+
+      expect(builtQuery).toEqual(getTwoResults(attr));
     }
   });
 });
