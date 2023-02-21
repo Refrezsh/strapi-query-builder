@@ -11,7 +11,7 @@
     "build:cjs": "tsc -p ./tsconfig.cjs.json && copyfiles -f src/sq-builder-types.d.ts lib/cjs",
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "prepack": "npm run build",
-    "test": "jest",
+    "test": "npm run build && jest",
     "speed": "node tests/performanceTest.js",
     "coverage": "jest --coverage"
   },

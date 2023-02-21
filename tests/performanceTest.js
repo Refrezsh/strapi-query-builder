@@ -1,4 +1,4 @@
-import { SQBuilder } from "../dist/lib/es6";
+const { SQBuilder } = require("../lib/cjs/index");
 
 const times = 100;
 let queryAssigmentSum = 0;
