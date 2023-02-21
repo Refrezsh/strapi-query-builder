@@ -65,7 +65,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Build Strapi query
    * @param {QueryTypes} queryType Default StrapiService
-   * @return {StrapiEntityQuery} Composed query
+   * @return {StrapiEntityQuery} Built query
    */
   public build(
     queryType: QueryTypes = "strapiService"
@@ -91,7 +91,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   /**
    * @description Build Strapi query for Strapi service
-   * @return {StrapiEntityQuery} Composed query
+   * @return {StrapiEntityQuery} Built query
    */
   public buildStrapiService(): StrapiEntityQuery<Model, Data> {
     return SQBuilder._buildQuery(this._query, "strapiService");
@@ -99,7 +99,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   /**
    * @description Build Strapi query for Entity service
-   * @return {StrapiEntityQuery} Composed query
+   * @return {StrapiEntityQuery} Built query
    */
   public buildEntityService(): StrapiEntityQuery<Model, Data> {
     return SQBuilder._buildQuery(this._query, "entityService");
@@ -107,7 +107,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   /**
    * @description Build Strapi query for Query service
-   * @return {StrapiEntityQuery} Composed query
+   * @return {StrapiEntityQuery} Built query
    */
   public buildQueryEngine(): StrapiEntityQuery<Model, Data> {
     return SQBuilder._buildQuery(this._query, "queryEngine");
@@ -116,27 +116,27 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   //<editor-fold desc="Filters functions">
   /**
-   * @description Filter query
-   * @description If filterInput is empty or callback builder wait for logical filtration if key input builder wait for attribute filters
-   * @param {FilterInputCallback| FilterKey} filterInput Can be key or callback with same builder for visual filter grouping
-   * @param {FilterInputCallback} thisCallback Provides same builder to group filters function calls
+   * @description Start filter query
+   * @description If the attribute is empty, it expects a logical filter or a nested filter "with"
+   * @param {FilterInputCallback| FilterKey} attribute Can be key or callback with same builder for visual filter grouping
+   * @param {FilterInputCallback} thisCallback Provides same builder to group filters chains
    * @return {SQBuilder} This builder
    */
   public filters(
-    filterInput?: FilterInputCallback<Model, Data> | FilterKey<Model>,
+    attribute?: FilterInputCallback<Model, Data> | FilterKey<Model>,
     thisCallback?: FilterInputCallback<Model, any>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    if (typeof filterInput === "function") {
-      filterInput(this);
+    if (typeof attribute === "function") {
+      attribute(this);
       return this;
     }
 
-    if (filterInput !== undefined) {
-      this._prevFilterKey = filterInput;
+    if (attribute !== undefined) {
+      this._prevFilterKey = attribute;
     }
 
     if (thisCallback !== undefined && typeof thisCallback === "function") {
@@ -148,7 +148,8 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * Add deep nested filters to current filter - this function provide new builder to callback
+   * Add deep nested filters to current filters
+   * Callback provide new builder
    * @param nestedCallback
    */
   public with<NestedModel extends object = {}>(
@@ -384,7 +385,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   public between(value: MultipleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$between", value);
   }
-  //</editor-fold> filt
+  //</editor-fold>
 
   //<editor-fold desc="Filter private actions">
   private _addAttribute(
@@ -425,7 +426,8 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   //<editor-fold desc="Population">
   /**
-   * @description Populate query can be simple populate or complex nested populate with builder callback
+   * @description Add query populate
+   * @description Can be as a simple key or take a callback for nested query
    * @param {StrapiPopulationInputQuery} populateQuery
    * @param {PopulationInputCallback} nestedCallback Provides callback with new builder for nested filtering, sorting and fields selection
    * @return {SQBuilder} This builder
@@ -487,7 +489,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Add populate fragments for dynamic zones
    * @param {string} componentTypeKey Component type key
-   * @param {PopulationInputCallback} nestedCallback Component Builder
+   * @param {PopulationInputCallback} nestedCallback Dynamic component builder
    * @return {SQBuilder} This builder
    */
   public on<PopulateModel extends object>(
@@ -611,7 +613,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   //<editor-fold desc="Fields">
   /**
-   * @description Select model fields
+   * @description Add filed selection to query
    * @description Same keys will be merged
    * @param {StrapiFieldsInputQuery} fields
    * @return {SQBuilder} This builder
@@ -634,7 +636,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   //<editor-fold desc="Sort">
   /**
-   * @description Add sorting
+   * @description Add sorting to query
    * @description Same keys will be merged
    * @param {StrapiSortInputQuery} sortQuery
    * @return {SQBuilder} This builder
@@ -739,7 +741,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   // <editor-fold desc="Pagination">
   /**
-   * @description Add StrapiService pagination
+   * @description Add StrapiService like page
    * @param {number} page
    * @return {SQBuilder} This builder
    */
@@ -751,6 +753,11 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     return this;
   }
 
+  /**
+   * @description Add StrapiService like page size
+   * @param {number} pageSize
+   * @return {SQBuilder} This builder
+   */
   public pageSize(pageSize: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -759,6 +766,11 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     return this;
   }
 
+  /**
+   * @description Add Offset like page start
+   * @param {number} start
+   * @return {SQBuilder} This builder
+   */
   public pageStart(start: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -767,6 +779,11 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     return this;
   }
 
+  /**
+   * @description Add Offset like page limit
+   * @param {number} limit
+   * @return {SQBuilder} This builder
+   */
   public pageLimit(limit: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -797,7 +814,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   // <editor-fold desc="Raw query utils">
   /**
-   * @description Create builder readonly that all filter methods don't change query state
+   * @description Make the builder read-only that all filter methods don't change query state
    * @param {boolean} isReadonly
    * @return {SQBuilder} This builder
    */
@@ -847,7 +864,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Get raw sort data
+   * @description Get raw pagination
    * @return {pagination?: StrapiPagination, offsetPagination?: StrapiOffsetPagination} Parsed sort data
    */
   public getRawPagination(): {
@@ -871,7 +888,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Get population by key
+   * @description Get builder prev population by key
    * @param {PopulationKey} populationKey
    * @return {StrapiPopulation | undefined} Population object
    */
@@ -930,7 +947,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Merge external builder filters
    * @param {SQBuilder} builder External builder
-   * @param {boolean} mergeRootLogical If true on first level merged filter override root logical if used with its add root logical to nested builder not this
+   * @param {boolean} mergeRootLogical If true, the main logic filter will be overwritten by the input
    * @return {SQBuilder} This builder
    */
   public joinFilters<T extends object, F extends object>(
