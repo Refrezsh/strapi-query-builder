@@ -23,26 +23,29 @@ const fullQuery = {
 };
 
 describe("Populate query", () => {
-  it("populate all", () => {
-    const query = new SQBuilder().populate("*").build();
+  it("Populate all", () => {
+    const builtQuery = new SQBuilder().populate("*").build();
 
-    expect(query).toEqual(getAllPopulate);
+    expect(builtQuery).toEqual(getAllPopulate);
   });
 
-  it("populate all query engine", () => {
-    const query = new SQBuilder().populate("*").buildQueryEngine();
+  it("Populate all query engine", () => {
+    const builtQuery = new SQBuilder().populate("*").buildQueryEngine();
 
-    expect(query).toEqual(populateAllQueryEngine);
+    expect(builtQuery).toEqual(populateAllQueryEngine);
   });
 
-  it("populate keys with same key", () => {
-    const query = new SQBuilder().populate([key1, key2]).populate(key1).build();
+  it("Populate keys with same key", () => {
+    const builtQuery = new SQBuilder()
+      .populate([key1, key2])
+      .populate(key1)
+      .build();
 
-    expect(query).toEqual(getKeyPopulation);
+    expect(builtQuery).toEqual(getKeyPopulation);
   });
 
-  it("complex populate", () => {
-    const query = new SQBuilder()
+  it("Complex populate", () => {
+    const builtQuery = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
           .sort([key1])
@@ -54,11 +57,11 @@ describe("Populate query", () => {
       })
       .build();
 
-    expect(query).toEqual(fullQuery);
+    expect(builtQuery).toEqual(fullQuery);
   });
 
-  it("illegal actions in complex populate", () => {
-    const query = new SQBuilder()
+  it("Illegal actions in complex populate", () => {
+    const builtQuery = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
           .page(1)
@@ -72,11 +75,11 @@ describe("Populate query", () => {
       })
       .build();
 
-    expect(query).toEqual(fullQuery);
+    expect(builtQuery).toEqual(fullQuery);
   });
 
-  it("key rewrite in complex populate", () => {
-    const query = new SQBuilder()
+  it("Key rewrite in complex populate", () => {
+    const builtQuery = new SQBuilder()
       .populate(key1)
       .populate(key1, (key1Builder) => {
         key1Builder
@@ -89,10 +92,10 @@ describe("Populate query", () => {
       })
       .build();
 
-    expect(query).toEqual(fullQuery);
+    expect(builtQuery).toEqual(fullQuery);
   });
 
-  it("complex merging in populate", () => {
+  it("Complex merging in populate", () => {
     const sortQuery = new SQBuilder()
       .sort([key1])
       .sort({ key: key2, type: "desc" });
@@ -104,7 +107,7 @@ describe("Populate query", () => {
       .filters(key1, (b) => b.eq(key1))
       .filters(key2, (b) => b.contains(key2));
 
-    const query = new SQBuilder()
+    const builtQuery = new SQBuilder()
       .populate(key1)
       .populate(key1, (key1Builder) => {
         key1Builder
@@ -114,6 +117,6 @@ describe("Populate query", () => {
       })
       .build();
 
-    expect(query).toEqual(fullQuery);
+    expect(builtQuery).toEqual(fullQuery);
   });
 });
