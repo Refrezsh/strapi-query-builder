@@ -312,3 +312,4 @@ export declare class SQBuilder<Model extends object, Data extends object = {}> {
     private static _parsePopulate;
     private static _isPopulateComplex;
 }
+//# sourceMappingURL=sq-builder.d.ts.map
