@@ -1,13 +1,14 @@
 {
-  "name": "@refresh/strapi-query-builder",
-  "version": "0.0.1",
+  "name": "strapi-query-builder",
+  "version": "1.0.0",
   "description": "Utility for creating Strapi queries in declarative way",
   "main": "./lib/cjs/index.js",
   "types": "./lib/cjs/index.d.ts",
   "module": "./lib/esm/index.js",
   "scripts": {
+    "rename": "node -e \"require('fs').rename('lib/esm/index.js', 'lib/esm/index.mjs', function(err) { if (err) console.log(err);})\"",
     "clean": "rimraf lib",
-    "build:esm": "tsc -p ./tsconfig.esm.json && copyfiles -f src/sq-builder-types.d.ts lib/esm",
+    "build:esm": "tsc -p ./tsconfig.esm.json && copyfiles -f src/sq-builder-types.d.ts lib/esm && npm run rename",
     "build:cjs": "tsc -p ./tsconfig.cjs.json && copyfiles -f src/sq-builder-types.d.ts lib/cjs",
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "prepack": "npm run build",
