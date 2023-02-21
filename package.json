@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc builder/sq-builder.ts",
     "test": "jest",
-    "test-speed": "tsc test/performanceTest.ts && node test/performanceTest.js"
+    "test-speed": "tsc test/performanceTest.ts && node test/performanceTest.js",
+    "coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "Igor",
