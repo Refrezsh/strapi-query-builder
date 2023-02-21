@@ -51,10 +51,9 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
 
   private _prevFilterKey?: FilterKey<Model>;
   private _nextAttributeNegate: boolean = false;
-
   private _prevPopulateKey?: PopulationKey<any>;
-
   private _isReadonly = false;
+
 
   constructor(builderConfig?: BuilderConfig) {
     if (builderConfig) {
@@ -148,6 +147,10 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     return this;
   }
 
+  /**
+   * Add deep nested filters to current filter - this function provide new builder to callback
+   * @param nestedCallback
+   */
   public with<NestedModel extends object = {}>(
     nestedCallback: FilterInputCallback<NestedModel, any>
   ): SQBuilder<Model, Data> {
@@ -172,6 +175,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     return this;
   }
 
+  //<editor-fold desc="Logical filters">
   /**
    * @description Negates current attribute or logical filter
    * @return {SQBuilder} This builder
@@ -184,13 +188,9 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     const target =
       this._prevFilterKey !== undefined ? "attribute" : "negateRoot";
 
-    if (target === "negateRoot") {
-      this._query.filters.negate = true;
-    }
-
-    if (target === "attribute") {
-      this._nextAttributeNegate = true;
-    }
+    target === "negateRoot"
+      ? (this._query.filters.negate = true)
+      : (this._nextAttributeNegate = true);
 
     return this;
   }
@@ -205,7 +205,6 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     this._query.filters.rootLogical = "$or";
-
     return this;
   }
 
@@ -219,11 +218,11 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     this._query.filters.rootLogical = "$and";
-
     return this;
   }
+  //</editor-fold>
 
-  //<editor-fold desc="Attributes">
+  //<editor-fold desc="Attributes filters">
   /**
    * @description Add "Equal" attribute filter
    * @param {SingleAttributeType} value
@@ -385,8 +384,9 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
   public between(value: MultipleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$between", value);
   }
-  //</editor-fold>
+  //</editor-fold> filt
 
+  //<editor-fold desc="Filter private actions">
   private _addAttribute(
     type: FilterAttributeType,
     value: AttributeValues
@@ -420,6 +420,7 @@ export class SQBuilder<Model extends object, Data extends object = {}> {
     this._query.filters.attributeFilters.push(filter);
     onAdded && onAdded();
   }
+  //</editor-fold>
   //</editor-fold>
 
   //<editor-fold desc="Population">

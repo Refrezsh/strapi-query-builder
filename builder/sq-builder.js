@@ -103,6 +103,10 @@ var SQBuilder = /** @class */ (function () {
         }
         return this;
     };
+    /**
+     * Add deep nested filters to current filter - this function provide new builder to callback
+     * @param nestedCallback
+     */
     SQBuilder.prototype["with"] = function (nestedCallback) {
         var _this = this;
         if (this._isReadonly) {
@@ -118,6 +122,7 @@ var SQBuilder = /** @class */ (function () {
         });
         return this;
     };
+    //<editor-fold desc="Logical filters">
     /**
      * @description Negates current attribute or logical filter
      * @return {SQBuilder} This builder
@@ -127,12 +132,9 @@ var SQBuilder = /** @class */ (function () {
             return this;
         }
         var target = this._prevFilterKey !== undefined ? "attribute" : "negateRoot";
-        if (target === "negateRoot") {
-            this._query.filters.negate = true;
-        }
-        if (target === "attribute") {
-            this._nextAttributeNegate = true;
-        }
+        target === "negateRoot"
+            ? (this._query.filters.negate = true)
+            : (this._nextAttributeNegate = true);
         return this;
     };
     /**
@@ -157,7 +159,8 @@ var SQBuilder = /** @class */ (function () {
         this._query.filters.rootLogical = "$and";
         return this;
     };
-    //<editor-fold desc="Attributes">
+    //</editor-fold>
+    //<editor-fold desc="Attributes filters">
     /**
      * @description Add "Equal" attribute filter
      * @param {SingleAttributeType} value
@@ -302,7 +305,8 @@ var SQBuilder = /** @class */ (function () {
     SQBuilder.prototype.between = function (value) {
         return this._addAttribute("$between", value);
     };
-    //</editor-fold>
+    //</editor-fold> filt
+    //<editor-fold desc="Filter private actions">
     SQBuilder.prototype._addAttribute = function (type, value) {
         var _this = this;
         if (this._isReadonly) {
@@ -325,6 +329,7 @@ var SQBuilder = /** @class */ (function () {
         this._query.filters.attributeFilters.push(filter);
         onAdded && onAdded();
     };
+    //</editor-fold>
     //</editor-fold>
     //<editor-fold desc="Population">
     /**
