@@ -1,4 +1,4 @@
-import { SQBuilder } from "../builder/sq-builder";
+import { SQBuilder } from "../src/sq-builder";
 import { attributeFilters } from "./filters-one-level.test";
 
 const emptyObject = {};

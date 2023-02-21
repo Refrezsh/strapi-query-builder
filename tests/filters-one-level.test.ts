@@ -1,4 +1,4 @@
-import { SQBuilder } from "../builder/sq-builder";
+import { SQBuilder } from "../src/sq-builder";
 
 const attribute = "attribute";
 const value = "value";

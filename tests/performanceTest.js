@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-var sq_builder_1 = require("../builder/sq-builder");
+var sq_builder_1 = require("../src/sq-builder");
 var times = 100;
 var queryAssigmentSum = 0;
 var queryBuildingSum = 0;

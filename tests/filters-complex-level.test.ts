@@ -1,4 +1,4 @@
-import { SQBuilder } from "../builder/sq-builder";
+import { SQBuilder } from "../src/sq-builder";
 
 describe("Filters - complex cases", () => {
   it("Double nested - without root attribute", () => {
