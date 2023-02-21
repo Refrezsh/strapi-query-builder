@@ -254,23 +254,6 @@ type ArrayPath<Model> = Model extends ReadonlyArray<infer V>
       [Key in keyof Model]-?: ArrayPathImpl<Key & string, Model[Key], Model>;
     }[keyof Model];
 
-type PathValue<Model, Pth extends Path<Model>> = Model extends any
-  ? Pth extends `${infer Key}.${infer SubKey}`
-    ? Key extends keyof Model
-      ? SubKey extends Path<Model[Key]>
-        ? PathValue<Model[Key], SubKey>
-        : never
-      : never
-    : Pth extends keyof Model
-    ? Model[Pth]
-    : never
-  : never;
-
-type FieldPathValue<
-  TFieldValues extends object,
-  TFieldPath extends FieldPath<TFieldValues>
-> = PathValue<TFieldValues, TFieldPath>;
-
 /**
  * @description Typing utils
  */
