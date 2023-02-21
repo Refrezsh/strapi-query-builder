@@ -1,4 +1,4 @@
-import { SQBuilder } from "../src/sq-builder";
+import { SQBuilder } from "../lib/cjs";
 
 describe("Filters - complex cases", () => {
   it("Double nested - without root attribute", () => {

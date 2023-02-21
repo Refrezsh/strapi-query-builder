@@ -1,4 +1,4 @@
-import { SQBuilder } from "../src/sq-builder";
+import { SQBuilder } from "../lib/cjs";
 
 const mainKey = "key1";
 const mainKey2 = "key2";

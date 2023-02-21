@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    // "strict": true,
     "esModuleInterop": true,
-    "target": "es2019",
-    "moduleResolution": "node",
-    "sourceMap": false,
-    "outDir": "dist",
-    "allowJs": true,
-    "removeComments": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "checkJs": true,
+    "allowJs": true,
+    "declaration": true,
+    "declarationMap": false,
+    "allowSyntheticDefaultImports": true
   },
-  "lib": ["es2015"]
+  "files": ["src/index.ts"],
+  "include": ["src/sq-builder-types.d.ts"]
 }

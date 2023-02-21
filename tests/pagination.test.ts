@@ -1,4 +1,4 @@
-import { SQBuilder } from "../src/sq-builder";
+import { SQBuilder } from "../lib/cjs";
 
 const page = 2;
 const size = 24;

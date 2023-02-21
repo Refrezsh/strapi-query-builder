@@ -1,22 +1,25 @@
 {
-  "name": "strapi-query-builder",
+  "name": "@refresh/strapi-query-builder",
   "version": "0.0.1",
-  "description": "",
-  "main": "dist/index.js",
-  "modlue": "dist/index.mjs",
+  "description": "Utility for creating Strapi queries in declarative vay",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "types": "./lib/cjs/index.d.ts",
   "scripts": {
-    "build-internal": "tsc src/sq-builder.ts",
-    "build": "",
+    "build:esm": "tsc -p ./tsconfig.esm.json",
+    "build:cjs": "tsc -p ./tsconfig.cjs.json",
+    "build": "npm run build:esm && npm run build:cjs",
+    "prepack": "npm run build",
     "test": "jest",
-    "speed": "tsc tests/performanceTest.ts && node tests/performanceTest.js",
-    "coverage": "jest --coverage",
-    "lint": "tsc"
+    "speed": "node tests/performanceTest.js",
+    "coverage": "jest --coverage"
   },
   "keywords": [
     "strapi",
-    "strapi query builder"
+    "utils",
+    "utilities"
   ],
-  "author": "Refrezsh",
+  "author": "Igor Badanyuk",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
@@ -29,9 +32,23 @@
     "prettier": "^2.8.0",
     "lodash": "^4.17.21"
   },
-  "peerDependencies": {
-    "lodash": "^4.x",
-    "@types/lodash": "^4.x",
-    "strapi": "^4.x"
-  }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JedWatson/classnames.git"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "lib/**/*"
+  ]
 }
