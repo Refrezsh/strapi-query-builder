@@ -1,4 +1,4 @@
-const { SQBuilder } = require("../lib/cjs/index");
+const SQBuilder = require("../lib/cjs/index").default
 
 const times = 100;
 let queryAssigmentSum = 0;

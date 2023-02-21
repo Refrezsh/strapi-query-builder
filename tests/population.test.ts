@@ -1,4 +1,4 @@
-import { SQBuilder } from "../lib/cjs";
+import SQBuilder from "../lib/cjs";
 
 const getAllPopulate = { populate: "*" };
 const populateAllQueryEngine = { populate: true };

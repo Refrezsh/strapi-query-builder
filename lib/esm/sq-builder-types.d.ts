@@ -1,5 +1,5 @@
 // <editor-fold desc="Sort Types">
-import { SQBuilder } from "./sq-builder";
+import { Index } from "./index";
 
 type StrapiSortInputQuery<Model extends object> =
   | StrapiSort<Model>

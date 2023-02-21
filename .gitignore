@@ -1,4 +1,4 @@
 node_modules
 .idea
 coverage
-dist
+lib
