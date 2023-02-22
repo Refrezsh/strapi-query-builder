@@ -622,7 +622,60 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       Array.isArray(nowSortValue) ? nowSortValue : [nowSortValue],
       Array.isArray(parsedSortQuery) ? parsedSortQuery : [parsedSortQuery]
     );
+
     return this;
+  }
+
+  /**
+   * @description Add sort ascending direction to last sort element or all sort chain
+   * @description Same keys will be merged
+   * @param {boolean} changeAll
+   * @return {SQBuilder} This builder
+   */
+  public asc(changeAll = false) {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    this._changeSortDirection(changeAll, "asc");
+
+    return this;
+  }
+
+  /**
+   * @description Add sort descending direction to last sort element or all sort chain
+   * @param {boolean} changeAll
+   * @return {SQBuilder} This builder
+   */
+  public desc(changeAll = false) {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    this._changeSortDirection(changeAll, "desc");
+
+    return this;
+  }
+
+  private _changeSortDirection(
+    changeAll = false,
+    direction: StrapiSortOptions
+  ) {
+    if (!changeAll) {
+      const lastIndex = this._query.sort.length - 1;
+      if (lastIndex === -1) {
+        return;
+      }
+
+      const lastSort = this._query.sort[lastIndex];
+      if (lastSort === undefined) {
+        return;
+      }
+      this._query.sort[lastIndex] = { ...lastSort, type: direction };
+      return;
+    }
+
+    this._query.sort = this._query.sort.map((s) => ({ ...s, type: direction }));
   }
 
   private static _createSortObject<ModelInput extends object>(

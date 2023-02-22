@@ -10,6 +10,10 @@ const getFewSorts = (key1: string, key2: string) => ({
   sort: [{ [key1]: "asc" }, { [key2]: "asc" }],
 });
 
+const getFewDiffSorts = (key1: string, key2: string) => ({
+  sort: [{ [key1]: "asc" }, { [key2]: "desc" }],
+});
+
 describe("Sorting query", () => {
   it("String", () => {
     const builtQuery = new SQBuilder().sort(oneKey).build();
@@ -31,6 +35,29 @@ describe("Sorting query", () => {
       .build();
 
     expect(builtQuery).not.toEqual(getOneSort(oneKey));
+  });
+
+  it("Chain direction", () => {
+    const builtQuery = new SQBuilder()
+      .sort(oneKey)
+      .asc()
+      .sort(secondKey)
+      .desc()
+      .build();
+
+    expect(builtQuery).toEqual(getFewDiffSorts(oneKey, secondKey));
+  });
+
+  it("Change all direction", () => {
+    const builtQuery = new SQBuilder({ defaultSort: "desc" })
+      .sort(oneKey)
+      .desc()
+      .sort(secondKey)
+      .desc()
+      .asc(true)
+      .build();
+
+    expect(builtQuery).toEqual(getFewSorts(oneKey, secondKey));
   });
 
   it("Same keys", () => {
