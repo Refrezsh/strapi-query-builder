@@ -1,3 +1,5 @@
+import { _set, _unionBy, _union } from "./query-utils";
+
 export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _query: QueryRawInfo<Model, Data> = {
     sort: [],
@@ -793,7 +795,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Get raw filters info
    * @return {StrapiRawFilters} Parsed filters
    */
-  public getRawFilters(): StrapiRawFilters<Model> {
+  protected getRawFilters(): StrapiRawFilters<Model> {
     return this._query.filters;
   }
 
@@ -801,7 +803,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Get fields selection data
    * @return {StrapiFields} Parsed fields data
    */
-  public getRawFields(): StrapiFields<Model> {
+  protected getRawFields(): StrapiFields<Model> {
     return this._query.fields;
   }
 
@@ -809,7 +811,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Get raw sort data
    * @return {StrapiSort[]} Parsed sort data
    */
-  public getRawSort(): StrapiSort<Model>[] {
+  protected getRawSort(): StrapiSort<Model>[] {
     return this._query.sort;
   }
 
@@ -817,7 +819,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Get population data
    * @return {StrapiPopulation} Parsed population data
    */
-  public getRawPopulation(): StrapiPopulation<Model, any>[] {
+  protected getRawPopulation(): StrapiPopulation<Model, any>[] {
     return this._query.population;
   }
 
@@ -825,7 +827,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Get full raw query
    * @return {QueryRawInfo} Parsed population data
    */
-  public getRawQuery(): QueryRawInfo<Model, Data> {
+  protected getRawQuery(): QueryRawInfo<Model, Data> {
     return this._query;
   }
 
@@ -833,7 +835,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Get raw pagination
    * @return {pagination?: StrapiPagination, offsetPagination?: StrapiOffsetPagination} Parsed sort data
    */
-  public getRawPagination(): {
+  protected getRawPagination(): {
     pagination?: StrapiPagination;
     offsetPagination?: StrapiOffsetPagination;
   } {
@@ -847,7 +849,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @description Set builder prev population key
    * @description
    */
-  public setPrevPopulationKey<PopulationModel extends object>(
+  protected setPrevPopulationKey<PopulationModel extends object>(
     populationKey: PopulationKey<PopulationModel>
   ): void {
     this._prevPopulateKey = populationKey;
@@ -858,7 +860,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @param {PopulationKey} populationKey
    * @return {StrapiPopulation | undefined} Population object
    */
-  public getPopulationByKey<PopulationModel extends object>(
+  protected getPopulationByKey<PopulationModel extends object>(
     populationKey: PopulationKey<Model>
   ): StrapiPopulation<Model, PopulationModel> | undefined {
     return this._query.population.find((p) => p.key === populationKey);
@@ -1198,50 +1200,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     return populate.nestedQuery !== undefined && populate.nestedQuery !== null;
   }
   // </editor-fold>
-}
-
-/**
- * Utils for obj and arrays
- */
-
-function _set<Model extends object>(
-  obj: Model,
-  path: string | string[],
-  value: any
-) {
-  const pathArray = Array.isArray(path) ? path : path.match(/([^[.\]])+/g);
-  if (!pathArray) {
-    return obj;
-  }
-
-  pathArray.reduce<Model>((acc, key, i) => {
-    // @ts-ignore
-    if (acc[key] === undefined) acc[key] = {};
-    // @ts-ignore
-    if (i === pathArray.length - 1) acc[key] = value;
-    // @ts-ignore
-    return acc[key];
-  }, obj);
-
-  return obj;
-}
-
-function _union(arr: string[], arr2: string[]) {
-  return [...new Set(arr.concat(arr2))];
-}
-
-function _unionBy<Type extends object>(
-  callback: (b: Type) => string | number | boolean | undefined,
-  array1: Type[],
-  array2: Type[]
-) {
-  return [...array1, ...array2].flat().filter(
-    (
-      (set) => (o) =>
-        // @ts-ignore
-        set.has(callback(o)) ? false : set.add(callback(o))
-    )(new Set())
-  );
 }
 
 type StrapiSortInputQuery<Model extends object> =
