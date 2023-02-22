@@ -37,7 +37,9 @@
     "typescript": "^4.9.3"
   },
   "release": {
-    "branches": ["master"]
+    "branches": [
+      "master"
+    ]
   },
   "publishConfig": {
     "access": "public"
