@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // "strict": true,
+    "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
@@ -11,6 +11,5 @@
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true
   },
-  "files": ["src/index.ts"],
-  "include": ["src/sq-builder-types.d.ts"]
+  "files": ["src/index.ts"]
 }

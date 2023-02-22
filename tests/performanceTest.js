@@ -88,7 +88,7 @@ for (let i = 0; i < times; i++) {
   queryAssigmentSum += process.hrtime(assigmentStarts)[1] / 1000000;
 
   const buildStarts = process.hrtime();
-  const builtQuery = query.build();
+  query.build();
   queryBuildingSum += process.hrtime(buildStarts)[1] / 1000000;
 }
 

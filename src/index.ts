@@ -1,39 +1,4 @@
-import {
-  AttributeValues,
-  BuilderConfig,
-  DefaultPopulation,
-  FieldPath,
-  FilterAttributeType,
-  FilterInputCallback,
-  FilterKey,
-  GetRelations,
-  GetStrictOrWeak,
-  MorphOnPopulation,
-  MultipleAttributeType,
-  PopulationInputCallback,
-  PopulationKey,
-  PopulationNestedQuery,
-  QueryRawInfo,
-  QueryTypes,
-  SingleAttributeType,
-  SortKey,
-  StrapiAttributesFilter,
-  StrapiEntityQuery,
-  StrapiFields,
-  StrapiFieldsInputQuery,
-  StrapiFiltersType,
-  StrapiOffsetPagination,
-  StrapiPagination,
-  StrapiPopulation,
-  StrapiPopulationInputQuery,
-  StrapiRawFilters,
-  StrapiSort,
-  StrapiSortInputQuery,
-  StrapiSortOptions,
-  UnionInputPagination,
-} from "./sq-builder-types";
-
-export default class Index<Model extends object, Data extends object = {}> {
+export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _query: QueryRawInfo<Model, Data> = {
     sort: [],
     filters: {
@@ -41,7 +6,7 @@ export default class Index<Model extends object, Data extends object = {}> {
       attributeFilters: [],
     },
     population: [],
-    fields: [] as StrapiFields<Model>,
+    fields: [] as unknown as StrapiFields<Model>,
   };
 
   private readonly _builderConfig: Required<BuilderConfig> = {
@@ -92,7 +57,7 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @return {StrapiEntityQuery} Built query
    */
   public buildStrapiService(): StrapiEntityQuery<Model, Data> {
-    return Index._buildQuery(this._query, "strapiService");
+    return SQBuilder._buildQuery(this._query, "strapiService");
   }
 
   /**
@@ -100,7 +65,7 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @return {StrapiEntityQuery} Built query
    */
   public buildEntityService(): StrapiEntityQuery<Model, Data> {
-    return Index._buildQuery(this._query, "entityService");
+    return SQBuilder._buildQuery(this._query, "entityService");
   }
 
   /**
@@ -108,7 +73,7 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @return {StrapiEntityQuery} Built query
    */
   public buildQueryEngine(): StrapiEntityQuery<Model, Data> {
-    return Index._buildQuery(this._query, "queryEngine");
+    return SQBuilder._buildQuery(this._query, "queryEngine");
   }
   //</editor-fold>
 
@@ -118,12 +83,12 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @description If the attribute is empty, it expects a logical filter or a nested filter "with"
    * @param {FilterInputCallback| FilterKey} attribute Can be key or callback with same builder for visual filter grouping
    * @param {FilterInputCallback} thisCallback Provides same builder to group filters chains
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
   public filters(
     attribute?: FilterInputCallback<Model, Data> | FilterKey<Model>,
     thisCallback?: FilterInputCallback<Model, any>
-  ): Index<Model, Data> {
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -149,15 +114,16 @@ export default class Index<Model extends object, Data extends object = {}> {
    * Add deep nested filters to current filters
    * Callback provide new builder
    * @param nestedCallback
+   * @return {SQBuilder} This builder
    */
   public with<NestedModel extends object = {}>(
     nestedCallback: FilterInputCallback<NestedModel, any>
-  ): Index<Model, Data> {
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    const nestedBuilder = new Index<NestedModel, any>();
+    const nestedBuilder = new SQBuilder<NestedModel, any>();
     nestedCallback(nestedBuilder);
 
     this._addToFilter(
@@ -177,9 +143,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   //<editor-fold desc="Logical filters">
   /**
    * @description Negates current attribute or logical filter
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public not(): Index<Model, Data> {
+  public not(): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -196,9 +162,9 @@ export default class Index<Model extends object, Data extends object = {}> {
 
   /**
    * @description Add logical OR filter.
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public or(): Index<Model, Data> {
+  public or(): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -209,9 +175,9 @@ export default class Index<Model extends object, Data extends object = {}> {
 
   /**
    * @description Add logical AND filter.
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public and(): Index<Model, Data> {
+  public and(): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -225,162 +191,162 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Add "Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public eq(value: SingleAttributeType): Index<Model, Data> {
+  public eq(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$eq", value);
   }
 
   /**
    * @description Add "Equal insensitive" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public eqi(value: SingleAttributeType): Index<Model, Data> {
+  public eqi(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$eqi", value);
   }
 
   /**
    * @description Add "Not Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public ne(value: SingleAttributeType): Index<Model, Data> {
+  public ne(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$ne", value);
   }
 
   /**
    * @description Add "In" attribute filter
    * @param {MultipleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public in(value: MultipleAttributeType): Index<Model, Data> {
+  public in(value: MultipleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$in", value);
   }
 
   /**
    * @description Add "Not In" attribute filter
    * @param {MultipleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public notIn(value: MultipleAttributeType): Index<Model, Data> {
+  public notIn(value: MultipleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$notIn", value);
   }
 
   /**
    * @description Add "Less Than" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public lt(value: SingleAttributeType): Index<Model, Data> {
+  public lt(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$lt", value);
   }
 
   /**
    * @description Add "Less Than or Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public lte(value: SingleAttributeType): Index<Model, Data> {
+  public lte(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$lte", value);
   }
 
   /**
    * @description Add "Greater Than" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public gt(value: SingleAttributeType): Index<Model, Data> {
+  public gt(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$gt", value);
   }
 
   /**
    * @description Add "Greater Than or Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public gte(value: SingleAttributeType): Index<Model, Data> {
+  public gte(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$gte", value);
   }
 
   /**
    * @description Add "Contains" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public contains(value: SingleAttributeType): Index<Model, Data> {
+  public contains(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$contains", value);
   }
 
   /**
    * @description Add "Not Contains" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public notContains(value: SingleAttributeType): Index<Model, Data> {
+  public notContains(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$notContains", value);
   }
 
   /**
    * @description Add "Contains case-insensitive" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public containsi(value: SingleAttributeType): Index<Model, Data> {
+  public containsi(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$containsi", value);
   }
 
   /**
    * @description Add "Not Contains case-insensitive" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public notContainsi(value: SingleAttributeType): Index<Model, Data> {
+  public notContainsi(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$notContainsi", value);
   }
 
   /**
    * @description Add "Start with" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public startsWith(value: SingleAttributeType): Index<Model, Data> {
+  public startsWith(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$startsWith", value);
   }
 
   /**
    * @description Add "Ends with" attribute filter
    * @param {SingleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public endsWith(value: SingleAttributeType): Index<Model, Data> {
+  public endsWith(value: SingleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$endsWith", value);
   }
 
   /**
    * @description Add "Is null" attribute filter
    * @param {boolean} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public null(value: boolean): Index<Model, Data> {
+  public null(value: boolean): SQBuilder<Model, Data> {
     return this._addAttribute("$null", value);
   }
 
   /**
    * @description Add "Is not null" attribute filter
    * @param {boolean} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public notNull(value: boolean): Index<Model, Data> {
+  public notNull(value: boolean): SQBuilder<Model, Data> {
     return this._addAttribute("$notNull", value);
   }
 
   /**
    * @description Add "Between" attribute filter
    * @param {MultipleAttributeType} value
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public between(value: MultipleAttributeType): Index<Model, Data> {
+  public between(value: MultipleAttributeType): SQBuilder<Model, Data> {
     return this._addAttribute("$between", value);
   }
   //</editor-fold>
@@ -389,7 +355,7 @@ export default class Index<Model extends object, Data extends object = {}> {
   private _addAttribute(
     type: FilterAttributeType,
     value: AttributeValues
-  ): Index<Model, Data> {
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -428,26 +394,27 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @description Can be as a simple key or take a callback for nested query
    * @param {StrapiPopulationInputQuery} populateQuery
    * @param {PopulationInputCallback} nestedCallback Provides callback with new builder for nested filtering, sorting and fields selection
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
   public populate<PopulateModel extends object>(
     populateQuery: StrapiPopulationInputQuery<Model>,
     nestedCallback?: PopulationInputCallback<PopulateModel>
-  ): Index<Model, Data> {
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    let nestedBuilder: Index<PopulateModel, any> | undefined = undefined;
+    let nestedBuilder: SQBuilder<PopulateModel, any> | undefined = undefined;
 
-    const parsedPopulateQuery = Index._parsePopulation<Model, PopulateModel>(
-      populateQuery
-    );
+    const parsedPopulateQuery = SQBuilder._parsePopulation<
+      Model,
+      PopulateModel
+    >(populateQuery);
 
     const singlePopulateQuery = parsedPopulateQuery[0];
 
     if (nestedCallback !== undefined && typeof nestedCallback === "function") {
-      nestedBuilder = new Index<PopulateModel, any>({
+      nestedBuilder = new SQBuilder<PopulateModel, any>({
         defaultSort: this._builderConfig.defaultSort,
       });
       nestedBuilder.setPrevPopulationKey(singlePopulateQuery.key);
@@ -461,7 +428,8 @@ export default class Index<Model extends object, Data extends object = {}> {
 
       const isMorphData =
         findMorph !== undefined &&
-        !Index._isDefaultQueryPopulation(findMorph.nestedQuery);
+        !!findMorph.nestedQuery &&
+        !SQBuilder._isDefaultQueryPopulation(findMorph.nestedQuery);
 
       parsedPopulateQuery[0] = {
         key: singlePopulateQuery.key,
@@ -487,12 +455,12 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @description Add populate fragments for dynamic zones
    * @param {string} componentTypeKey Component type key
    * @param {PopulationInputCallback} nestedCallback Dynamic component builder
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
   public on<PopulateModel extends object>(
     componentTypeKey: string,
     nestedCallback: PopulationInputCallback<PopulateModel>
-  ): Index<Model, Data> {
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -505,7 +473,7 @@ export default class Index<Model extends object, Data extends object = {}> {
       (p) => p.key === this._prevPopulateKey
     );
 
-    const nestedBuilder: Index<PopulateModel, any> = new Index<
+    const nestedBuilder: SQBuilder<PopulateModel, any> = new SQBuilder<
       PopulateModel,
       any
     >({
@@ -571,12 +539,16 @@ export default class Index<Model extends object, Data extends object = {}> {
     }
 
     if (this._isArrayOfPopKeys(populationQuery)) {
-      return populationQuery.map((s) => ({ key: s }));
+      return populationQuery.map(
+        (s) => ({ key: s } as StrapiPopulation<ParentModel, PopulateModel>)
+      );
     }
 
     if (this._isNotArrayOfPopKeys(populationQuery)) {
       return [{ key: populationQuery }];
     }
+
+    return [];
   }
 
   private static _isNotArrayOfPopKeys<ParentModel extends object>(
@@ -612,19 +584,16 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @description Add filed selection to query
    * @description Same keys will be merged
    * @param {StrapiFieldsInputQuery} fields
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public fields(fields: StrapiFieldsInputQuery<Model>): Index<Model, Data> {
+  public fields(fields: StrapiFieldsInputQuery<Model>): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
     const nowFields = this._query.fields;
-
-    this._query.fields = _union(
-      nowFields,
-      Array.isArray(fields) ? fields : [fields]
-    ) as StrapiFields<Model>;
+    const newFields = (Array.isArray(fields) ? fields : [fields]) as string[];
+    this._query.fields = _union(nowFields, newFields) as StrapiFields<Model>;
 
     return this;
   }
@@ -635,23 +604,23 @@ export default class Index<Model extends object, Data extends object = {}> {
    * @description Add sorting to query
    * @description Same keys will be merged
    * @param {StrapiSortInputQuery} sortQuery
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public sort(sortQuery: StrapiSortInputQuery<Model>): Index<Model, Data> {
+  public sort(sortQuery: StrapiSortInputQuery<Model>): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
     const nowSortValue = this._query.sort;
-    const parsedSortQuery = Index._parseSortObject<Model>(
+    const parsedSortQuery = SQBuilder._parseSortObject<Model>(
       sortQuery,
       this._builderConfig.defaultSort
     );
 
     this._query.sort = _unionBy(
+      (v) => v.key,
       Array.isArray(nowSortValue) ? nowSortValue : [nowSortValue],
-      Array.isArray(parsedSortQuery) ? parsedSortQuery : [parsedSortQuery],
-      (v) => v.key
+      Array.isArray(parsedSortQuery) ? parsedSortQuery : [parsedSortQuery]
     );
     return this;
   }
@@ -667,7 +636,7 @@ export default class Index<Model extends object, Data extends object = {}> {
     stringArray: SortKey<ModelInput>[],
     defaultSort: StrapiSortOptions
   ): StrapiSort<ModelInput>[] {
-    return stringArray.map((s) => Index._createSortObject(s, defaultSort));
+    return stringArray.map((s) => SQBuilder._createSortObject(s, defaultSort));
   }
 
   private static _parseSortObject<ModelInput extends object>(
@@ -676,7 +645,10 @@ export default class Index<Model extends object, Data extends object = {}> {
   ): StrapiSort<ModelInput> | StrapiSort<ModelInput>[] {
     if (this._isSortArray(sortQuery)) {
       if (this._isArrayOfKeys(sortQuery)) {
-        return Index._createSortObjectArray<ModelInput>(sortQuery, defaultSort);
+        return SQBuilder._createSortObjectArray<ModelInput>(
+          sortQuery,
+          defaultSort
+        );
       } else {
         return sortQuery;
       }
@@ -684,10 +656,11 @@ export default class Index<Model extends object, Data extends object = {}> {
       if (this._isSortObject(sortQuery)) {
         return sortQuery;
       }
-
       if (this._isSortKey(sortQuery)) {
-        return Index._createSortObject(sortQuery, defaultSort);
+        return SQBuilder._createSortObject(sortQuery, defaultSort);
       }
+
+      return [];
     }
   }
 
@@ -736,9 +709,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Add StrapiService like page
    * @param {number} page
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public page(page: number): Index<Model, Data> {
+  public page(page: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -749,9 +722,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Add StrapiService like page size
    * @param {number} pageSize
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public pageSize(pageSize: number): Index<Model, Data> {
+  public pageSize(pageSize: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -762,9 +735,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Add Offset like page start
    * @param {number} start
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public pageStart(start: number): Index<Model, Data> {
+  public pageStart(start: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -775,9 +748,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Add Offset like page limit
    * @param {number} limit
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public pageLimit(limit: number): Index<Model, Data> {
+  public pageLimit(limit: number): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -793,9 +766,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Add Any input data to query
    * @param {object} dataObject
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public data(dataObject: Data): Index<Model, Data> {
+  public data(dataObject: Data): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -809,9 +782,9 @@ export default class Index<Model extends object, Data extends object = {}> {
   /**
    * @description Make the builder read-only that all filter methods don't change query state
    * @param {boolean} isReadonly
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
-  public readonly(isReadonly?: boolean): Index<Model, Data> {
+  public readonly(isReadonly?: boolean): SQBuilder<Model, Data> {
     this._isReadonly = isReadonly === undefined ? true : isReadonly;
     return this;
   }
@@ -895,12 +868,12 @@ export default class Index<Model extends object, Data extends object = {}> {
   //<editor-fold desc="Merge utils">
   /**
    * @description Merge external builder pagination
-   * @param {Index} builder External builder
-   * @return {Index} This builder
+   * @param {SQBuilder} builder External builder
+   * @return {SQBuilder} This builder
    */
   public joinPagination<T extends object, F extends object>(
-    builder: Index<T, F>
-  ): Index<Model, Data> {
+    builder: SQBuilder<T, F>
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -915,12 +888,12 @@ export default class Index<Model extends object, Data extends object = {}> {
 
   /**
    * @description Merge external builder population
-   * @param {Index} builder External builder
-   * @return {Index} This builder
+   * @param {SQBuilder} builder External builder
+   * @return {SQBuilder} This builder
    */
   public joinPopulation<T extends object, F extends object>(
-    builder: Index<T, F>
-  ): Index<Model, Data> {
+    builder: SQBuilder<T, F>
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -929,9 +902,9 @@ export default class Index<Model extends object, Data extends object = {}> {
       builder.getRawPopulation() as unknown as StrapiPopulation<Model, any>[];
 
     this._query.population = _unionBy(
+      (p) => p.key,
       this._query.population,
-      externalPopulation,
-      (p) => p.key
+      externalPopulation
     );
 
     return this;
@@ -939,14 +912,14 @@ export default class Index<Model extends object, Data extends object = {}> {
 
   /**
    * @description Merge external builder filters
-   * @param {Index} builder External builder
+   * @param {SQBuilder} builder External builder
    * @param {boolean} mergeRootLogical If true, the main logic filter will be overwritten by the input
-   * @return {Index} This builder
+   * @return {SQBuilder} This builder
    */
   public joinFilters<T extends object, F extends object>(
-    builder: Index<T, F>,
+    builder: SQBuilder<T, F>,
     mergeRootLogical: boolean = false
-  ): Index<Model, Data> {
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -969,33 +942,36 @@ export default class Index<Model extends object, Data extends object = {}> {
 
   /**
    * @description Merge external builder sorts
-   * @param {Index} builder External builder
-   * @return {Index} This builder
+   * @param {SQBuilder} builder External builder
+   * @return {SQBuilder} This builder
    */
-  public joinSort(builder: Index<Model, Data>): Index<Model, Data> {
+  public joinSort(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
     const externalSort = builder.getRawSort();
 
-    this._query.sort = _unionBy(this._query.sort, externalSort, (s) => s.key);
+    this._query.sort = _unionBy<StrapiSort<Model>>(
+      (s) => s.key,
+      this._query.sort,
+      externalSort
+    );
 
     return this;
   }
 
   /**
    * @description Merge external builder fields
-   * @param {Index} builder External builder
-   * @return {Index} This builder
+   * @param {SQBuilder} builder External builder
+   * @return {SQBuilder} This builder
    */
-  public joinFields(builder: Index<Model, Data>): Index<Model, Data> {
+  public joinFields(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
     const externalFields = builder.getRawFields();
-
     this._query.fields = _union(
       this._query.fields,
       externalFields
@@ -1014,7 +990,7 @@ export default class Index<Model extends object, Data extends object = {}> {
     let parsedQuery: StrapiEntityQuery<Md, Dt> = {};
 
     // Parsed sort values the same in service, entity service and query engine
-    const sort = Index._parseSort<Md>(rawQuery.sort);
+    const sort = SQBuilder._parseSort<Md>(rawQuery.sort);
     if (sort !== undefined) {
       parsedQuery[isQueryEngine ? "orderBy" : "sort"] = sort;
     }
@@ -1025,13 +1001,13 @@ export default class Index<Model extends object, Data extends object = {}> {
     }
 
     // Filter values the same in service, entity service and query engine
-    const filters = Index._parseFilters<Md>(rawQuery.filters);
+    const filters = SQBuilder._parseFilters<Md>(rawQuery.filters);
     if (filters !== undefined) {
       parsedQuery[isQueryEngine ? "where" : "filters"] = filters;
     }
 
     // Populate calls build for nested query
-    const populate = Index._parsePopulate(rawQuery.population, queryType);
+    const populate = SQBuilder._parsePopulate(rawQuery.population, queryType);
     if (populate !== undefined) {
       parsedQuery.populate = populate;
     }
@@ -1097,14 +1073,15 @@ export default class Index<Model extends object, Data extends object = {}> {
   ): StrapiFiltersType<Md> | undefined {
     if (filter.nested !== undefined) {
       const nestedFilters = this._parseFilters(filter.nested);
-
       if (nestedFilters === undefined) {
         return undefined;
       }
 
-      return filter.key === undefined
-        ? nestedFilters
-        : (_set({}, filter.key, nestedFilters) as StrapiFiltersType<Md>);
+      return (
+        filter.key === undefined
+          ? nestedFilters
+          : _set({}, filter.key, nestedFilters)
+      ) as StrapiFiltersType<Md>;
     }
 
     if (filter.value === undefined || filter.type === undefined) {
@@ -1112,12 +1089,12 @@ export default class Index<Model extends object, Data extends object = {}> {
     }
 
     return filter.negate
-      ? (_set({}, filter.key, {
+      ? (_set({}, filter.key as string, {
           ["$not"]: {
             [filter.type]: filter.value,
           },
         }) as StrapiFiltersType<Md>)
-      : (_set({}, filter.key, {
+      : (_set({}, filter.key as string, {
           [filter.type]: filter.value,
         }) as StrapiFiltersType<Md>);
   }
@@ -1132,7 +1109,7 @@ export default class Index<Model extends object, Data extends object = {}> {
     const parsedFilters: StrapiFiltersType<Md>[] = [];
 
     for (const attributeQuery of attributeFilters) {
-      const parsedAttribute = Index._parseAttributeFilter(attributeQuery);
+      const parsedAttribute = SQBuilder._parseAttributeFilter(attributeQuery);
       if (parsedAttribute === undefined) {
         continue;
       }
@@ -1181,21 +1158,21 @@ export default class Index<Model extends object, Data extends object = {}> {
         break;
       }
 
-      const isComplex = Index._isPopulateComplex(populate);
+      const isComplex = SQBuilder._isPopulateComplex(populate);
 
       if (isComplex) {
-        const nestedQuery = populate.nestedQuery;
+        const nestedQuery = populate.nestedQuery as PopulationNestedQuery<Dt>;
 
         const isDefaultQuery = this._isDefaultQueryPopulation(nestedQuery);
 
         if (isDefaultQuery) {
           Object.assign(parsedPopulates, {
-            [populate.key]: Index._buildQuery(nestedQuery, queryType),
+            [populate.key]: SQBuilder._buildQuery(nestedQuery, queryType),
           });
         } else {
           const morphQuery = {};
           Object.entries(nestedQuery).forEach(([key, query]) => {
-            const parsedQuery = Index._buildQuery(query, queryType);
+            const parsedQuery = SQBuilder._buildQuery(query, queryType);
 
             if (Object.keys(parsedQuery).length > 0) {
               Object.assign(morphQuery, {
@@ -1218,7 +1195,7 @@ export default class Index<Model extends object, Data extends object = {}> {
   private static _isPopulateComplex<Md extends object, Dt extends object>(
     populate: StrapiPopulation<Md, Dt>
   ) {
-    return populate.nestedQuery !== undefined;
+    return populate.nestedQuery !== undefined && populate.nestedQuery !== null;
   }
   // </editor-fold>
 }
@@ -1227,31 +1204,338 @@ export default class Index<Model extends object, Data extends object = {}> {
  * Utils for obj and arrays
  */
 
-function _set(obj: any = {}, path: string, value: any) {
+function _set<Model extends object>(
+  obj: Model,
+  path: string | string[],
+  value: any
+) {
   const pathArray = Array.isArray(path) ? path : path.match(/([^[.\]])+/g);
+  if (!pathArray) {
+    return obj;
+  }
 
-  pathArray.reduce((acc, key, i) => {
+  pathArray.reduce<Model>((acc, key, i) => {
+    // @ts-ignore
     if (acc[key] === undefined) acc[key] = {};
+    // @ts-ignore
     if (i === pathArray.length - 1) acc[key] = value;
+    // @ts-ignore
     return acc[key];
   }, obj);
 
   return obj;
 }
 
-function _union(arr: any[], ...args) {
-  return [...new Set(arr.concat(...args))];
+function _union(arr: string[], arr2: string[]) {
+  return [...new Set(arr.concat(arr2))];
 }
 
-function _unionBy(...arrays) {
-  const iteratee = arrays.pop();
-  if (Array.isArray(iteratee)) {
-    return [];
-  }
-  return [...arrays].flat().filter(
+function _unionBy<Type extends object>(
+  callback: (b: Type) => string | number | boolean | undefined,
+  array1: Type[],
+  array2: Type[]
+) {
+  return [...array1, ...array2].flat().filter(
     (
       (set) => (o) =>
-        set.has(iteratee(o)) ? false : set.add(iteratee(o))
+        // @ts-ignore
+        set.has(callback(o)) ? false : set.add(callback(o))
     )(new Set())
   );
 }
+
+type StrapiSortInputQuery<Model extends object> =
+  | StrapiSort<Model>
+  | StrapiSort<Model>[]
+  | GetStrictOrWeak<
+      Model,
+      FieldPath<Model> | FieldPath<Model>[],
+      FieldPath<Model> | FieldPath<Model>[] | string | string[]
+    >;
+
+type StrapiSortOptions = "desc" | "asc";
+
+type SortKey<Model extends object> = GetStrictOrWeak<
+  Model,
+  FieldPath<Model>,
+  FieldPath<Model> | string
+>;
+
+interface StrapiSort<Model extends object> {
+  key: SortKey<Model>;
+  type: StrapiSortOptions;
+}
+// </editor-fold>
+
+// <editor-fold desc="Pagination Types">
+interface StrapiPagination {
+  page?: number;
+  pageSize?: number;
+}
+
+interface StrapiOffsetPagination {
+  start?: number;
+  limit?: number;
+}
+
+type UnionInputPagination = StrapiPagination | StrapiOffsetPagination;
+// </editor-fold>
+
+// <editor-fold desc="Filter types">
+type FilterLogicalType = "$and" | "$or" | "$not";
+type FilterAttributeType =
+  | "$eq"
+  | "$eqi"
+  | "$ne"
+  | "$in"
+  | "$notIn"
+  | "$lt"
+  | "$lte"
+  | "$gt"
+  | "$gte"
+  | "$between"
+  | "$contains"
+  | "$notContains"
+  | "$containsi"
+  | "$notContainsi"
+  | "$startsWith"
+  | "$endsWith"
+  | "$null"
+  | "$notNull";
+
+type SingleAttributeType = string | number | boolean;
+type MultipleAttributeType = string[] | number[];
+
+type FilterInputCallback<Model extends object, Data extends object> = (
+  builder: SQBuilder<Model, Data>
+) => void;
+
+type FilterKey<Model extends object> = GetStrictOrWeak<
+  Model,
+  FieldPath<Model>,
+  FieldPath<Model> | string
+>;
+
+type AttributeValues = string | string[] | number | number[] | boolean;
+
+interface StrapiAttributesFilter<
+  Model extends object,
+  NestedModel extends object = {}
+> {
+  key?: FilterKey<Model>;
+  type?: FilterAttributeType;
+  value?: AttributeValues;
+  negate?: boolean;
+  nested?: StrapiRawFilters<NestedModel>;
+}
+
+interface StrapiRawFilters<Model extends object> {
+  rootLogical: FilterLogicalType;
+  negate?: boolean;
+  attributeFilters: StrapiAttributesFilter<Model>[];
+}
+// </editor-fold>
+
+// <editor-fold desc="Population Types">
+type StrapiPopulationInputQuery<Model extends object> =
+  | GetStrictOrWeak<
+      Model,
+      GetRelations<Model> | GetRelations<Model>[],
+      GetRelations<Model> | GetRelations<Model>[] | string | string[]
+    >
+  | "*";
+
+type PopulationKey<Model extends object> =
+  | GetStrictOrWeak<Model, GetRelations<Model>, GetRelations<Model> | string>
+  | "*";
+
+type MorphOnPopulation<PopulateModel extends object> = {
+  [key: string]: Omit<QueryRawInfo<PopulateModel, object>, "pagination">;
+};
+
+type DefaultPopulation<PopulateModel extends object> = Omit<
+  QueryRawInfo<PopulateModel, object>,
+  "pagination"
+>;
+
+type PopulationNestedQuery<PopulateModel extends object> =
+  | DefaultPopulation<PopulateModel>
+  | MorphOnPopulation<PopulateModel>;
+
+interface StrapiPopulation<
+  ParentModel extends object,
+  PopulateModel extends object
+> {
+  key: PopulationKey<ParentModel>;
+  nestedQuery?: PopulationNestedQuery<PopulateModel>;
+}
+
+type PopulationInputCallback<PopulationModel extends object> = (
+  builder: SQBuilder<PopulationModel, any>
+) => void;
+// </editor-fold>
+
+//<editor-fold desc="Fields Types">
+type StrapiFieldsInputQuery<Model extends object> = GetStrictOrWeak<
+  Model,
+  GetAttributes<Model> | GetAttributes<Model>[],
+  GetAttributes<Model> | GetAttributes<Model>[] | string | string[]
+>;
+
+type StrapiFields<Model extends object> = GetStrictOrWeak<
+  Model,
+  GetAttributes<Model>[],
+  GetAttributes<Model>[] | string[]
+>;
+//</editor-fold>
+
+// <editor-fold desc="Query shapes">
+type QueryTypes = "strapiService" | "entityService" | "queryEngine";
+
+interface BuilderConfig {
+  defaultSort?: StrapiSortOptions;
+}
+
+interface QueryRawInfo<Model extends object, Data extends object> {
+  sort: StrapiSort<Model>[];
+  filters: StrapiRawFilters<Model>;
+  pagination?: StrapiPagination;
+  offsetPagination?: StrapiOffsetPagination;
+  population: StrapiPopulation<Model, any>[];
+  fields: StrapiFields<Model>;
+  data?: Data;
+}
+
+type StrapiFiltersType<Model extends object> = {
+  [key in
+    | FilterLogicalType
+    | FilterAttributeType
+    | FieldPath<Model>
+    | GetAttributes<Model>
+    | GetRelations<Model>]:
+    | number
+    | string
+    | number[]
+    | string[]
+    | StrapiFiltersType<Model>
+    | StrapiFiltersType<Model>[];
+};
+
+interface StrapiEntityQuery<Model extends object, Data extends object> {
+  filters?: StrapiFiltersType<Model>;
+  fields?: StrapiFields<Model>;
+  data?: Data;
+  pagination?: UnionInputPagination;
+  [key: string]: any;
+}
+// </editor-fold>
+
+/**
+ * @description Utils types for getting nested keys and values type
+ * inspired by https://github.com/react-hook-form/react-hook-form/blob/274d8fb950f9944547921849fb6b3ee6e879e358/src/types/utils.ts#L119
+ * @description Array will be typed as first object in type array
+ * @description Nested object works perfectly
+ * @description There is 1 level limitation on Cyclic deps
+ */
+type Primitive = null | undefined | string | number | boolean | symbol | bigint;
+
+type IsTuple<T extends ReadonlyArray<any>> = number extends T["length"]
+  ? false
+  : true;
+type TupleKey<T extends ReadonlyArray<any>> = Exclude<keyof T, keyof any[]>;
+
+type IsSameType<T1, T2> = T1 extends T2 ? true : false;
+
+type PathImpl<
+  Key extends string | number,
+  Value,
+  BaseType
+> = Value extends Primitive
+  ? `${Key}`
+  : IsSameType<Value, BaseType> extends true
+  ? `${Key}` | `${Key}.${keyof Value & string}`
+  : `${Key}` | `${Key}.${Path<Value>}`;
+
+type Path<Model> = Model extends ReadonlyArray<infer Value>
+  ? IsTuple<Model> extends true
+    ? {
+        [K in TupleKey<Model>]-?: PathImpl<K & string, Model[K], Model>;
+      }[TupleKey<Model>]
+    : { [Key in keyof Model[0]]-?: Key & string }[keyof Model[0]]
+  : {
+      [Key in keyof Model]-?: PathImpl<Key & string, Model[Key], Model>;
+    }[keyof Model];
+
+type FieldPath<TFieldValues extends object> = Path<TFieldValues>;
+
+type ArrayPathImpl<
+  Key extends string | number,
+  Value,
+  BaseType
+> = Value extends Primitive
+  ? never
+  : Value extends ReadonlyArray<infer U>
+  ? U extends Primitive
+    ? never
+    : IsSameType<Value, BaseType> extends true
+    ? `${Key}CyclicDepsFounded`
+    : `${Key}` | `${Key}.${ArrayPath<Value>}`
+  : `${Key}.${ArrayPath<Value>}`;
+
+type ArrayPath<Model> = Model extends ReadonlyArray<infer V>
+  ? IsTuple<Model> extends true
+    ? {
+        [Key in TupleKey<Model>]-?: ArrayPathImpl<
+          Key & string,
+          Model[Key],
+          Model
+        >;
+      }[TupleKey<Model>]
+    : { [Key in keyof Model[0]]-?: Key & string }[keyof Model[0]]
+  : {
+      [Key in keyof Model]-?: ArrayPathImpl<Key & string, Model[Key], Model>;
+    }[keyof Model];
+
+/**
+ * @description Typing utils
+ */
+type ModelPrimitive = string | number | boolean | symbol | bigint;
+
+/**
+ * @description Predicate to select primitive keys
+ */
+type IsAttribute<
+  Key extends string | number,
+  Value
+> = Value extends ModelPrimitive ? `${Key}` : never;
+
+/**
+ * @description Predicate to select not primitive keys
+ */
+type IsNotAttribute<
+  Key extends string | number,
+  Value
+> = Value extends ModelPrimitive ? never : `${Key}`;
+
+/**
+ * @description Get one or another type by id in Model
+ */
+type GetStrictOrWeak<Model extends object, Strict, Weak> = Model extends {
+  id: infer U;
+}
+  ? Strict
+  : Weak;
+
+/**
+ * @description Get attribute keys one level of model
+ */
+type GetAttributes<Model extends object> = {
+  [Key in keyof Model]-?: IsAttribute<Key & string, Model[Key]>;
+}[keyof Model];
+
+/**
+ * @description Get relation keys one level of model
+ */
+type GetRelations<Model extends object> = {
+  [Key in keyof Model]-?: IsNotAttribute<Key & string, Model[Key]>;
+}[keyof Model];

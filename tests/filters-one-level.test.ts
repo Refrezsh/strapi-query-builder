@@ -24,12 +24,12 @@ export const attributeFilters = [
   "$notNull",
 ];
 
-const getResult = (type, negate = false) =>
+const getResult = (type: string, negate = false) =>
   negate
     ? { filters: { attribute: { $not: { [type]: value } } } }
     : { filters: { attribute: { [type]: value } } };
 
-const getTwoResults = (type, negateRoot = false) =>
+const getTwoResults = (type: string, negateRoot = false) =>
   negateRoot
     ? {
         filters: {
@@ -54,6 +54,7 @@ describe("Filters - one level", () => {
   it("Attributes", () => {
     for (const atr of attributeFilters) {
       const fnAttr = atr.replace("$", "");
+      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
       const builtQuery = new SQBuilder()
         .filters(attribute)
         [fnAttr](value)
@@ -66,6 +67,7 @@ describe("Filters - one level", () => {
   it("Attributes duplicates", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
+      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
       const builtQuery = new SQBuilder()
         .filters(attribute)
         [fnAttr](value)
@@ -80,6 +82,7 @@ describe("Filters - one level", () => {
   it("Two attributes with same key", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
+      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
       const builtQuery = new SQBuilder()
         .and()
         .filters(attribute)
@@ -95,6 +98,7 @@ describe("Filters - one level", () => {
   it("Attribute negation", () => {
     for (const atr of attributeFilters) {
       const fnAttr = atr.replace("$", "");
+      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
       const builtQuery = new SQBuilder()
         .filters(attribute)
         .not()
@@ -108,6 +112,7 @@ describe("Filters - one level", () => {
   it("Root negation", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
+      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
       const builtQuery = new SQBuilder()
         .not()
         .and()
@@ -125,6 +130,7 @@ describe("Filters - one level", () => {
     const type = attributeFilters[0];
     const fnAttr = type.replace("$", "");
 
+    // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
     const query = new SQBuilder().filters(attribute)[fnAttr](value);
     const builtQuery = new SQBuilder().joinFilters(query).build();
 

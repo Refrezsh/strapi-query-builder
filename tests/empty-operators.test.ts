@@ -19,7 +19,8 @@ describe("Empty operators", () => {
     const query = new SQBuilder();
 
     for (const attr of attributeFilters) {
-      const fnAttr = attr.replace("$", "");
+      const fnAttr = attr.replace("$", "") as keyof SQBuilder<object>;
+      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
       query[fnAttr](attribute);
     }
 
