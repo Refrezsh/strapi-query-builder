@@ -353,7 +353,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
   //</editor-fold>
 
-  //<editor-fold desc="Filter private actions">
   private _addAttribute(
     type: FilterAttributeType,
     value: AttributeValues
@@ -387,7 +386,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     this._query.filters.attributeFilters.push(filter);
     onAdded && onAdded();
   }
-  //</editor-fold>
   //</editor-fold>
 
   //<editor-fold desc="Population">
@@ -780,61 +778,19 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
   // </editor-fold>
 
-  // <editor-fold desc="Raw query utils">
-  /**
-   * @description Make the builder read-only that all filter methods don't change query state
-   * @param {boolean} isReadonly
-   * @return {SQBuilder} This builder
-   */
-  public readonly(isReadonly?: boolean): SQBuilder<Model, Data> {
-    this._isReadonly = isReadonly === undefined ? true : isReadonly;
-    return this;
-  }
-
-  /**
-   * @description Get raw filters info
-   * @return {StrapiRawFilters} Parsed filters
-   */
+  // <editor-fold desc="Protected utils">
   protected getRawFilters(): StrapiRawFilters<Model> {
     return this._query.filters;
   }
-
-  /**
-   * @description Get fields selection data
-   * @return {StrapiFields} Parsed fields data
-   */
   protected getRawFields(): StrapiFields<Model> {
     return this._query.fields;
   }
-
-  /**
-   * @description Get raw sort data
-   * @return {StrapiSort[]} Parsed sort data
-   */
   protected getRawSort(): StrapiSort<Model>[] {
     return this._query.sort;
   }
-
-  /**
-   * @description Get population data
-   * @return {StrapiPopulation} Parsed population data
-   */
   protected getRawPopulation(): StrapiPopulation<Model, any>[] {
     return this._query.population;
   }
-
-  /**
-   * @description Get full raw query
-   * @return {QueryRawInfo} Parsed population data
-   */
-  protected getRawQuery(): QueryRawInfo<Model, Data> {
-    return this._query;
-  }
-
-  /**
-   * @description Get raw pagination
-   * @return {pagination?: StrapiPagination, offsetPagination?: StrapiOffsetPagination} Parsed sort data
-   */
   protected getRawPagination(): {
     pagination?: StrapiPagination;
     offsetPagination?: StrapiOffsetPagination;
@@ -845,21 +801,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     };
   }
 
-  /**
-   * @description Set builder prev population key
-   * @description
-   */
   protected setPrevPopulationKey<PopulationModel extends object>(
     populationKey: PopulationKey<PopulationModel>
   ): void {
     this._prevPopulateKey = populationKey;
   }
-
-  /**
-   * @description Get builder prev population by key
-   * @param {PopulationKey} populationKey
-   * @return {StrapiPopulation | undefined} Population object
-   */
   protected getPopulationByKey<PopulationModel extends object>(
     populationKey: PopulationKey<Model>
   ): StrapiPopulation<Model, PopulationModel> | undefined {
@@ -867,7 +813,47 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
   // </editor-fold>
 
-  //<editor-fold desc="Merge utils">
+  //<editor-fold desc="Public functions">
+  /**
+   * @description Make the builder read-only that all filter methods don't change query state
+   * @param {PublicationStates} state
+   * @return {SQBuilder} This builder
+   */
+  public publicationState(state: PublicationStates): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    this._query.publicationState = state;
+
+    return this;
+  }
+
+  /**
+   * @description Make the builder read-only that all filter methods don't change query state
+   * @param {string} code
+   * @return {SQBuilder} This builder
+   */
+  public locale(code: string): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    this._query.locale = code;
+
+    return this;
+  }
+
+  /**
+   * @description Make the builder read-only that all filter methods don't change query state
+   * @param {boolean} isReadonly
+   * @return {SQBuilder} This builder
+   */
+  public readonly(isReadonly?: boolean): SQBuilder<Model, Data> {
+    this._isReadonly = isReadonly === undefined ? true : isReadonly;
+    return this;
+  }
+
   /**
    * @description Merge external builder pagination
    * @param {SQBuilder} builder External builder
@@ -882,8 +868,33 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     const externalPagination = builder.getRawPagination();
 
-    this._query.pagination = externalPagination.pagination;
-    this._query.offsetPagination = externalPagination.offsetPagination;
+    if (externalPagination.pagination?.page) {
+      this._query.pagination = {
+        ...this._query.pagination,
+        page: externalPagination.pagination.page,
+      };
+    }
+
+    if (externalPagination.pagination?.pageSize) {
+      this._query.pagination = {
+        ...this._query.pagination,
+        pageSize: externalPagination.pagination.pageSize,
+      };
+    }
+
+    if (externalPagination.offsetPagination?.start) {
+      this._query.offsetPagination = {
+        ...this._query.offsetPagination,
+        start: externalPagination.offsetPagination.start,
+      };
+    }
+
+    if (externalPagination.offsetPagination?.limit) {
+      this._query.offsetPagination = {
+        ...this._query.offsetPagination,
+        limit: externalPagination.offsetPagination.limit,
+      };
+    }
 
     return this;
   }
@@ -981,6 +992,25 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     return this;
   }
+
+  /**
+   * @description Join all state
+   * @param {SQBuilder} builder External builder
+   * @return {SQBuilder} This builder
+   */
+  public joinAll(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    this.joinPagination(builder);
+    this.joinPopulation(builder);
+    this.joinFilters(builder);
+    this.joinSort(builder);
+    this.joinFields(builder);
+
+    return this;
+  }
   //</editor-fold>
 
   // <editor-fold desc="Query parsing utils">
@@ -1027,6 +1057,20 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     // Data pass without any mods
     if (rawQuery?.data !== undefined) {
       parsedQuery.data = rawQuery.data;
+    }
+
+    // TODO: Check and create filtering for pub-state, locale for entity service, query engine if possible
+    // Publication state only for strapi service
+    if (
+      rawQuery?.publicationState !== undefined &&
+      queryType === "strapiService"
+    ) {
+      parsedQuery.publicationState = rawQuery.publicationState;
+    }
+
+    // Locale the same as publication
+    if (rawQuery?.locale !== undefined && queryType === "strapiService") {
+      parsedQuery.locale = rawQuery.locale;
     }
 
     return parsedQuery;
@@ -1202,6 +1246,10 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   // </editor-fold>
 }
 
+/**
+ * SQ Types and type utils
+ */
+// <editor-fold desc="Sort types">
 type StrapiSortInputQuery<Model extends object> =
   | StrapiSort<Model>
   | StrapiSort<Model>[]
@@ -1349,6 +1397,7 @@ type StrapiFields<Model extends object> = GetStrictOrWeak<
 
 // <editor-fold desc="Query shapes">
 type QueryTypes = "strapiService" | "entityService" | "queryEngine";
+type PublicationStates = "live" | "preview";
 
 interface BuilderConfig {
   defaultSort?: StrapiSortOptions;
@@ -1362,6 +1411,8 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   population: StrapiPopulation<Model, any>[];
   fields: StrapiFields<Model>;
   data?: Data;
+  publicationState?: PublicationStates;
+  locale?: string;
 }
 
 type StrapiFiltersType<Model extends object> = {
@@ -1384,6 +1435,10 @@ interface StrapiEntityQuery<Model extends object, Data extends object> {
   fields?: StrapiFields<Model>;
   data?: Data;
   pagination?: UnionInputPagination;
+  population?: any;
+  publicationState?: PublicationStates;
+  locale?: string;
+  where?: StrapiFiltersType<Model>;
   [key: string]: any;
 }
 // </editor-fold>

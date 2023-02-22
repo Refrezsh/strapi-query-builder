@@ -26,7 +26,7 @@ describe("Fields query", () => {
     expect(builtQuery).toEqual(getFields(field, filed1));
   });
 
-  it("Merging", () => {
+  it("Join", () => {
     const query1 = new SQBuilder().fields([field]);
     const query2 = new SQBuilder().fields([filed1]);
     const query3 = new SQBuilder().fields([field]);

@@ -126,7 +126,7 @@ describe("Filters - one level", () => {
     }
   });
 
-  it("Merge filters", () => {
+  it("Join filters", () => {
     const type = attributeFilters[0];
     const fnAttr = type.replace("$", "");
 

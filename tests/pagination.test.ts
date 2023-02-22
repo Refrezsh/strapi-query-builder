@@ -83,4 +83,15 @@ describe("Pagination", () => {
     expect(entityService).toEqual(paginationFull);
     expect(queryEngine).toEqual({});
   });
+
+  it("Pagination - join", () => {
+    const query = new SQBuilder().page(page);
+
+    const builtQuery = new SQBuilder()
+      .pageSize(size)
+      .joinPagination(query)
+      .build();
+
+    expect(builtQuery).toEqual(paginationFull);
+  });
 });
