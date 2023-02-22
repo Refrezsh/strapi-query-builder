@@ -1,6 +1,6 @@
 {
   "name": "strapi-query-builder",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "Utility for creating Strapi queries in declarative and typesafe way",
   "main": "./lib/cjs/index.js",
   "types": "./lib/cjs/index.d.ts",
@@ -15,7 +15,8 @@
     "prepack": "npm run build",
     "test": "npm run build && jest",
     "speed": "node tests/performanceTest.js",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "strapi",
@@ -31,8 +32,15 @@
     "jest": "^29.3.1",
     "prettier": "^2.8.0",
     "rimraf": "^4.1.2",
+    "semantic-release": "^20.1.0",
     "ts-jest": "^29.0.3",
     "typescript": "^4.9.3"
+  },
+  "release": {
+    "branches": ["main"]
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
