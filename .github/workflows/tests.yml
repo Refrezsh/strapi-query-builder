@@ -17,6 +17,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
-      - name: Release
+      - name: Tests
       - run: npm ci
       - run: npm test
