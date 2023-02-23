@@ -10,7 +10,7 @@ export function _set<
 
   pathArray.reduce<Model>((acc, key, i) => {
     if (acc[key] === undefined) {
-      // @ts-ignore
+      // @ts-ignore FIXME: Don't know how to fix it yet.
       acc[key] = {};
     }
     if (i === pathArray.length - 1) acc[key] = value;

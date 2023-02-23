@@ -17,7 +17,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
   private _prevFilterKey?: FilterKey<Model>;
   private _nextAttributeNegate: boolean = false;
-  private _prevPopulateKey?: PopulationKey<any>;
+  private _prevPopulateKey?: PopulateKey<any>;
   private _isReadonly = false;
 
   constructor(builderConfig?: BuilderConfig) {
@@ -30,11 +30,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Build Strapi query
    * @param {QueryTypes} queryType Default StrapiService
-   * @return {StrapiEntityQuery} Built query
+   * @return {StrapiBuiltQuery} Built query
    */
   public build(
     queryType: QueryTypes = "strapiService"
-  ): StrapiEntityQuery<Model, Data> {
+  ): StrapiBuiltQuery<Model, Data> {
     switch (queryType) {
       case "entityService": {
         return this.buildEntityService();
@@ -56,25 +56,25 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
   /**
    * @description Build Strapi query for Strapi service
-   * @return {StrapiEntityQuery} Built query
+   * @return {StrapiBuiltQuery} Built query
    */
-  public buildStrapiService(): StrapiEntityQuery<Model, Data> {
+  public buildStrapiService(): StrapiBuiltQuery<Model, Data> {
     return SQBuilder._buildQuery(this._query, "strapiService");
   }
 
   /**
    * @description Build Strapi query for Entity service
-   * @return {StrapiEntityQuery} Built query
+   * @return {StrapiBuiltQuery} Built query
    */
-  public buildEntityService(): StrapiEntityQuery<Model, Data> {
+  public buildEntityService(): StrapiBuiltQuery<Model, Data> {
     return SQBuilder._buildQuery(this._query, "entityService");
   }
 
   /**
    * @description Build Strapi query for Query service
-   * @return {StrapiEntityQuery} Built query
+   * @return {StrapiBuiltQuery} Built query
    */
-  public buildQueryEngine(): StrapiEntityQuery<Model, Data> {
+  public buildQueryEngine(): StrapiBuiltQuery<Model, Data> {
     return SQBuilder._buildQuery(this._query, "queryEngine");
   }
   //</editor-fold>
@@ -83,13 +83,13 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Start filter query
    * @description If the attribute is empty, it expects a logical filter or a nested filter "with"
-   * @param {FilterInputCallback| FilterKey} attribute Can be key or callback with same builder for visual filter grouping
-   * @param {FilterInputCallback} thisCallback Provides same builder to group filters chains
+   * @param {FilterCallback| FilterKey} attribute Can be key or callback with same builder for visual filter grouping
+   * @param {FilterCallback} thisCallback Provides same builder to group filters chains
    * @return {SQBuilder} This builder
    */
   public filters(
-    attribute?: FilterInputCallback<Model, Data> | FilterKey<Model>,
-    thisCallback?: FilterInputCallback<Model, any>
+    attribute?: FilterCallback<Model, Data> | FilterKey<Model>,
+    thisCallback?: FilterCallback<Model, any>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -119,7 +119,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public with<NestedModel extends object = {}>(
-    nestedCallback: FilterInputCallback<NestedModel, any>
+    nestedCallback: FilterCallback<NestedModel, any>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -392,13 +392,13 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Add query populate
    * @description Can be as a simple key or take a callback for nested query
-   * @param {StrapiPopulationInputQuery} populateQuery
-   * @param {PopulationInputCallback} nestedCallback Provides callback with new builder for nested filtering, sorting and fields selection
+   * @param {StrapiPopulateInputQuery} populateQuery
+   * @param {PopulateCallback} nestedCallback Provides callback with new builder for nested filtering, sorting and fields selection
    * @return {SQBuilder} This builder
    */
   public populate<PopulateModel extends object>(
-    populateQuery: StrapiPopulationInputQuery<Model>,
-    nestedCallback?: PopulationInputCallback<PopulateModel>
+    populateQuery: StrapiPopulateInputQuery<Model>,
+    nestedCallback?: PopulateCallback<PopulateModel>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -423,7 +423,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     if (nestedBuilder) {
       const findMorph = nestedBuilder.getPopulationByKey<PopulateModel>(
-        singlePopulateQuery.key as PopulationKey<PopulateModel>
+        singlePopulateQuery.key as PopulateKey<PopulateModel>
       );
 
       const isMorphData =
@@ -454,12 +454,12 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Add populate fragments for dynamic zones
    * @param {string} componentTypeKey Component type key
-   * @param {PopulationInputCallback} nestedCallback Dynamic component builder
+   * @param {PopulateCallback} nestedCallback Dynamic component builder
    * @return {SQBuilder} This builder
    */
   public on<PopulateModel extends object>(
     componentTypeKey: string,
-    nestedCallback: PopulationInputCallback<PopulateModel>
+    nestedCallback: PopulateCallback<PopulateModel>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
@@ -482,7 +482,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     nestedCallback(nestedBuilder);
 
-    const newQuery: MorphOnPopulation<PopulateModel> = {};
+    const newQuery: MorphOnPopulate<PopulateModel> = {};
     Object.assign(newQuery, {
       [componentTypeKey]: {
         fields: nestedBuilder.getRawFields(),
@@ -494,14 +494,14 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     if (populationIndex === -1) {
       this._query.population.push({
-        key: this._prevPopulateKey as PopulationKey<Model>,
+        key: this._prevPopulateKey as PopulateKey<Model>,
         nestedQuery: newQuery,
       });
     } else {
       const populationQuery = this._query.population[populationIndex];
 
       this._query.population[populationIndex] = {
-        key: this._prevPopulateKey as PopulationKey<Model>,
+        key: this._prevPopulateKey as PopulateKey<Model>,
         nestedQuery: { ...populationQuery.nestedQuery, ...newQuery },
       };
     }
@@ -510,7 +510,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   private _addToPopulate<PopulateModel extends object>(
-    populate: StrapiPopulation<Model, PopulateModel>
+    populate: StrapiPopulate<Model, PopulateModel>
   ) {
     if (populate.key === "*") {
       this._query.population = [{ key: populate.key }];
@@ -532,15 +532,15 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     ParentModel extends object,
     PopulateModel extends object
   >(
-    populationQuery: StrapiPopulationInputQuery<ParentModel>
-  ): StrapiPopulation<ParentModel, PopulateModel>[] {
+    populationQuery: StrapiPopulateInputQuery<ParentModel>
+  ): StrapiPopulate<ParentModel, PopulateModel>[] {
     if (populationQuery === "*") {
       return [{ key: "*" }];
     }
 
     if (this._isArrayOfPopKeys(populationQuery)) {
       return populationQuery.map(
-        (s) => ({ key: s } as StrapiPopulation<ParentModel, PopulateModel>)
+        (s) => ({ key: s } as StrapiPopulate<ParentModel, PopulateModel>)
       );
     }
 
@@ -552,8 +552,8 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   private static _isNotArrayOfPopKeys<ParentModel extends object>(
-    query: StrapiPopulationInputQuery<ParentModel>
-  ): query is PopulationKey<ParentModel> {
+    query: StrapiPopulateInputQuery<ParentModel>
+  ): query is PopulateKey<ParentModel> {
     return !Array.isArray(query);
   }
 
@@ -563,13 +563,13 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       | GetRelations<ParentModel>[]
       | string
       | string[]
-  ): query is PopulationKey<ParentModel>[] {
+  ): query is PopulateKey<ParentModel>[] {
     return Array.isArray(query);
   }
 
   private static _isDefaultQueryPopulation<PopulateModel extends object>(
-    query: PopulationNestedQuery<PopulateModel>
-  ): query is DefaultPopulation<PopulateModel> {
+    query: PopulateNestedQuery<PopulateModel>
+  ): query is DefaultPopulate<PopulateModel> {
     return (
       "sort" in query ||
       "filters" in query ||
@@ -841,7 +841,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   protected getRawSort(): StrapiSort<Model>[] {
     return this._query.sort;
   }
-  protected getRawPopulation(): StrapiPopulation<Model, any>[] {
+  protected getRawPopulation(): StrapiPopulate<Model, any>[] {
     return this._query.population;
   }
   protected getRawPagination(): {
@@ -855,13 +855,13 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   protected setPrevPopulationKey<PopulationModel extends object>(
-    populationKey: PopulationKey<PopulationModel>
+    populationKey: PopulateKey<PopulationModel>
   ): void {
     this._prevPopulateKey = populationKey;
   }
   protected getPopulationByKey<PopulationModel extends object>(
-    populationKey: PopulationKey<Model>
-  ): StrapiPopulation<Model, PopulationModel> | undefined {
+    populationKey: PopulateKey<Model>
+  ): StrapiPopulate<Model, PopulationModel> | undefined {
     return this._query.population.find((p) => p.key === populationKey);
   }
   // </editor-fold>
@@ -965,7 +965,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     const externalPopulation =
-      builder.getRawPopulation() as unknown as StrapiPopulation<Model, any>[];
+      builder.getRawPopulation() as unknown as StrapiPopulate<Model, any>[];
 
     this._query.population = _unionBy(
       (p) => p.key,
@@ -1070,9 +1070,9 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   private static _buildQuery<Md extends object, Dt extends object>(
     rawQuery: QueryRawInfo<Md, Dt>,
     queryType: QueryTypes = "strapiService"
-  ): StrapiEntityQuery<Md, Dt> {
+  ): StrapiBuiltQuery<Md, Dt> {
     const isQueryEngine = this._isQueryEngine(queryType);
-    let parsedQuery: StrapiEntityQuery<Md, Dt> = {};
+    let parsedQuery: StrapiBuiltQuery<Md, Dt> = {};
 
     // Parsed sort values the same in service, entity service and query engine
     const sort = SQBuilder._parseSort<Md>(rawQuery.sort);
@@ -1137,7 +1137,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     queryType: QueryTypes,
     pagination?: StrapiPagination,
     offsetPagination?: StrapiOffsetPagination
-  ): UnionInputPagination | undefined {
+  ): UnionPagination | undefined {
     if (offsetPagination !== undefined) {
       return offsetPagination;
     }
@@ -1240,7 +1240,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   private static _parsePopulate<Md extends object, Dt extends object>(
-    populates?: StrapiPopulation<Md, Dt>[],
+    populates?: StrapiPopulate<Md, Dt>[],
     queryType: QueryTypes = "strapiService"
   ): any | undefined {
     if (!populates?.some((f) => !!f)) {
@@ -1260,7 +1260,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       const isComplex = SQBuilder._isPopulateComplex(populate);
 
       if (isComplex) {
-        const nestedQuery = populate.nestedQuery as PopulationNestedQuery<Dt>;
+        const nestedQuery = populate.nestedQuery as PopulateNestedQuery<Dt>;
 
         const isDefaultQuery = this._isDefaultQueryPopulation(nestedQuery);
 
@@ -1292,7 +1292,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   private static _isPopulateComplex<Md extends object, Dt extends object>(
-    populate: StrapiPopulation<Md, Dt>
+    populate: StrapiPopulate<Md, Dt>
   ) {
     return populate.nestedQuery !== undefined && populate.nestedQuery !== null;
   }
@@ -1302,6 +1302,32 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 /**
  * SQ Types and type utils
  */
+// <editor-fold desc="Base types">
+type QueryTypes = "strapiService" | "entityService" | "queryEngine";
+type PublicationStates = "live" | "preview";
+type StrapiSortOptions = "desc" | "asc";
+type FilterLogicalType = "$and" | "$or" | "$not";
+type FilterAttributeType =
+  | "$eq"
+  | "$eqi"
+  | "$ne"
+  | "$in"
+  | "$notIn"
+  | "$lt"
+  | "$lte"
+  | "$gt"
+  | "$gte"
+  | "$between"
+  | "$contains"
+  | "$notContains"
+  | "$containsi"
+  | "$notContainsi"
+  | "$startsWith"
+  | "$endsWith"
+  | "$null"
+  | "$notNull";
+//</editor-fold>
+
 // <editor-fold desc="Sort types">
 type StrapiSortInputQuery<Model extends object> =
   | StrapiSort<Model>
@@ -1311,8 +1337,6 @@ type StrapiSortInputQuery<Model extends object> =
       FieldPath<Model> | FieldPath<Model>[],
       FieldPath<Model> | FieldPath<Model>[] | string | string[]
     >;
-
-type StrapiSortOptions = "desc" | "asc";
 
 type SortKey<Model extends object> = GetStrictOrWeak<
   Model,
@@ -1337,35 +1361,14 @@ interface StrapiOffsetPagination {
   limit?: number;
 }
 
-type UnionInputPagination = StrapiPagination | StrapiOffsetPagination;
+type UnionPagination = StrapiPagination | StrapiOffsetPagination;
 // </editor-fold>
 
 // <editor-fold desc="Filter types">
-type FilterLogicalType = "$and" | "$or" | "$not";
-type FilterAttributeType =
-  | "$eq"
-  | "$eqi"
-  | "$ne"
-  | "$in"
-  | "$notIn"
-  | "$lt"
-  | "$lte"
-  | "$gt"
-  | "$gte"
-  | "$between"
-  | "$contains"
-  | "$notContains"
-  | "$containsi"
-  | "$notContainsi"
-  | "$startsWith"
-  | "$endsWith"
-  | "$null"
-  | "$notNull";
-
 type SingleAttributeType = string | number | boolean;
 type MultipleAttributeType = string[] | number[];
 
-type FilterInputCallback<Model extends object, Data extends object> = (
+type FilterCallback<Model extends object, Data extends object> = (
   builder: SQBuilder<Model, Data>
 ) => void;
 
@@ -1396,7 +1399,7 @@ interface StrapiRawFilters<Model extends object> {
 // </editor-fold>
 
 // <editor-fold desc="Population Types">
-type StrapiPopulationInputQuery<Model extends object> =
+type StrapiPopulateInputQuery<Model extends object> =
   | GetStrictOrWeak<
       Model,
       GetRelations<Model> | GetRelations<Model>[],
@@ -1404,32 +1407,32 @@ type StrapiPopulationInputQuery<Model extends object> =
     >
   | "*";
 
-type PopulationKey<Model extends object> =
+type PopulateKey<Model extends object> =
   | GetStrictOrWeak<Model, GetRelations<Model>, GetRelations<Model> | string>
   | "*";
 
-type MorphOnPopulation<PopulateModel extends object> = {
+type MorphOnPopulate<PopulateModel extends object> = {
   [key: string]: Omit<QueryRawInfo<PopulateModel, object>, "pagination">;
 };
 
-type DefaultPopulation<PopulateModel extends object> = Omit<
+type DefaultPopulate<PopulateModel extends object> = Omit<
   QueryRawInfo<PopulateModel, object>,
   "pagination"
 >;
 
-type PopulationNestedQuery<PopulateModel extends object> =
-  | DefaultPopulation<PopulateModel>
-  | MorphOnPopulation<PopulateModel>;
+type PopulateNestedQuery<PopulateModel extends object> =
+  | DefaultPopulate<PopulateModel>
+  | MorphOnPopulate<PopulateModel>;
 
-interface StrapiPopulation<
+interface StrapiPopulate<
   ParentModel extends object,
   PopulateModel extends object
 > {
-  key: PopulationKey<ParentModel>;
-  nestedQuery?: PopulationNestedQuery<PopulateModel>;
+  key: PopulateKey<ParentModel>;
+  nestedQuery?: PopulateNestedQuery<PopulateModel>;
 }
 
-type PopulationInputCallback<PopulationModel extends object> = (
+type PopulateCallback<PopulationModel extends object> = (
   builder: SQBuilder<PopulationModel, any>
 ) => void;
 // </editor-fold>
@@ -1449,9 +1452,6 @@ type StrapiFields<Model extends object> = GetStrictOrWeak<
 //</editor-fold>
 
 // <editor-fold desc="Query shapes">
-type QueryTypes = "strapiService" | "entityService" | "queryEngine";
-type PublicationStates = "live" | "preview";
-
 interface BuilderConfig {
   defaultSort?: StrapiSortOptions;
 }
@@ -1461,7 +1461,7 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   filters: StrapiRawFilters<Model>;
   pagination?: StrapiPagination;
   offsetPagination?: StrapiOffsetPagination;
-  population: StrapiPopulation<Model, any>[];
+  population: StrapiPopulate<Model, any>[];
   fields: StrapiFields<Model>;
   data?: Data;
   publicationState?: PublicationStates;
@@ -1483,11 +1483,11 @@ type StrapiFiltersType<Model extends object> = {
     | StrapiFiltersType<Model>[];
 };
 
-interface StrapiEntityQuery<Model extends object, Data extends object> {
+interface StrapiBuiltQuery<Model extends object, Data extends object> {
   filters?: StrapiFiltersType<Model>;
   fields?: StrapiFields<Model>;
   data?: Data;
-  pagination?: UnionInputPagination;
+  pagination?: UnionPagination;
   population?: any;
   publicationState?: PublicationStates;
   locale?: string;
@@ -1503,11 +1503,13 @@ interface StrapiEntityQuery<Model extends object, Data extends object> {
  * @description Nested object works perfectly
  * @description There is 1 level limitation on Cyclic deps
  */
+
 type Primitive = null | undefined | string | number | boolean | symbol | bigint;
 
 type IsTuple<T extends ReadonlyArray<any>> = number extends T["length"]
   ? false
   : true;
+
 type TupleKey<T extends ReadonlyArray<any>> = Exclude<keyof T, keyof any[]>;
 
 type IsSameType<T1, T2> = T1 extends T2 ? true : false;
@@ -1518,7 +1520,7 @@ type PathImpl<
   BaseType
 > = Value extends Primitive
   ? `${Key}`
-  : IsSameType<Value, BaseType> extends true
+  : IsSameType<Value, BaseType> extends true // There is trick to prevent typescript crush on cyclic dependencies
   ? `${Key}` | `${Key}.${keyof Value & string}`
   : `${Key}` | `${Key}.${Path<Value>}`;
 
@@ -1543,7 +1545,7 @@ type ArrayPathImpl<
   : Value extends ReadonlyArray<infer U>
   ? U extends Primitive
     ? never
-    : IsSameType<Value, BaseType> extends true
+    : IsSameType<Value, BaseType> extends true // There is trick to prevent typescript crush on cyclic dependencies
     ? `${Key}CyclicDepsFounded`
     : `${Key}` | `${Key}.${ArrayPath<Value>}`
   : `${Key}.${ArrayPath<Value>}`;
