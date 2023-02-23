@@ -60,7 +60,7 @@ const query = {
 };
 ```
 
-But that's not all, we can improve readability through callbacks and add IDE autocompletion if we provide the type for which the query is executed
+We can improve readability through callbacks and add IDE autocompletion if we provide the type for which the query is executed
 
 ```ts
 import SQLBuilder from "strapi-query-builder";
@@ -346,13 +346,11 @@ const filterCategories = new SQBuilder()
   .build();
 ```
 
-That is, it's possible to attach filters, sorting or even populations to both sub-builders and the main builder.
-
-> More examples here
+That it, it's possible to attach filters, sorting or even populations to both sub-builders and the main builder.
 
 ### Populate fragments
 
-Strapi has a powerful solution in the form of dynamic zones. Builder also supports this by `.on` operator. [Strapi populate fragment](https://docs.strapi.io/dev-docs/api/entity-service/populate#populate-fragments)
+Strapi has a powerful solution in the form of dynamic zones. SQBuilder also supports this by `.on` operator. [Strapi populate fragment](https://docs.strapi.io/dev-docs/api/entity-service/populate#populate-fragments)
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -366,8 +364,6 @@ const filterCategories = new SQBuilder()
   )
   .build();
 ```
-
-> More examples here
 
 ## Sort, Fields, Pagination, PublicationState, Locale, Data
 
