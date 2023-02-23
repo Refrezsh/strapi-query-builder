@@ -908,7 +908,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Merge external builder pagination
+   * @description Join external builder pagination
    * @param {SQBuilder} builder External builder
    * @return {SQBuilder} This builder
    */
@@ -953,7 +953,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Merge external builder population
+   * @description Join external builder population
    * @param {SQBuilder} builder External builder
    * @return {SQBuilder} This builder
    */
@@ -977,7 +977,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Merge external builder filters
+   * @description Join external builder filters
    * @param {SQBuilder} builder External builder
    * @param {boolean} mergeRootLogical If true, the main logic filter will be overwritten by the input
    * @return {SQBuilder} This builder
@@ -1007,7 +1007,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Merge external builder sorts
+   * @description Join external builder sorts
    * @param {SQBuilder} builder External builder
    * @return {SQBuilder} This builder
    */
@@ -1028,7 +1028,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Merge external builder fields
+   * @description Join external builder fields
    * @param {SQBuilder} builder External builder
    * @return {SQBuilder} This builder
    */
