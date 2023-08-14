@@ -2,9 +2,20 @@ import SQBuilder from "../lib/cjs";
 
 const strapiService = {
   filters: {
-    attribute: {
-      $eq: "attribute",
-    },
+    $and: [
+      {
+        attribute: {
+          $eq: "attribute",
+        },
+      },
+      {
+        nested: {
+          attribute: {
+            $eq: "attribute",
+          },
+        },
+      },
+    ],
   },
   sort: { attribute: "asc" },
   populate: {
@@ -21,16 +32,59 @@ const strapiService = {
   locale: "uk",
   pagination: {
     page: 5,
+    withCount: true,
   },
 };
 
-const { publicationState, locale, ...entityService } = strapiService;
+const entityService = {
+  filters: {
+    $and: [
+      {
+        attribute: {
+          $eq: "attribute",
+        },
+      },
+      {
+        nested: {
+          attribute: {
+            $eq: "attribute",
+          },
+        },
+      },
+    ],
+  },
+  sort: { attribute: "asc" },
+  populate: {
+    attribute: {
+      filters: {
+        attribute: {
+          $eq: "attribute",
+        },
+      },
+    },
+  },
+  fields: ["attribute"],
+  pagination: {
+    page: 5,
+  },
+};
 
 const queryEngine = {
   where: {
-    attribute: {
-      $eq: "attribute",
-    },
+    $and: [
+      {
+        attribute: {
+          $eq: "attribute",
+        },
+      },
+      {
+        nested: {
+          attribute: {
+            $eq: "attribute",
+          },
+        },
+      },
+    ],
   },
   orderBy: { attribute: "asc" },
   populate: {
@@ -48,19 +102,20 @@ const queryEngine = {
   },
 };
 
-describe("Build types", () => {
-  it("Several types - one query", () => {
+describe("Strapi query build types", () => {
+  it("should build strapi proper structure queries", () => {
     const query = new SQBuilder()
       .sort("attribute")
       .asc()
       .fields("attribute")
       .filters("attribute", (b) => b.eq("attribute"))
+      .filters("nested.attribute", (b) => b.eq("attribute"))
       .populate("attribute", (b) => b.filters("attribute").eq("attribute"))
       .publicationState("preview")
       .locale("uk");
 
-    const serviceBuilt = query.page(5).buildStrapiService();
-    const entityServiceBuilt = query.page(5).buildEntityService();
+    const serviceBuilt = query.page(5, true).buildStrapiService();
+    const entityServiceBuilt = query.page(5, true).buildEntityService();
     const queryEngineBuilt = query.pageStart(5).buildQueryEngine();
 
     expect(serviceBuilt).toEqual(strapiService);

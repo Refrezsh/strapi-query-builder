@@ -1,4 +1,4 @@
-import { _set, _unionBy, _union } from "./query-utils";
+import { _set, _unionBy, _union, _isDefined } from "./query-utils";
 
 export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _query: QueryRawInfo<Model, Data> = {
@@ -762,13 +762,20 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Add StrapiService like page
    * @param {number} page
+   * @param {boolean} withCount
    * @return {SQBuilder} This builder
    */
-  public page(page: number): SQBuilder<Model, Data> {
+  public page(page: number, withCount?: boolean): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
+
     this._query.pagination = { ...this._query.pagination, page };
+
+    if (withCount !== undefined && withCount !== null) {
+      this._query.pagination.withCount = withCount;
+    }
+
     return this;
   }
 
@@ -788,13 +795,19 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   /**
    * @description Add Offset like page start
    * @param {number} start
+   * @param {boolean} withCount
    * @return {SQBuilder} This builder
    */
-  public pageStart(start: number): SQBuilder<Model, Data> {
+  public pageStart(start: number, withCount?: boolean): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
     this._query.offsetPagination = { ...this._query.offsetPagination, start };
+
+    if (withCount !== undefined && withCount !== null) {
+      this._query.offsetPagination.withCount = withCount;
+    }
+
     return this;
   }
 
@@ -921,31 +934,17 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     const externalPagination = builder.getRawPagination();
 
-    if (externalPagination.pagination?.page) {
+    if (_isDefined(externalPagination?.pagination)) {
       this._query.pagination = {
         ...this._query.pagination,
-        page: externalPagination.pagination.page,
+        ...externalPagination.pagination,
       };
     }
 
-    if (externalPagination.pagination?.pageSize) {
-      this._query.pagination = {
-        ...this._query.pagination,
-        pageSize: externalPagination.pagination.pageSize,
-      };
-    }
-
-    if (externalPagination.offsetPagination?.start) {
+    if (_isDefined(externalPagination?.offsetPagination)) {
       this._query.offsetPagination = {
         ...this._query.offsetPagination,
-        start: externalPagination.offsetPagination.start,
-      };
-    }
-
-    if (externalPagination.offsetPagination?.limit) {
-      this._query.offsetPagination = {
-        ...this._query.offsetPagination,
-        limit: externalPagination.offsetPagination.limit,
+        ...externalPagination.offsetPagination,
       };
     }
 
@@ -1071,7 +1070,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     rawQuery: QueryRawInfo<Md, Dt>,
     queryType: QueryTypes = "strapiService"
   ): StrapiBuiltQuery<Md, Dt> {
-    const isQueryEngine = this._isQueryEngine(queryType);
+    const isQueryEngine = queryType === "queryEngine";
     let parsedQuery: StrapiBuiltQuery<Md, Dt> = {};
 
     // Parsed sort values the same in service, entity service and query engine
@@ -1112,7 +1111,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       parsedQuery.data = rawQuery.data;
     }
 
-    // TODO: Check and create filtering for pub-state, locale for entity service, query engine if possible
     // Publication state only for strapi service
     if (
       rawQuery?.publicationState !== undefined &&
@@ -1121,7 +1119,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       parsedQuery.publicationState = rawQuery.publicationState;
     }
 
-    // Locale the same as publication
+    // Locale property only for strapi service
     if (rawQuery?.locale !== undefined && queryType === "strapiService") {
       parsedQuery.locale = rawQuery.locale;
     }
@@ -1129,20 +1127,28 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     return parsedQuery;
   }
 
-  private static _isQueryEngine(queryType: QueryTypes) {
-    return queryType === "queryEngine";
-  }
-
   private static _parsePagination(
     queryType: QueryTypes,
     pagination?: StrapiPagination,
     offsetPagination?: StrapiOffsetPagination
   ): UnionPagination | undefined {
-    if (offsetPagination !== undefined) {
+    // All engines have limit pagination
+    if (_isDefined(offsetPagination)) {
+      if (queryType === "entityService" || queryType === "queryEngine") {
+        const { start, limit } = offsetPagination;
+        return { start, limit };
+      }
+
       return offsetPagination;
     }
 
+    // Page pagination works only for Service and Entity engines
     if (pagination !== undefined && queryType !== "queryEngine") {
+      if (queryType === "entityService") {
+        const { page, pageSize } = pagination;
+        return { page, pageSize };
+      }
+
       return pagination;
     }
   }
@@ -1247,7 +1253,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       return undefined;
     }
 
-    const isQueryEngine = this._isQueryEngine(queryType);
+    const isQueryEngine = queryType === "queryEngine";
 
     let parsedPopulates: any = {};
 
@@ -1354,11 +1360,13 @@ interface StrapiSort<Model extends object> {
 interface StrapiPagination {
   page?: number;
   pageSize?: number;
+  withCount?: boolean;
 }
 
 interface StrapiOffsetPagination {
   start?: number;
   limit?: number;
+  withCount?: boolean;
 }
 
 type UnionPagination = StrapiPagination | StrapiOffsetPagination;
@@ -1499,9 +1507,9 @@ interface StrapiBuiltQuery<Model extends object, Data extends object> {
 /**
  * @description Utils types for getting nested keys and values type
  * inspired by https://github.com/react-hook-form/react-hook-form/blob/274d8fb950f9944547921849fb6b3ee6e879e358/src/types/utils.ts#L119
- * @description Array will be typed as first object in type array
+ * @description Array will be typed as first object in type of array
  * @description Nested object works perfectly
- * @description There is 1 level limitation on Cyclic deps
+ * @description There is 1 level limitation on Cyclic deps to prevent TS Errors
  */
 
 type Primitive = null | undefined | string | number | boolean | symbol | bigint;
@@ -1565,7 +1573,7 @@ type ArrayPath<Model> = Model extends ReadonlyArray<infer V>
     }[keyof Model];
 
 /**
- * @description Typing utils
+ * @description Model primitive attributes
  */
 type ModelPrimitive = string | number | boolean | symbol | bigint;
 
@@ -1578,7 +1586,7 @@ type IsAttribute<
 > = Value extends ModelPrimitive ? `${Key}` : never;
 
 /**
- * @description Predicate to select not primitive keys
+ * @description Predicate to select relations
  */
 type IsNotAttribute<
   Key extends string | number,
@@ -1586,7 +1594,7 @@ type IsNotAttribute<
 > = Value extends ModelPrimitive ? never : `${Key}`;
 
 /**
- * @description Get one or another type by id in Model
+ * @description Get strict or weak type by presence of "id" in Model
  */
 type GetStrictOrWeak<Model extends object, Strict, Weak> = Model extends {
   id: infer U;
@@ -1595,14 +1603,14 @@ type GetStrictOrWeak<Model extends object, Strict, Weak> = Model extends {
   : Weak;
 
 /**
- * @description Get attribute keys one level of model
+ * @description Get attribute keys in one level of model
  */
 type GetAttributes<Model extends object> = {
   [Key in keyof Model]-?: IsAttribute<Key & string, Model[Key]>;
 }[keyof Model];
 
 /**
- * @description Get relation keys one level of model
+ * @description Get relation keys in one level of model
  */
 type GetRelations<Model extends object> = {
   [Key in keyof Model]-?: IsNotAttribute<Key & string, Model[Key]>;
