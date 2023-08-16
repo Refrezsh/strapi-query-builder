@@ -22,20 +22,20 @@ const fullQuery = {
   },
 };
 
-describe("Populate query", () => {
-  it("Populate all", () => {
+describe("Population operator", () => {
+  it("should populate all", () => {
     const builtQuery = new SQBuilder().populate("*").build();
 
     expect(builtQuery).toEqual(getAllPopulate);
   });
 
-  it("Populate all query engine", () => {
+  it("should populate all with true for query engine", () => {
     const builtQuery = new SQBuilder().populate("*").buildQueryEngine();
 
     expect(builtQuery).toEqual(populateAllQueryEngine);
   });
 
-  it("Populate keys with same key", () => {
+  it("should merge same keys", () => {
     const builtQuery = new SQBuilder()
       .populate([key1, key2])
       .populate(key1)
@@ -44,7 +44,7 @@ describe("Populate query", () => {
     expect(builtQuery).toEqual(getKeyPopulation);
   });
 
-  it("Complex populate", () => {
+  it("should create nested population", () => {
     const builtQuery = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
@@ -60,11 +60,14 @@ describe("Populate query", () => {
     expect(builtQuery).toEqual(fullQuery);
   });
 
-  it("Illegal actions in complex populate", () => {
+  it("should skip illegal operators of population", () => {
     const builtQuery = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
-          .page(1)
+          .page(1, true)
+          .pageSize(24)
+          .locale("ua")
+          .publicationState("preview")
           .sort([key1])
           .sort({ key: key2, type: "desc" })
           .fields([key1, key2])
@@ -78,7 +81,7 @@ describe("Populate query", () => {
     expect(builtQuery).toEqual(fullQuery);
   });
 
-  it("Key rewrite in complex populate", () => {
+  it("should select last population of same keys", () => {
     const builtQuery = new SQBuilder()
       .populate(key1)
       .populate(key1, (key1Builder) => {
@@ -95,7 +98,7 @@ describe("Populate query", () => {
     expect(builtQuery).toEqual(fullQuery);
   });
 
-  it("Complex merging in populate", () => {
+  it("should merge population", () => {
     const sortQuery = new SQBuilder()
       .sort([key1])
       .sort({ key: key2, type: "desc" });

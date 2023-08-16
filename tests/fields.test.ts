@@ -5,20 +5,20 @@ const filed1 = "key2";
 
 const getFields = (key: string, key2: string) => ({ fields: [key, key2] });
 
-describe("Fields query", () => {
-  it("Chain", () => {
+describe("Field operator", () => {
+  it("should create query by chain", () => {
     const builtQuery = new SQBuilder().fields(field).fields(filed1).build();
 
     expect(builtQuery).toEqual(getFields(field, filed1));
   });
 
-  it("Array", () => {
+  it("should create query by array", () => {
     const builtQuery = new SQBuilder().fields([field, filed1]).build();
 
     expect(builtQuery).toEqual(getFields(field, filed1));
   });
 
-  it("Same keys", () => {
+  it("should merge same keys", () => {
     const builtQuery = new SQBuilder()
       .fields([field, filed1, field, filed1])
       .build();
@@ -26,7 +26,7 @@ describe("Fields query", () => {
     expect(builtQuery).toEqual(getFields(field, filed1));
   });
 
-  it("Join", () => {
+  it("should join query and merge same keys", () => {
     const query1 = new SQBuilder().fields([field]);
     const query2 = new SQBuilder().fields([filed1]);
     const query3 = new SQBuilder().fields([field]);

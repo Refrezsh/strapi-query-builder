@@ -50,11 +50,11 @@ const getTwoResults = (type: string, negateRoot = false) =>
         },
       };
 
-describe("Filters - one level", () => {
-  it("Attributes", () => {
+describe("Filters operator", () => {
+  it("should create filter query for all operators", () => {
     for (const atr of attributeFilters) {
       const fnAttr = atr.replace("$", "");
-      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
+      // @ts-ignore TODO: Typescript won't iterate by keyof SQBuilder
       const builtQuery = new SQBuilder()
         .filters(attribute)
         [fnAttr](value)
@@ -64,10 +64,10 @@ describe("Filters - one level", () => {
     }
   });
 
-  it("Attributes duplicates", () => {
+  it("should not duplicate filter query for all operators", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
-      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
+      // @ts-ignore TODO: Typescript won't iterate by keyof SQBuilder
       const builtQuery = new SQBuilder()
         .filters(attribute)
         [fnAttr](value)
@@ -79,10 +79,10 @@ describe("Filters - one level", () => {
     }
   });
 
-  it("Two attributes with same key", () => {
+  it("should create query for single attribute and all operators", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
-      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
+      // @ts-ignore TODO: Typescript won't iterate by keyof SQBuilder
       const builtQuery = new SQBuilder()
         .and()
         .filters(attribute)
@@ -95,10 +95,10 @@ describe("Filters - one level", () => {
     }
   });
 
-  it("Attribute negation", () => {
+  it("should create query with not for single attribute and all operators", () => {
     for (const atr of attributeFilters) {
       const fnAttr = atr.replace("$", "");
-      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
+      // @ts-ignore TODO: Typescript won't iterate by keyof SQBuilder
       const builtQuery = new SQBuilder()
         .filters(attribute)
         .not()
@@ -109,10 +109,10 @@ describe("Filters - one level", () => {
     }
   });
 
-  it("Root negation", () => {
+  it("should add not operator to root query", () => {
     for (const attr of attributeFilters) {
       const fnAttr = attr.replace("$", "");
-      // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
+      // @ts-ignore TODO: Typescript won't iterate by keyof SQBuilder
       const builtQuery = new SQBuilder()
         .not()
         .and()
@@ -126,14 +126,10 @@ describe("Filters - one level", () => {
     }
   });
 
-  it("Join filters", () => {
-    const type = attributeFilters[0];
-    const fnAttr = type.replace("$", "");
-
-    // @ts-ignore FIXME Why is it impossible (It's works but ts can't inherit function type from class by key)
-    const query = new SQBuilder().filters(attribute)[fnAttr](value);
+  it("should join filters", () => {
+    const query = new SQBuilder().filters(attribute).eq(value);
     const builtQuery = new SQBuilder().joinFilters(query).build();
 
-    expect(builtQuery).toEqual(getResult(type));
+    expect(builtQuery).toEqual(getResult("$eq"));
   });
 });

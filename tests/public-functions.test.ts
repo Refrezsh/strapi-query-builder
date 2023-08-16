@@ -20,8 +20,8 @@ const pubState = { publicationState: "preview" };
 
 const locale = { locale: "uk" };
 
-describe("Readonly", () => {
-  it("Is readonly", () => {
+describe("Utils function", () => {
+  it("should read only block modification", () => {
     const query = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
@@ -53,12 +53,12 @@ describe("Readonly", () => {
     expect(query.build()).toEqual(fullQuery);
   });
 
-  it("Publication state", () => {
+  it("should publication state works", () => {
     const builtQuery = new SQBuilder().publicationState("preview").build();
 
     expect(builtQuery).toEqual(pubState);
   });
-  it("Publication state - query builder eg entity service", () => {
+  it("should be publication state omitted for query engine", () => {
     const builtQuery = new SQBuilder()
       .publicationState("preview")
       .build("queryEngine");
@@ -66,18 +66,18 @@ describe("Readonly", () => {
     expect(builtQuery).toEqual({});
   });
 
-  it("Locale", () => {
+  it("should locale works for strapi service", () => {
     const builtQuery = new SQBuilder().locale("uk").build();
 
     expect(builtQuery).toEqual(locale);
   });
-  it("Locale - query builder eg entity service", () => {
+  it("should be locale omitted for query engine", () => {
     const builtQuery = new SQBuilder().locale("uk").build("queryEngine");
 
     expect(builtQuery).toEqual({});
   });
 
-  it("Join All", () => {
+  it("should join queries", () => {
     const query1 = new SQBuilder()
       .sort({ key: key1, type: "asc" })
       .fields(key1)

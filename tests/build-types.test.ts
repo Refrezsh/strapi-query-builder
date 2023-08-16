@@ -5,13 +5,13 @@ const strapiService = {
     $and: [
       {
         attribute: {
-          $eq: "attribute",
+          $eq: "value",
         },
       },
       {
         nested: {
           attribute: {
-            $eq: "attribute",
+            $eq: "value",
           },
         },
       },
@@ -22,7 +22,14 @@ const strapiService = {
     attribute: {
       filters: {
         attribute: {
-          $eq: "attribute",
+          $eq: "value",
+        },
+      },
+    },
+    dynamicZone: {
+      on: {
+        component: {
+          fields: ["attribute"],
         },
       },
     },
@@ -32,6 +39,7 @@ const strapiService = {
   locale: "uk",
   pagination: {
     page: 5,
+    pageSize: 24,
     withCount: true,
   },
 };
@@ -41,13 +49,13 @@ const entityService = {
     $and: [
       {
         attribute: {
-          $eq: "attribute",
+          $eq: "value",
         },
       },
       {
         nested: {
           attribute: {
-            $eq: "attribute",
+            $eq: "value",
           },
         },
       },
@@ -58,13 +66,21 @@ const entityService = {
     attribute: {
       filters: {
         attribute: {
-          $eq: "attribute",
+          $eq: "value",
+        },
+      },
+    },
+    dynamicZone: {
+      on: {
+        component: {
+          fields: ["attribute"],
         },
       },
     },
   },
   fields: ["attribute"],
   page: 5,
+  pageSize: 24,
 };
 
 const queryEngine = {
@@ -72,13 +88,13 @@ const queryEngine = {
     $and: [
       {
         attribute: {
-          $eq: "attribute",
+          $eq: "value",
         },
       },
       {
         nested: {
           attribute: {
-            $eq: "attribute",
+            $eq: "value",
           },
         },
       },
@@ -89,30 +105,47 @@ const queryEngine = {
     attribute: {
       where: {
         attribute: {
-          $eq: "attribute",
+          $eq: "value",
+        },
+      },
+    },
+    dynamicZone: {
+      on: {
+        component: {
+          select: ["attribute"],
         },
       },
     },
   },
   select: ["attribute"],
   start: 5,
+  limit: 24,
 };
 
-describe("Strapi query build types", () => {
-  it("should build strapi proper structure queries", () => {
+describe("Strapi query builder", () => {
+  it("should build proper strapi structure of queries", () => {
     const query = new SQBuilder()
       .sort("attribute")
       .asc()
       .fields("attribute")
-      .filters("attribute", (b) => b.eq("attribute"))
-      .filters("nested.attribute", (b) => b.eq("attribute"))
-      .populate("attribute", (b) => b.filters("attribute").eq("attribute"))
+      .filters("attribute", (b) => b.eq("value"))
+      .filters("nested.attribute", (b) => b.eq("value"))
+      .populate("attribute", (b) => b.filters("attribute").eq("value"))
+      .populate("dynamicZone", (dynamicZoneBuilder) => {
+        dynamicZoneBuilder.on("component", (b) => b.fields("attribute"));
+      })
       .publicationState("preview")
       .locale("uk");
 
-    const serviceBuilt = query.page(5, true).buildStrapiService();
-    const entityServiceBuilt = query.page(5, true).buildEntityService();
-    const queryEngineBuilt = query.pageStart(5).buildQueryEngine();
+    const serviceBuilt = query.page(5, true).pageSize(24).buildStrapiService();
+    const entityServiceBuilt = query
+      .page(5, true)
+      .pageSize(24)
+      .buildEntityService();
+    const queryEngineBuilt = query
+      .pageStart(5)
+      .pageLimit(24)
+      .buildQueryEngine();
 
     expect(serviceBuilt).toEqual(strapiService);
     expect(entityServiceBuilt).toEqual(entityService);

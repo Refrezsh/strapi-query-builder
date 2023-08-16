@@ -14,14 +14,14 @@ const getFewDiffSorts = (key1: string, key2: string) => ({
   sort: [{ [key1]: "asc" }, { [key2]: "desc" }],
 });
 
-describe("Sorting query", () => {
-  it("String", () => {
+describe("Sort operator", () => {
+  it("should sort by string", () => {
     const builtQuery = new SQBuilder().sort(oneKey).build();
 
     expect(builtQuery).toEqual(getOneSort(oneKey));
   });
 
-  it("Object", () => {
+  it("should sort by object", () => {
     const builtQuery = new SQBuilder()
       .sort({ key: oneKey, type: "asc" })
       .build();
@@ -29,7 +29,7 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getOneSort(oneKey));
   });
 
-  it("Order", () => {
+  it("should change order", () => {
     const builtQuery = new SQBuilder()
       .sort({ key: oneKey, type: "desc" })
       .build();
@@ -37,7 +37,7 @@ describe("Sorting query", () => {
     expect(builtQuery).not.toEqual(getOneSort(oneKey));
   });
 
-  it("Chain direction", () => {
+  it("should sort by chain", () => {
     const builtQuery = new SQBuilder()
       .sort(oneKey)
       .asc()
@@ -48,7 +48,7 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getFewDiffSorts(oneKey, secondKey));
   });
 
-  it("Change all direction", () => {
+  it("should change root direction", () => {
     const builtQuery = new SQBuilder({ defaultSort: "desc" })
       .sort(oneKey)
       .desc()
@@ -60,7 +60,7 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getFewSorts(oneKey, secondKey));
   });
 
-  it("Same keys", () => {
+  it("should merge same keys", () => {
     const builtQuery = new SQBuilder()
       .sort([
         { key: oneKey, type: "asc" },
@@ -72,13 +72,13 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getOneSort(oneKey));
   });
 
-  it("String array", () => {
+  it("should sort by string array", () => {
     const builtQuery = new SQBuilder().sort([oneKey, secondKey]).build();
 
     expect(builtQuery).toEqual(getFewSorts(oneKey, secondKey));
   });
 
-  it("Object array", () => {
+  it("should sort by object array", () => {
     const builtQuery = new SQBuilder()
       .sort([
         { key: oneKey, type: "asc" },
@@ -89,7 +89,7 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getFewSorts(oneKey, secondKey));
   });
 
-  it("Chain", () => {
+  it("should sort by chain of different forms", () => {
     const builtQuery = new SQBuilder()
       .sort(oneKey)
       .sort({ key: secondKey, type: "asc" })
@@ -98,7 +98,7 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getFewSorts(oneKey, secondKey));
   });
 
-  it("Deep by key", () => {
+  it("should create deep sort", () => {
     const builtQuery = new SQBuilder()
       .sort([{ key: `${oneKey}.${secondKey}`, type: "asc" }])
       .build();
@@ -106,9 +106,9 @@ describe("Sorting query", () => {
     expect(builtQuery).toEqual(getDeepSort(oneKey, secondKey));
   });
 
-  it("Merging", () => {
+  it("should join sort", () => {
     const query1 = new SQBuilder().sort([oneKey]);
-    const query2 = new SQBuilder().sort([secondKey]);
+    const query2 = new SQBuilder().sort(secondKey);
 
     const builtQuery = query1.joinSort(query2).build();
 

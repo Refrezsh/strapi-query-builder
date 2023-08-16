@@ -1,18 +1,20 @@
 import SQBuilder from "../lib/cjs";
 
-describe("Filters - complex cases", () => {
-  it("Double nested - without root attribute", () => {
+describe("Filters operator", () => {
+  it("should create nested filters without attribute", () => {
     const builtQuery = new SQBuilder()
       .and()
-      .filters()
-      .with((nestedBuilder) =>
-        nestedBuilder
-          .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2")
+      .filters((b) =>
+        b.with((nestedBuilder) =>
+          nestedBuilder
+            .or()
+            .filters("createdAt")
+            .lte("date1")
+            .filters("createdAt")
+            .gte("date2")
+        )
       )
+
       .filters()
       .with((nestedBuilder) =>
         nestedBuilder
@@ -27,17 +29,18 @@ describe("Filters - complex cases", () => {
     expect(builtQuery).toEqual(doubleNestedOrInRootAnd);
   });
 
-  it("Double nested - with few attribute", () => {
+  it("should create nested filters with attribute", () => {
     const builtQuery = new SQBuilder()
       .and()
-      .filters("attribute1")
-      .with((nestedBuilder) =>
-        nestedBuilder
-          .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2")
+      .filters("attribute1", (b) =>
+        b.with((nestedBuilder) =>
+          nestedBuilder
+            .or()
+            .filters("createdAt")
+            .lte("date1")
+            .filters("createdAt")
+            .gte("date2")
+        )
       )
       .filters("attribute2")
       .with((nestedBuilder) =>
@@ -53,7 +56,7 @@ describe("Filters - complex cases", () => {
     expect(builtQuery).toEqual(doubleNestedWithAttributes);
   });
 
-  it("Complex filter with many nested filters, negations, inline building and wrong operations", () => {
+  it("should create complex query", () => {
     const builtQuery = new SQBuilder()
       .or()
       .filters("attribute1")
@@ -105,7 +108,7 @@ describe("Filters - complex cases", () => {
       )
       .filters()
       .with((nestedBuilder) =>
-        // Try attach not filter specific data
+        // Try to create illegal operators on nested filter operator
         nestedBuilder
           .or()
           .filters("createdAt")

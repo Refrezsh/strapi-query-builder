@@ -6,8 +6,8 @@ const mainKey2 = "key2";
 const keyType1 = "keyType1";
 const keyType2 = "ketType2";
 
-describe("Populate morph ", () => {
-  it("Morph single population", () => {
+describe("Dynamic zone operator", () => {
+  it("should create proper query", () => {
     const builtQuery = new SQBuilder()
       .populate(mainKey, (keyBuilder) => {
         keyBuilder
@@ -27,7 +27,7 @@ describe("Populate morph ", () => {
     expect(builtQuery).toEqual(morphQuery);
   });
 
-  it("Morph multiple population", () => {
+  it("should create multiple dynamic zones query", () => {
     const builtQuery = new SQBuilder()
       .populate(mainKey, (keyBuilder) => {
         keyBuilder
@@ -60,7 +60,7 @@ describe("Populate morph ", () => {
     expect(builtQuery).toEqual(twoMorphQuery);
   });
 
-  it("Morph same key", () => {
+  it("should select last population for same dynamic zones", () => {
     const builtQuery = new SQBuilder()
       .populate(mainKey, (keyBuilder) => {
         keyBuilder
@@ -93,7 +93,7 @@ describe("Populate morph ", () => {
     expect(builtQuery).toEqual(morphQuery);
   });
 
-  it("Morph population join", () => {
+  it("should join", () => {
     const query1 = new SQBuilder().populate(mainKey, (keyBuilder) => {
       keyBuilder
         .on(keyType1, (typeBuilder) => {

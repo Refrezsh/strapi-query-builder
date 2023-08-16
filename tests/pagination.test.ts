@@ -15,7 +15,7 @@ const paginationEntityQueryEngine = {
   pagination: { page: page, pageSize: size },
 };
 
-describe("Pagination query", () => {
+describe("Pagination operator", () => {
   it("should create offset pagination for strapi service", () => {
     const queryBuilder = new SQBuilder().pageStart(page, true).pageLimit(size);
     const service = queryBuilder.buildStrapiService();
