@@ -1102,8 +1102,13 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       rawQuery.pagination,
       rawQuery.offsetPagination
     );
+
     if (pagination !== undefined) {
-      parsedQuery.pagination = pagination;
+      if (queryType === "strapiService") {
+        parsedQuery.pagination = pagination;
+      } else {
+        Object.assign(parsedQuery, pagination);
+      }
     }
 
     // Data pass without any mods

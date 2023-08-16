@@ -27,10 +27,10 @@ describe("Pagination query", () => {
     const queryBuilder = new SQBuilder().pageStart(page, true).pageLimit(size);
 
     const entity = queryBuilder.buildEntityService();
-    const query = queryBuilder.buildEntityService();
+    const query = queryBuilder.buildQueryEngine();
 
-    expect(entity).toEqual(offsetEntityQueryEngine);
-    expect(query).toEqual(offsetEntityQueryEngine);
+    expect(entity).toEqual(offsetEntityQueryEngine.pagination);
+    expect(query).toEqual(offsetEntityQueryEngine.pagination);
   });
 
   it("should create page pagination for strapi service", () => {
@@ -44,10 +44,10 @@ describe("Pagination query", () => {
     const queryBuilder = new SQBuilder().page(page, true).pageSize(size);
 
     const entity = queryBuilder.buildEntityService();
-    const query = queryBuilder.buildEntityService();
+    const query = queryBuilder.buildQueryEngine();
 
-    expect(entity).toEqual(paginationEntityQueryEngine);
-    expect(query).toEqual(paginationEntityQueryEngine);
+    expect(entity).toEqual(paginationEntityQueryEngine.pagination);
+    expect(query).toEqual({});
   });
 
   it("Pagination - join", () => {
@@ -58,6 +58,18 @@ describe("Pagination query", () => {
       .joinPagination(query)
       .buildStrapiService();
 
+    const entityService = new SQBuilder()
+      .pageSize(size)
+      .joinPagination(query)
+      .buildEntityService();
+
+    const queryEngine = new SQBuilder()
+      .pageSize(size)
+      .joinPagination(query)
+      .buildQueryEngine();
+
     expect(builtQuery).toEqual(paginationPageFull);
+    expect(entityService).toEqual(paginationEntityQueryEngine.pagination);
+    expect(queryEngine).toEqual({});
   });
 });

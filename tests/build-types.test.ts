@@ -64,9 +64,7 @@ const entityService = {
     },
   },
   fields: ["attribute"],
-  pagination: {
-    page: 5,
-  },
+  page: 5,
 };
 
 const queryEngine = {
@@ -97,9 +95,7 @@ const queryEngine = {
     },
   },
   select: ["attribute"],
-  pagination: {
-    start: 5,
-  },
+  start: 5,
 };
 
 describe("Strapi query build types", () => {
