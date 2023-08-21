@@ -3,7 +3,6 @@
   "version": "1.2.0",
   "description": "Utility for creating Strapi queries in declarative and typesafe way",
   "main": "./lib/cjs/index.js",
-  "types": "./lib/cjs/index.d.ts",
   "module": "./lib/esm/index.js",
   "scripts": {
     "rename": "node -e \"require('fs').rename('lib/esm/index.js', 'lib/esm/index.mjs', function(err) { if (err) console.log(err);})\"",
@@ -51,11 +50,11 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./lib/esm/types/index.d.ts",
+        "types": "./lib/esm/index.d.ts",
         "default": "./lib/esm/index.mjs"
       },
       "require": {
-        "types": "./lib/cjs/types/index.d.ts",
+        "types": "./lib/cjs/index.d.ts",
         "default": "./lib/cjs/index.js"
       }
     }
