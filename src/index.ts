@@ -1,4 +1,4 @@
-import { _set, _unionBy, _union, _isDefined } from "./query-utils";
+import { _set, _unionBy, _isDefined } from "./query-utils";
 
 export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _query: QueryRawInfo<Model, Data> = {
@@ -8,7 +8,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       attributeFilters: [],
     },
     population: [],
-    fields: [] as unknown as StrapiFields<Model>,
+    fields: new Set(),
   };
 
   private readonly _builderConfig: Required<BuilderConfig> = {
@@ -35,23 +35,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   public build(
     queryType: QueryTypes = "strapiService"
   ): StrapiBuiltQuery<Model, Data> {
-    switch (queryType) {
-      case "entityService": {
-        return this.buildEntityService();
-      }
-
-      case "queryEngine": {
-        return this.buildQueryEngine();
-      }
-
-      case "strapiService": {
-        return this.buildStrapiService();
-      }
-
-      default: {
-        return this.buildStrapiService();
-      }
-    }
+    return SQBuilder._buildQuery(this._query, queryType);
   }
 
   /**
@@ -71,7 +55,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Build Strapi query for Query service
+   * @description Build Strapi query for Query engine
    * @return {StrapiBuiltQuery} Built query
    */
   public buildQueryEngine(): StrapiBuiltQuery<Model, Data> {
@@ -104,7 +88,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       this._prevFilterKey = attribute;
     }
 
-    if (thisCallback !== undefined && typeof thisCallback === "function") {
+    if (thisCallback !== undefined) {
       thisCallback(this);
       return this;
     }
@@ -581,20 +565,36 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
   //<editor-fold desc="Fields">
   /**
-   * @description Add filed selection to query
-   * @description Same keys will be merged
-   * @param {StrapiFieldsInputQuery} fields
+   * @description Select specific fields
+   * @summary Same keys will be merged
+   * @param {StrapiSingleFieldInput[]} fields
    * @return {SQBuilder} This builder
    */
-  public fields(fields: StrapiFieldsInputQuery<Model>): SQBuilder<Model, Data> {
+  public fields(
+    fields: StrapiSingleFieldInput<Model>[]
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    const nowFields = this._query.fields;
-    const newFields = (Array.isArray(fields) ? fields : [fields]) as string[];
-    this._query.fields = _union(nowFields, newFields) as StrapiFields<Model>;
+    if (fields.length > 0) {
+      fields.forEach((f) => this._query.fields.add(f));
+    }
+    return this;
+  }
 
+  /**
+   * @description Select specific field
+   * @summary Same keys will be merged
+   * @param {StrapiSingleFieldInput} field
+   * @return {SQBuilder} This builder
+   */
+  public field(field: StrapiSingleFieldInput<Model>): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    this._query.fields.add(field);
     return this;
   }
   //</editor-fold>
@@ -848,8 +848,8 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   protected getRawFilters(): StrapiRawFilters<Model> {
     return this._query.filters;
   }
-  protected getRawFields(): StrapiFields<Model> {
-    return this._query.fields;
+  protected getRawFields(): Set<StrapiSingleFieldInput<Model>> {
+    return new Set([...this._query.fields]);
   }
   protected getRawSort(): StrapiSort<Model>[] {
     return this._query.sort;
@@ -1037,10 +1037,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     const externalFields = builder.getRawFields();
-    this._query.fields = _union(
-      this._query.fields,
-      externalFields
-    ) as StrapiFields<Model>;
+    if (externalFields.size > 0) {
+      externalFields.forEach((f) => {
+        this._query.fields.add(f);
+      });
+    }
 
     return this;
   }
@@ -1079,9 +1080,8 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       parsedQuery[isQueryEngine ? "orderBy" : "sort"] = sort;
     }
 
-    // Fields values the same in service, entity service and query engine
-    if (rawQuery?.fields?.some((f) => !!f)) {
-      parsedQuery[isQueryEngine ? "select" : "fields"] = rawQuery.fields;
+    if (rawQuery.fields.size > 0) {
+      parsedQuery[isQueryEngine ? "select" : "fields"] = [...rawQuery.fields];
     }
 
     // Filter values the same in service, entity service and query engine
@@ -1450,19 +1450,11 @@ type PopulateCallback<PopulationModel extends object> = (
 ) => void;
 // </editor-fold>
 
-//<editor-fold desc="Fields Types">
-type StrapiFieldsInputQuery<Model extends object> = GetStrictOrWeak<
+type StrapiSingleFieldInput<Model extends object> = GetStrictOrWeak<
   Model,
-  GetAttributes<Model> | GetAttributes<Model>[],
-  GetAttributes<Model> | GetAttributes<Model>[] | string | string[]
+  GetAttributes<Model>,
+  GetAttributes<Model> | string
 >;
-
-type StrapiFields<Model extends object> = GetStrictOrWeak<
-  Model,
-  GetAttributes<Model>[],
-  GetAttributes<Model>[] | string[]
->;
-//</editor-fold>
 
 // <editor-fold desc="Query shapes">
 interface BuilderConfig {
@@ -1475,7 +1467,7 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   pagination?: StrapiPagination;
   offsetPagination?: StrapiOffsetPagination;
   population: StrapiPopulate<Model, any>[];
-  fields: StrapiFields<Model>;
+  fields: Set<StrapiSingleFieldInput<Model>>;
   data?: Data;
   publicationState?: PublicationStates;
   locale?: string;
@@ -1498,7 +1490,7 @@ type StrapiFiltersType<Model extends object> = {
 
 interface StrapiBuiltQuery<Model extends object, Data extends object> {
   filters?: StrapiFiltersType<Model>;
-  fields?: StrapiFields<Model>;
+  fields?: StrapiSingleFieldInput<Model>[];
   data?: Data;
   pagination?: UnionPagination;
   population?: any;
@@ -1508,14 +1500,6 @@ interface StrapiBuiltQuery<Model extends object, Data extends object> {
   [key: string]: any;
 }
 // </editor-fold>
-
-/**
- * @description Utils types for getting nested keys and values type
- * inspired by https://github.com/react-hook-form/react-hook-form/blob/274d8fb950f9944547921849fb6b3ee6e879e358/src/types/utils.ts#L119
- * @description Array will be typed as first object in type of array
- * @description Nested object works perfectly
- * @description There is 1 level limitation on Cyclic deps to prevent TS Errors
- */
 
 type Primitive = null | undefined | string | number | boolean | symbol | bigint;
 
@@ -1577,46 +1561,28 @@ type ArrayPath<Model> = Model extends ReadonlyArray<infer V>
       [Key in keyof Model]-?: ArrayPathImpl<Key & string, Model[Key], Model>;
     }[keyof Model];
 
-/**
- * @description Model primitive attributes
- */
 type ModelPrimitive = string | number | boolean | symbol | bigint;
 
-/**
- * @description Predicate to select primitive keys
- */
 type IsAttribute<
   Key extends string | number,
   Value
 > = Value extends ModelPrimitive ? `${Key}` : never;
 
-/**
- * @description Predicate to select relations
- */
 type IsNotAttribute<
   Key extends string | number,
   Value
 > = Value extends ModelPrimitive ? never : `${Key}`;
 
-/**
- * @description Get strict or weak type by presence of "id" in Model
- */
 type GetStrictOrWeak<Model extends object, Strict, Weak> = Model extends {
   id: infer U;
 }
   ? Strict
   : Weak;
 
-/**
- * @description Get attribute keys in one level of model
- */
 type GetAttributes<Model extends object> = {
   [Key in keyof Model]-?: IsAttribute<Key & string, Model[Key]>;
 }[keyof Model];
 
-/**
- * @description Get relation keys in one level of model
- */
 type GetRelations<Model extends object> = {
   [Key in keyof Model]-?: IsNotAttribute<Key & string, Model[Key]>;
 }[keyof Model];

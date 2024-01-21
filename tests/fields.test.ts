@@ -7,7 +7,7 @@ const getFields = (key: string, key2: string) => ({ fields: [key, key2] });
 
 describe("Field operator", () => {
   it("should create query by chain", () => {
-    const builtQuery = new SQBuilder().fields(field).fields(filed1).build();
+    const builtQuery = new SQBuilder().field(field).field(filed1).build();
 
     expect(builtQuery).toEqual(getFields(field, filed1));
   });

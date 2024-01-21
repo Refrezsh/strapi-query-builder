@@ -1,4 +1,4 @@
-import { _set, _union, _unionBy, _isDefined } from "../lib/cjs/query-utils";
+import { _set, _unionBy, _isDefined } from "../lib/cjs/query-utils";
 
 const objectSet = {
   one: {
@@ -24,13 +24,6 @@ describe("Utils", () => {
     const object = _set({}, "one.two.free", "value");
     const addedAnotherKey = _set(object, "one.two.four", "value2");
     expect(addedAnotherKey).toEqual(objectSet);
-  });
-
-  it("should union values", () => {
-    const arr1 = ["value1", "value1", "value2"];
-    const arr2 = ["value2"];
-    const union = _union(arr1, arr2);
-    expect(union).toEqual(array);
   });
 
   it("should union by", () => {

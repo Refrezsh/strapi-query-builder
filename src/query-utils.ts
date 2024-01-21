@@ -20,10 +20,6 @@ export function _set<
   return obj;
 }
 
-export function _union(arr: string[], arr2: string[]) {
-  return [...new Set(arr.concat(arr2))];
-}
-
 export function _unionBy<Type>(
   callback: (b: Type) => string | number | boolean,
   array1: Type[],

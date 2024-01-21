@@ -127,12 +127,12 @@ describe("Strapi query builder", () => {
     const query = new SQBuilder()
       .sort("attribute")
       .asc()
-      .fields("attribute")
+      .field("attribute")
       .filters("attribute", (b) => b.eq("value"))
       .filters("nested.attribute", (b) => b.eq("value"))
       .populate("attribute", (b) => b.filters("attribute").eq("value"))
       .populate("dynamicZone", (dynamicZoneBuilder) => {
-        dynamicZoneBuilder.on("component", (b) => b.fields("attribute"));
+        dynamicZoneBuilder.on("component", (b) => b.field("attribute"));
       })
       .publicationState("preview")
       .locale("uk");

@@ -1,15 +1,11 @@
 const SQBuilder = require("../lib/cjs/index").default;
 
-const times = 100;
-let queryAssigmentSum = 0;
-let queryBuildingSum = 0;
+const times = 500;
 
+let query;
+const assigmentStarts = performance.now();
 for (let i = 0; i < times; i++) {
-  const assigmentStarts = process.hrtime();
-
-  // Create huge QUERY
-  const query = new SQBuilder();
-  // Yah some queries can be really large
+  query = new SQBuilder();
   query
     .fields([
       "GoodName",
@@ -84,18 +80,31 @@ for (let i = 0; i < times; i++) {
           });
         });
     });
-
-  queryAssigmentSum += process.hrtime(assigmentStarts)[1] / 1000000;
-
-  const buildStarts = process.hrtime();
-  query.build();
-  queryBuildingSum += process.hrtime(buildStarts)[1] / 1000000;
 }
+const assigmentEnds = performance.now();
 
-const meanAssigmentTime = queryAssigmentSum / times;
-const meanBuildTime = queryBuildingSum / times;
-console.log(`Average query assign: ${meanAssigmentTime}ms`);
-console.log(`Average query build: ${meanBuildTime}ms`);
+const buildStarts = performance.now();
+for (let i = 0; i < times; i++) {
+  query.build();
+}
+const buildEnds = performance.now();
+
+const meanAssigmentTime = assigmentEnds - assigmentStarts;
+const meanBuildTime = buildEnds - buildStarts;
+const assignAndBuild = meanAssigmentTime + meanBuildTime;
+
 console.log(
-  `Average query performance: ${meanAssigmentTime + meanBuildTime}ms`
+  `Query assign: ${meanAssigmentTime}ms for ${times}times. Av: ${
+    meanAssigmentTime / times
+  }`
+);
+console.log(
+  `Average query build: ${meanBuildTime}ms for ${times}times. Av: ${
+    meanBuildTime / times
+  }`
+);
+console.log(
+  `Average query performance: ${assignAndBuild}ms for ${times}. Av: ${
+    assignAndBuild / times
+  }`
 );

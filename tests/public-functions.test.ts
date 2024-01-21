@@ -36,7 +36,7 @@ describe("Utils function", () => {
 
     query
       .sort("illegalKey")
-      .fields("illegalKey")
+      .field("illegalKey")
       .filters("key")
       .eq("value")
       .populate("key")
@@ -80,13 +80,13 @@ describe("Utils function", () => {
   it("should join queries", () => {
     const query1 = new SQBuilder()
       .sort({ key: key1, type: "asc" })
-      .fields(key1)
+      .field(key1)
       .filters(key1)
       .eq(key1);
 
     const query2 = new SQBuilder()
       .sort({ key: key2, type: "desc" })
-      .fields(key2)
+      .field(key2)
       .filters(key2)
       .contains(key2);
 

@@ -16,7 +16,7 @@ describe("Dynamic zone operator", () => {
           })
           .on(keyType2, (keyType2Builder) => {
             keyType2Builder
-              .fields(keyType2)
+              .field(keyType2)
               .and()
               .filters(keyType2, (b) => b.in([keyType2]))
               .filters(keyType2, (b) => b.eq(keyType2));
@@ -36,7 +36,7 @@ describe("Dynamic zone operator", () => {
           })
           .on(keyType2, (keyType2Builder) => {
             keyType2Builder
-              .fields(keyType2)
+              .field(keyType2)
               .and()
               .filters(keyType2, (b) => b.in([keyType2]))
               .filters(keyType2, (b) => b.eq(keyType2));
@@ -49,7 +49,7 @@ describe("Dynamic zone operator", () => {
           })
           .on(keyType2, (keyType2Builder) => {
             keyType2Builder
-              .fields(keyType2)
+              .field(keyType2)
               .and()
               .filters(keyType2, (b) => b.in([keyType2]))
               .filters(keyType2, (b) => b.eq(keyType2));
@@ -69,7 +69,7 @@ describe("Dynamic zone operator", () => {
           })
           .on(keyType2, (keyType2Builder) => {
             keyType2Builder
-              .fields(keyType2)
+              .field(keyType2)
               .and()
               .filters(keyType2, (b) => b.in([keyType2]))
               .filters(keyType2, (b) => b.eq(keyType2));
@@ -82,7 +82,7 @@ describe("Dynamic zone operator", () => {
           })
           .on(keyType2, (keyType2Builder) => {
             keyType2Builder
-              .fields(keyType2)
+              .field(keyType2)
               .and()
               .filters(keyType2, (b) => b.in([keyType2]))
               .filters(keyType2, (b) => b.eq(keyType2));
@@ -101,7 +101,7 @@ describe("Dynamic zone operator", () => {
         })
         .on(keyType2, (keyType2Builder) => {
           keyType2Builder
-            .fields(keyType2)
+            .field(keyType2)
             .and()
             .filters(keyType2, (b) => b.in([keyType2]))
             .filters(keyType2, (b) => b.eq(keyType2));
@@ -115,7 +115,7 @@ describe("Dynamic zone operator", () => {
         })
         .on(keyType2, (keyType2Builder) => {
           keyType2Builder
-            .fields(keyType2)
+            .field(keyType2)
             .and()
             .filters(keyType2, (b) => b.in([keyType2]))
             .filters(keyType2, (b) => b.eq(keyType2));
