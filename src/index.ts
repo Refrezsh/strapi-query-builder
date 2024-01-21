@@ -1,8 +1,8 @@
-import { _set, _unionBy, _isDefined } from "./query-utils";
+import { _isDefined, _set, _unionBy } from "./query-utils";
 
 export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _query: QueryRawInfo<Model, Data> = {
-    sort: [],
+    sort: new Map(),
     filters: {
       rootLogical: "$and",
       attributeFilters: [],
@@ -18,6 +18,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _prevFilterKey?: FilterKey<Model>;
   private _nextAttributeNegate: boolean = false;
   private _prevPopulateKey?: PopulateKey<any>;
+  private _prevSortKey?: SortKey<Model>;
   private _isReadonly = false;
 
   constructor(builderConfig?: BuilderConfig) {
@@ -601,38 +602,101 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
   //<editor-fold desc="Sort">
   /**
-   * @description Add sorting to query
-   * @description Same keys will be merged
-   * @param {StrapiSortInputQuery} sortQuery
+   * @description Add sort key
+   * @summary Same keys will be merged
+   * @summary With next chain call .asc() .desc()
+   * @param {SortKey} sortKey
    * @return {SQBuilder} This builder
    */
-  public sort(sortQuery: StrapiSortInputQuery<Model>): SQBuilder<Model, Data> {
+  public sort(sortKey: SortKey<Model>): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    const nowSortValue = this._query.sort;
-    const parsedSortQuery = SQBuilder._parseSortObject<Model>(
-      sortQuery,
-      this._builderConfig.defaultSort
-    );
+    this._query.sort.set(sortKey, {
+      key: sortKey,
+      type: this._builderConfig.defaultSort,
+    });
 
-    this._query.sort = _unionBy(
-      (v) => v.key,
-      Array.isArray(nowSortValue) ? nowSortValue : [nowSortValue],
-      Array.isArray(parsedSortQuery) ? parsedSortQuery : [parsedSortQuery]
-    );
+    this._prevSortKey = sortKey;
+
+    return this;
+  }
+
+  /**
+   * @description Add sort keys list
+   * @summary Same keys will be merged
+   * @param {SortKey[]} sortKeys
+   * @return {SQBuilder} This builder
+   */
+  public sorts(sortKeys: SortKey<Model>[]): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    if (sortKeys.length > 0) {
+      sortKeys.forEach((key) => {
+        this._query.sort.set(key, {
+          key: key,
+          type: this._builderConfig.defaultSort,
+        });
+      });
+    }
+
+    this._prevSortKey = undefined;
+
+    return this;
+  }
+
+  /**
+   * @description Add sort as object description
+   * @summary Same keys will be merged
+   * @summary With next chain call .asc() .desc()
+   * @param {StrapiSort} sort
+   * @return {SQBuilder} This builder
+   */
+  public sortRaw(sort: StrapiSort<Model>): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    const sortKey = sort.key;
+
+    this._query.sort.set(sortKey, sort);
+    this._prevSortKey = sortKey;
+
+    return this;
+  }
+
+  /**
+   * @description Add sorts as object description list
+   * @summary Same keys will be merged
+   * @param {StrapiSort[]} sorts
+   * @return {SQBuilder} This builder
+   */
+  public sortsRaw(sorts: StrapiSort<Model>[]): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    if (sorts.length > 0) {
+      sorts.forEach((sort) => {
+        this._query.sort.set(sort.key, sort);
+      });
+    }
+
+    this._prevSortKey = undefined;
 
     return this;
   }
 
   /**
    * @description Add sort ascending direction to last sort element or all sort chain
-   * @description Same keys will be merged
+   * @summary Param changeAll changes all sorts to specified direction
    * @param {boolean} changeAll
    * @return {SQBuilder} This builder
    */
-  public asc(changeAll = false) {
+  public asc(changeAll: boolean = false): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -644,10 +708,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
   /**
    * @description Add sort descending direction to last sort element or all sort chain
+   * @summary Param changeAll changes all sorts to specified direction
    * @param {boolean} changeAll
    * @return {SQBuilder} This builder
    */
-  public desc(changeAll = false) {
+  public desc(changeAll: boolean = false): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -662,99 +727,24 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     direction: StrapiSortOptions
   ) {
     if (!changeAll) {
-      const lastIndex = this._query.sort.length - 1;
-      if (lastIndex === -1) {
+      const previousSortKey = this._prevSortKey;
+      if (!previousSortKey) {
         return;
       }
 
-      const lastSort = this._query.sort[lastIndex];
-      if (lastSort === undefined) {
-        return;
-      }
-      this._query.sort[lastIndex] = { ...lastSort, type: direction };
+      this._query.sort.set(previousSortKey, {
+        key: previousSortKey,
+        type: direction,
+      });
+      this._prevSortKey = undefined;
+
       return;
-    }
-
-    this._query.sort = this._query.sort.map((s) => ({ ...s, type: direction }));
-  }
-
-  private static _createSortObject<ModelInput extends object>(
-    stringKey: SortKey<ModelInput>,
-    defaultSort: StrapiSortOptions
-  ): StrapiSort<ModelInput> {
-    return { key: stringKey, type: defaultSort };
-  }
-
-  private static _createSortObjectArray<ModelInput extends object>(
-    stringArray: SortKey<ModelInput>[],
-    defaultSort: StrapiSortOptions
-  ): StrapiSort<ModelInput>[] {
-    return stringArray.map((s) => SQBuilder._createSortObject(s, defaultSort));
-  }
-
-  private static _parseSortObject<ModelInput extends object>(
-    sortQuery: StrapiSortInputQuery<ModelInput>,
-    defaultSort: StrapiSortOptions
-  ): StrapiSort<ModelInput> | StrapiSort<ModelInput>[] {
-    if (this._isSortArray(sortQuery)) {
-      if (this._isArrayOfKeys(sortQuery)) {
-        return SQBuilder._createSortObjectArray<ModelInput>(
-          sortQuery,
-          defaultSort
-        );
-      } else {
-        return sortQuery;
-      }
     } else {
-      if (this._isSortObject(sortQuery)) {
-        return sortQuery;
-      }
-      if (this._isSortKey(sortQuery)) {
-        return SQBuilder._createSortObject(sortQuery, defaultSort);
-      }
-
-      return [];
+      this._query.sort.forEach((sort) => {
+        const sortKey = sort.key;
+        this._query.sort.set(sortKey, { key: sortKey, type: direction });
+      });
     }
-  }
-
-  private static _isSortObject<ModelInput extends object>(
-    sortQuery: StrapiSortInputQuery<ModelInput>
-  ): sortQuery is StrapiSort<ModelInput> {
-    return typeof sortQuery === "object";
-  }
-
-  private static _isSortKey<ModelInput extends object>(
-    sortQuery: StrapiSortInputQuery<ModelInput>
-  ): sortQuery is SortKey<ModelInput> {
-    return typeof sortQuery === "string";
-  }
-
-  private static _isSortArray<ModelInput extends object>(
-    sortQuery: StrapiSortInputQuery<ModelInput>
-  ): sortQuery is
-    | StrapiSort<ModelInput>[]
-    | GetStrictOrWeak<
-        ModelInput,
-        FieldPath<ModelInput>[],
-        FieldPath<ModelInput>[] | string | string[]
-      > {
-    return Array.isArray(sortQuery);
-  }
-
-  private static _isArrayOfKeys<ModelInput extends object>(
-    sortQuery:
-      | StrapiSort<ModelInput>[]
-      | GetStrictOrWeak<
-          ModelInput,
-          FieldPath<ModelInput>[],
-          FieldPath<ModelInput>[] | string | string[]
-        >
-    // @ts-ignore
-  ): sortQuery is SortKey<ModelInput>[] {
-    return (
-      this._isSortArray(sortQuery) &&
-      sortQuery.every((s) => !!this._isSortKey(s))
-    );
   }
   //</editor-fold>
 
@@ -848,11 +838,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   protected getRawFilters(): StrapiRawFilters<Model> {
     return this._query.filters;
   }
-  protected getRawFields(): Set<StrapiSingleFieldInput<Model>> {
+  protected getRawFields(): StrapiFields<Model> {
     return new Set([...this._query.fields]);
   }
-  protected getRawSort(): StrapiSort<Model>[] {
-    return this._query.sort;
+  protected getRawSort(): StrapiSorts<Model> {
+    return new Map([...this._query.sort]);
   }
   protected getRawPopulation(): StrapiPopulate<Model, any>[] {
     return this._query.population;
@@ -1016,12 +1006,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     const externalSort = builder.getRawSort();
-
-    this._query.sort = _unionBy<StrapiSort<Model>>(
-      (s) => s.key,
-      this._query.sort,
-      externalSort
-    );
+    if (externalSort.size > 0) {
+      externalSort.forEach((value, key) => {
+        this._query.sort.set(key, value);
+      });
+    }
 
     return this;
   }
@@ -1074,10 +1063,9 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     const isQueryEngine = queryType === "queryEngine";
     let parsedQuery: StrapiBuiltQuery<Md, Dt> = {};
 
-    // Parsed sort values the same in service, entity service and query engine
-    const sort = SQBuilder._parseSort<Md>(rawQuery.sort);
-    if (sort !== undefined) {
-      parsedQuery[isQueryEngine ? "orderBy" : "sort"] = sort;
+    if (rawQuery.sort.size > 0) {
+      parsedQuery[isQueryEngine ? "orderBy" : "sort"] =
+        SQBuilder._parseSort<Md>(rawQuery.sort);
     }
 
     if (rawQuery.fields.size > 0) {
@@ -1158,22 +1146,21 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
   }
 
-  private static _parseSort<Md extends object>(sorts?: StrapiSort<Md>[]) {
-    let sortQuery: any = undefined;
-
-    if (sorts?.some((s) => !!s)) {
-      const isOneSort = sorts.length === 1;
-
-      if (isOneSort) {
-        const firstSort = sorts[0];
-        sortQuery = _set({}, firstSort.key, firstSort.type);
-      } else {
-        sortQuery = [];
-        for (const sort of sorts) {
-          sortQuery.push(_set({}, sort.key, sort.type));
-        }
-      }
+  private static _parseSort<Md extends object>(sorts?: StrapiSorts<Md>) {
+    if (!sorts) {
+      return [];
     }
+    if (sorts.size === 0) {
+      return [];
+    }
+
+    const sortQuery: any[] = new Array(sorts.size);
+
+    let index = 0;
+    sorts.forEach((sort) => {
+      sortQuery[index] = _set({}, sort.key, sort.type);
+      index++;
+    });
 
     return sortQuery;
   }
@@ -1310,9 +1297,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   // </editor-fold>
 }
 
-/**
- * SQ Types and type utils
- */
 // <editor-fold desc="Base types">
 type QueryTypes = "strapiService" | "entityService" | "queryEngine";
 type PublicationStates = "live" | "preview";
@@ -1340,15 +1324,6 @@ type FilterAttributeType =
 //</editor-fold>
 
 // <editor-fold desc="Sort types">
-type StrapiSortInputQuery<Model extends object> =
-  | StrapiSort<Model>
-  | StrapiSort<Model>[]
-  | GetStrictOrWeak<
-      Model,
-      FieldPath<Model> | FieldPath<Model>[],
-      FieldPath<Model> | FieldPath<Model>[] | string | string[]
-    >;
-
 type SortKey<Model extends object> = GetStrictOrWeak<
   Model,
   FieldPath<Model>,
@@ -1359,6 +1334,8 @@ interface StrapiSort<Model extends object> {
   key: SortKey<Model>;
   type: StrapiSortOptions;
 }
+
+type StrapiSorts<Model extends object> = Map<SortKey<Model>, StrapiSort<Model>>;
 // </editor-fold>
 
 // <editor-fold desc="Pagination Types">
@@ -1450,11 +1427,15 @@ type PopulateCallback<PopulationModel extends object> = (
 ) => void;
 // </editor-fold>
 
+// <editor-fold desc="Field types">
 type StrapiSingleFieldInput<Model extends object> = GetStrictOrWeak<
   Model,
   GetAttributes<Model>,
   GetAttributes<Model> | string
 >;
+
+type StrapiFields<Model extends object> = Set<StrapiSingleFieldInput<Model>>;
+// </editor-fold>
 
 // <editor-fold desc="Query shapes">
 interface BuilderConfig {
@@ -1462,12 +1443,12 @@ interface BuilderConfig {
 }
 
 interface QueryRawInfo<Model extends object, Data extends object> {
-  sort: StrapiSort<Model>[];
+  sort: StrapiSorts<Model>;
   filters: StrapiRawFilters<Model>;
   pagination?: StrapiPagination;
   offsetPagination?: StrapiOffsetPagination;
   population: StrapiPopulate<Model, any>[];
-  fields: Set<StrapiSingleFieldInput<Model>>;
+  fields: StrapiFields<Model>;
   data?: Data;
   publicationState?: PublicationStates;
   locale?: string;

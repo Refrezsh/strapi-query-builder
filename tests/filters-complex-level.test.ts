@@ -118,7 +118,7 @@ describe("Filters operator", () => {
           .pageSize(1)
           .populate("*")
           .fields(["some"])
-          .sort(["some"])
+          .sorts(["some"])
       )
       .build();
 

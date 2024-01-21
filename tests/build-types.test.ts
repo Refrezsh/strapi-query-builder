@@ -17,7 +17,7 @@ const strapiService = {
       },
     ],
   },
-  sort: { attribute: "asc" },
+  sort: [{ attribute: "asc" }],
   populate: {
     attribute: {
       filters: {
@@ -61,7 +61,7 @@ const entityService = {
       },
     ],
   },
-  sort: { attribute: "asc" },
+  sort: [{ attribute: "asc" }],
   populate: {
     attribute: {
       filters: {
@@ -100,7 +100,7 @@ const queryEngine = {
       },
     ],
   },
-  orderBy: { attribute: "asc" },
+  orderBy: [{ attribute: "asc" }],
   populate: {
     attribute: {
       where: {

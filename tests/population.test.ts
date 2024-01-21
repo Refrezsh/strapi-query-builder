@@ -48,8 +48,8 @@ describe("Population operator", () => {
     const builtQuery = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
-          .sort([key1])
-          .sort({ key: key2, type: "desc" })
+          .sorts([key1])
+          .sortRaw({ key: key2, type: "desc" })
           .fields([key1, key2])
           .and()
           .filters(key1, (b) => b.eq(key1))
@@ -68,8 +68,8 @@ describe("Population operator", () => {
           .pageSize(24)
           .locale("ua")
           .publicationState("preview")
-          .sort([key1])
-          .sort({ key: key2, type: "desc" })
+          .sorts([key1])
+          .sortRaw({ key: key2, type: "desc" })
           .fields([key1, key2])
           .and()
           .filters(key1, (b) => b.eq(key1))
@@ -86,8 +86,8 @@ describe("Population operator", () => {
       .populate(key1)
       .populate(key1, (key1Builder) => {
         key1Builder
-          .sort([key1])
-          .sort({ key: key2, type: "desc" })
+          .sorts([key1])
+          .sortRaw({ key: key2, type: "desc" })
           .fields([key1, key2])
           .and()
           .filters(key1, (b) => b.eq(key1))
@@ -100,8 +100,8 @@ describe("Population operator", () => {
 
   it("should merge population", () => {
     const sortQuery = new SQBuilder()
-      .sort([key1])
-      .sort({ key: key2, type: "desc" });
+      .sorts([key1])
+      .sortRaw({ key: key2, type: "desc" });
 
     const fieldsQuery = new SQBuilder().fields([key1, key2]);
 

@@ -135,7 +135,7 @@ const morphQuery = {
   populate: {
     [mainKey]: {
       on: {
-        [keyType1]: { sort: { [keyType1]: "asc" } },
+        [keyType1]: { sort: [{ [keyType1]: "asc" }] },
         [keyType2]: {
           fields: [keyType2],
           filters: {
@@ -154,7 +154,7 @@ const twoMorphQuery = {
   populate: {
     [mainKey]: {
       on: {
-        [keyType1]: { sort: { [keyType1]: "asc" } },
+        [keyType1]: { sort: [{ [keyType1]: "asc" }] },
         [keyType2]: {
           fields: [keyType2],
           filters: {
@@ -168,7 +168,7 @@ const twoMorphQuery = {
     },
     [mainKey2]: {
       on: {
-        [keyType1]: { sort: { [keyType1]: "asc" } },
+        [keyType1]: { sort: [{ [keyType1]: "asc" }] },
         [keyType2]: {
           fields: [keyType2],
           filters: {

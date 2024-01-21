@@ -25,8 +25,8 @@ describe("Utils function", () => {
     const query = new SQBuilder()
       .populate(key1, (key1Builder) => {
         key1Builder
-          .sort([key1])
-          .sort({ key: key2, type: "desc" })
+          .sorts([key1])
+          .sortRaw({ key: key2, type: "desc" })
           .fields([key1, key2])
           .and()
           .filters(key1, (b) => b.eq(key1))
@@ -79,13 +79,13 @@ describe("Utils function", () => {
 
   it("should join queries", () => {
     const query1 = new SQBuilder()
-      .sort({ key: key1, type: "asc" })
+      .sortRaw({ key: key1, type: "asc" })
       .field(key1)
       .filters(key1)
       .eq(key1);
 
     const query2 = new SQBuilder()
-      .sort({ key: key2, type: "desc" })
+      .sortRaw({ key: key2, type: "desc" })
       .field(key2)
       .filters(key2)
       .contains(key2);
