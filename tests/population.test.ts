@@ -24,20 +24,20 @@ const fullQuery = {
 
 describe("Population operator", () => {
   it("should populate all", () => {
-    const builtQuery = new SQBuilder().populate("*").build();
+    const builtQuery = new SQBuilder().populateAll().build();
 
     expect(builtQuery).toEqual(getAllPopulate);
   });
 
   it("should populate all with true for query engine", () => {
-    const builtQuery = new SQBuilder().populate("*").buildQueryEngine();
+    const builtQuery = new SQBuilder().populateAll().buildQueryEngine();
 
     expect(builtQuery).toEqual(populateAllQueryEngine);
   });
 
   it("should merge same keys", () => {
     const builtQuery = new SQBuilder()
-      .populate([key1, key2])
+      .populates([key1, key2])
       .populate(key1)
       .build();
 
@@ -46,7 +46,7 @@ describe("Population operator", () => {
 
   it("should create nested population", () => {
     const builtQuery = new SQBuilder()
-      .populate(key1, (key1Builder) => {
+      .populateDeep(key1, (key1Builder) => {
         key1Builder
           .sorts([key1])
           .sortRaw({ key: key2, type: "desc" })
@@ -62,7 +62,7 @@ describe("Population operator", () => {
 
   it("should skip illegal operators of population", () => {
     const builtQuery = new SQBuilder()
-      .populate(key1, (key1Builder) => {
+      .populateDeep(key1, (key1Builder) => {
         key1Builder
           .page(1, true)
           .pageSize(24)
@@ -84,7 +84,7 @@ describe("Population operator", () => {
   it("should select last population of same keys", () => {
     const builtQuery = new SQBuilder()
       .populate(key1)
-      .populate(key1, (key1Builder) => {
+      .populateDeep(key1, (key1Builder) => {
         key1Builder
           .sorts([key1])
           .sortRaw({ key: key2, type: "desc" })
@@ -112,7 +112,7 @@ describe("Population operator", () => {
 
     const builtQuery = new SQBuilder()
       .populate(key1)
-      .populate(key1, (key1Builder) => {
+      .populateDeep(key1, (key1Builder) => {
         key1Builder
           .joinSort(sortQuery)
           .joinFields(fieldsQuery)

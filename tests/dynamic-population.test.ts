@@ -9,7 +9,7 @@ const keyType2 = "ketType2";
 describe("Dynamic zone operator", () => {
   it("should create proper query", () => {
     const builtQuery = new SQBuilder()
-      .populate(mainKey, (keyBuilder) => {
+      .populateDeep(mainKey, (keyBuilder) => {
         keyBuilder
           .on(keyType1, (typeBuilder) => {
             typeBuilder.sort(keyType1);
@@ -29,7 +29,7 @@ describe("Dynamic zone operator", () => {
 
   it("should create multiple dynamic zones query", () => {
     const builtQuery = new SQBuilder()
-      .populate(mainKey, (keyBuilder) => {
+      .populateDeep(mainKey, (keyBuilder) => {
         keyBuilder
           .on(keyType1, (typeBuilder) => {
             typeBuilder.sort(keyType1);
@@ -42,7 +42,7 @@ describe("Dynamic zone operator", () => {
               .filters(keyType2, (b) => b.eq(keyType2));
           });
       })
-      .populate(mainKey2, (keyBuilder) => {
+      .populateDeep(mainKey2, (keyBuilder) => {
         keyBuilder
           .on(keyType1, (typeBuilder) => {
             typeBuilder.sort(keyType1);
@@ -62,7 +62,7 @@ describe("Dynamic zone operator", () => {
 
   it("should select last population for same dynamic zones", () => {
     const builtQuery = new SQBuilder()
-      .populate(mainKey, (keyBuilder) => {
+      .populateDeep(mainKey, (keyBuilder) => {
         keyBuilder
           .on(keyType1, (typeBuilder) => {
             typeBuilder.sort(keyType2);
@@ -75,7 +75,7 @@ describe("Dynamic zone operator", () => {
               .filters(keyType2, (b) => b.eq(keyType2));
           });
       })
-      .populate(mainKey, (keyBuilder) => {
+      .populateDeep(mainKey, (keyBuilder) => {
         keyBuilder
           .on(keyType1, (typeBuilder) => {
             typeBuilder.sort(keyType1);
@@ -94,7 +94,7 @@ describe("Dynamic zone operator", () => {
   });
 
   it("should join", () => {
-    const query1 = new SQBuilder().populate(mainKey, (keyBuilder) => {
+    const query1 = new SQBuilder().populateDeep(mainKey, (keyBuilder) => {
       keyBuilder
         .on(keyType1, (typeBuilder) => {
           typeBuilder.sort(keyType1);
@@ -108,7 +108,7 @@ describe("Dynamic zone operator", () => {
         });
     });
 
-    const query2 = new SQBuilder().populate(mainKey2, (keyBuilder) => {
+    const query2 = new SQBuilder().populateDeep(mainKey2, (keyBuilder) => {
       keyBuilder
         .on(keyType1, (typeBuilder) => {
           typeBuilder.sort(keyType1);

@@ -143,8 +143,8 @@ describe("Strapi query builder", () => {
       .field("attribute")
       .filters("attribute", (b) => b.eq("value"))
       .filters("nested.attribute", (b) => b.eq("value"))
-      .populate("attribute", (b) => b.filters("attribute").eq("value"))
-      .populate("dynamicZone", (dynamicZoneBuilder) => {
+      .populateDeep("attribute", (b) => b.filters("attribute").eq("value"))
+      .populateDeep("dynamicZone", (dynamicZoneBuilder) => {
         dynamicZoneBuilder.on("component", (b) => b.field("attribute"));
       })
       .publicationState("preview")

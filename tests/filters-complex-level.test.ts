@@ -101,7 +101,7 @@ describe("Filters operator", () => {
           .filters("createdAt")
           .gte("date2")
           .pageSize(1)
-          .populate("*")
+          .populateAll()
           .fields(["some"])
           .sorts(["some"])
       )

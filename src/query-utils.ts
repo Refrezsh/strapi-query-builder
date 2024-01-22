@@ -20,19 +20,6 @@ export function _set<
   return obj;
 }
 
-export function _unionBy<Type>(
-  callback: (b: Type) => string | number | boolean,
-  array1: Type[],
-  array2: Type[]
-) {
-  return [...array1, ...array2].flat().filter(
-    (
-      (set: Set<string | number | boolean>) => (o) =>
-        set.has(callback(o as Type)) ? false : set.add(callback(o as Type))
-    )(new Set())
-  );
-}
-
 export function _isDefined<T>(value: T | undefined | null): value is T {
   return value !== undefined && value !== null;
 }

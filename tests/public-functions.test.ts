@@ -23,7 +23,7 @@ const locale = { locale: "uk" };
 describe("Utils function", () => {
   it("should read only block modification", () => {
     const query = new SQBuilder()
-      .populate(key1, (key1Builder) => {
+      .populateDeep(key1, (key1Builder) => {
         key1Builder
           .sorts([key1])
           .sortRaw({ key: key2, type: "desc" })
