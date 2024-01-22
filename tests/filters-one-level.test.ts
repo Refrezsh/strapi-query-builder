@@ -26,8 +26,8 @@ export const attributeFilters = [
 
 const getResult = (type: string, negate = false) =>
   negate
-    ? { filters: { attribute: { $not: { [type]: value } } } }
-    : { filters: { attribute: { [type]: value } } };
+    ? { filters: { $and: [{ attribute: { $not: { [type]: value } } }] } }
+    : { filters: { $and: [{ attribute: { [type]: value } }] } };
 
 const getTwoResults = (type: string, negateRoot = false) =>
   negateRoot

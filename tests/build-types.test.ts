@@ -21,9 +21,13 @@ const strapiService = {
   populate: {
     attribute: {
       filters: {
-        attribute: {
-          $eq: "value",
-        },
+        $and: [
+          {
+            attribute: {
+              $eq: "value",
+            },
+          },
+        ],
       },
     },
     dynamicZone: {
@@ -65,9 +69,13 @@ const entityService = {
   populate: {
     attribute: {
       filters: {
-        attribute: {
-          $eq: "value",
-        },
+        $and: [
+          {
+            attribute: {
+              $eq: "value",
+            },
+          },
+        ],
       },
     },
     dynamicZone: {
@@ -104,9 +112,13 @@ const queryEngine = {
   populate: {
     attribute: {
       where: {
-        attribute: {
-          $eq: "value",
-        },
+        $and: [
+          {
+            attribute: {
+              $eq: "value",
+            },
+          },
+        ],
       },
     },
     dynamicZone: {

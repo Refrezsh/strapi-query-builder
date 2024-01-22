@@ -4,19 +4,15 @@ describe("Filters operator", () => {
   it("should create nested filters without attribute", () => {
     const builtQuery = new SQBuilder()
       .and()
-      .filters((b) =>
-        b.with((nestedBuilder) =>
-          nestedBuilder
-            .or()
-            .filters("createdAt")
-            .lte("date1")
-            .filters("createdAt")
-            .gte("date2")
-        )
+      .filterThis((nestedBuilder) =>
+        nestedBuilder
+          .or()
+          .filters("createdAt")
+          .lte("date1")
+          .filters("createdAt")
+          .gte("date2")
       )
-
-      .filters()
-      .with((nestedBuilder) =>
+      .filterThis((nestedBuilder) =>
         nestedBuilder
           .or()
           .filters("createdAt")
@@ -32,18 +28,7 @@ describe("Filters operator", () => {
   it("should create nested filters with attribute", () => {
     const builtQuery = new SQBuilder()
       .and()
-      .filters("attribute1", (b) =>
-        b.with((nestedBuilder) =>
-          nestedBuilder
-            .or()
-            .filters("createdAt")
-            .lte("date1")
-            .filters("createdAt")
-            .gte("date2")
-        )
-      )
-      .filters("attribute2")
-      .with((nestedBuilder) =>
+      .filterDeep("attribute1", (nestedBuilder) =>
         nestedBuilder
           .or()
           .filters("createdAt")
@@ -51,6 +36,14 @@ describe("Filters operator", () => {
           .filters("createdAt")
           .gte("date2")
       )
+      .filterDeep("attribute2", (nestedBuilder) => {
+        nestedBuilder
+          .or()
+          .filters("createdAt")
+          .lte("date1")
+          .filters("createdAt")
+          .gte("date2");
+      })
       .build();
 
     expect(builtQuery).toEqual(doubleNestedWithAttributes);
@@ -59,36 +52,30 @@ describe("Filters operator", () => {
   it("should create complex query", () => {
     const builtQuery = new SQBuilder()
       .or()
-      .filters("attribute1")
-      .with((nestedBuilder) =>
+      .filterDeep("attribute1", (nestedBuilder) => {
         nestedBuilder
           .or()
           .filters("createdAt")
           .lte("date1")
           .filters("createdAt")
-          .gte("date2")
-      )
-      .filters("attribute2")
-      .with((nestedBuilder) =>
-        // Inlined callbacks + negation + attribute negation + deep nested without key
+          .gte("date2");
+      })
+      .filterDeep("attribute2", (nestedBuilder) => {
         nestedBuilder
           .not()
           .and()
           .filters("createdAt", (b) => b.lte("date1"))
           .filters("createdAt", (b) => b.not().gte("date2"))
-          .filters()
-          .with((secondNestedBuilder) => {
+          .filterThis((secondNestedBuilder) => {
             secondNestedBuilder
               .or()
               .filters("deep1", (d) => d.eq("some"))
               .filters("deep1")
               .not()
               .contains("some-other");
-          })
-      )
-      .filters()
-      .with((nestedBuilder) =>
-        // Creates third nested with floated eq - FLOAT EQ with another nested by attribute
+          });
+      })
+      .filterThis((nestedBuilder) => {
         nestedBuilder
           .or()
           .filters("createdAt")
@@ -96,18 +83,16 @@ describe("Filters operator", () => {
           .filters("createdAt")
           .not()
           .gte("date2")
-          .filters("deep2")
-          .with((thirdNestedBuilder) => {
+          .filterDeep("deep2", (thirdNestedBuilder) => {
             thirdNestedBuilder
               .filters("some2")
               .eq("some")
               .filters("some3")
               .between(["a", "b"]);
           })
-          .eq("FLOAT EQ")
-      )
-      .filters()
-      .with((nestedBuilder) =>
+          .eq("FLOAT EQ");
+      })
+      .filterThis((nestedBuilder) =>
         // Try to create illegal operators on nested filter operator
         nestedBuilder
           .or()

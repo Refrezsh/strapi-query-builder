@@ -5,6 +5,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     sort: new Map(),
     filters: {
       rootLogical: "$and",
+      negate: false,
       attributeFilters: [],
     },
     population: [],
@@ -67,43 +68,61 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   //<editor-fold desc="Filters functions">
   /**
    * @description Start filter query
-   * @description If the attribute is empty, it expects a logical filter or a nested filter "with"
-   * @param {FilterCallback| FilterKey} attribute Can be key or callback with same builder for visual filter grouping
+   * @param {FilterKey} attribute This model attribute key
    * @param {FilterCallback} thisCallback Provides same builder to group filters chains
    * @return {SQBuilder} This builder
    */
   public filters(
-    attribute?: FilterCallback<Model, Data> | FilterKey<Model>,
+    attribute: FilterKey<Model>,
     thisCallback?: FilterCallback<Model, any>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    if (typeof attribute === "function") {
-      attribute(this);
-      return this;
-    }
-
-    if (attribute !== undefined) {
-      this._prevFilterKey = attribute;
-    }
+    this._prevFilterKey = attribute;
 
     if (thisCallback !== undefined) {
       thisCallback(this);
-      return this;
     }
 
     return this;
   }
 
   /**
-   * Add deep nested filters to current filters
-   * Callback provide new builder
-   * @param nestedCallback
+   * @description Add deep nested filters to current Model
+   * @param {FilterCallback} nestedCallback
    * @return {SQBuilder} This builder
    */
-  public with<NestedModel extends object = {}>(
+  public filterThis(
+    nestedCallback: FilterCallback<Model, Data>
+  ): SQBuilder<Model, Data> {
+    if (this._isReadonly) {
+      return this;
+    }
+
+    const nestedBuilder = new SQBuilder<Model, Data>();
+    nestedCallback(nestedBuilder);
+
+    this._addToFilter(
+      {
+        nested:
+          nestedBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
+      },
+      () => {}
+    );
+
+    return this;
+  }
+
+  /**
+   * @description Add deep nested filters to next Model
+   * @param {FilterKey} attribute
+   * @param {FilterCallback} nestedCallback
+   * @return {SQBuilder} This builder
+   */
+  public filterDeep<NestedModel extends object = {}>(
+    attribute: FilterKey<Model>,
     nestedCallback: FilterCallback<NestedModel, any>
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
@@ -115,7 +134,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     this._addToFilter(
       {
-        key: this._prevFilterKey,
+        key: attribute,
         nested:
           nestedBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
       },
@@ -148,7 +167,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Add logical OR filter.
+   * @description Add root logical OR filter.
    * @return {SQBuilder} This builder
    */
   public or(): SQBuilder<Model, Data> {
@@ -161,7 +180,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   }
 
   /**
-   * @description Add logical AND filter.
+   * @description Add root logical AND filter.
    * @return {SQBuilder} This builder
    */
   public and(): SQBuilder<Model, Data> {
@@ -346,30 +365,32 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       return this;
     }
 
-    if (this._prevFilterKey !== undefined) {
-      this._addToFilter(
-        {
-          key: this._prevFilterKey,
-          type: type,
-          value,
-          negate: this._nextAttributeNegate,
-        },
-        () => {
-          this._prevFilterKey = undefined;
-          this._nextAttributeNegate = false;
-        }
-      );
+    if (this._prevFilterKey === undefined) {
+      return this;
     }
+
+    this._addToFilter(
+      {
+        key: this._prevFilterKey,
+        type: type,
+        value,
+        negate: this._nextAttributeNegate,
+      },
+      () => {
+        this._prevFilterKey = undefined;
+        this._nextAttributeNegate = false;
+      }
+    );
 
     return this;
   }
 
   private _addToFilter(
     filter: StrapiAttributesFilter<Model>,
-    onAdded?: () => void
+    onAdded: () => void
   ) {
     this._query.filters.attributeFilters.push(filter);
-    onAdded && onAdded();
+    onAdded();
   }
   //</editor-fold>
 
@@ -1072,7 +1093,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       parsedQuery[isQueryEngine ? "select" : "fields"] = [...rawQuery.fields];
     }
 
-    // Filter values the same in service, entity service and query engine
     const filters = SQBuilder._parseFilters<Md>(rawQuery.filters);
     if (filters !== undefined) {
       parsedQuery[isQueryEngine ? "where" : "filters"] = filters;
@@ -1181,17 +1201,21 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       ) as StrapiFiltersType<Md>;
     }
 
-    if (filter.value === undefined || filter.type === undefined) {
+    if (
+      filter.value === undefined ||
+      filter.type === undefined ||
+      filter.key === undefined
+    ) {
       return undefined;
     }
 
     return filter.negate
-      ? (_set({}, filter.key as string, {
+      ? (_set({}, filter.key, {
           ["$not"]: {
             [filter.type]: filter.value,
           },
         }) as StrapiFiltersType<Md>)
-      : (_set({}, filter.key as string, {
+      : (_set({}, filter.key, {
           [filter.type]: filter.value,
         }) as StrapiFiltersType<Md>);
   }
@@ -1205,36 +1229,27 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     const parsedFilters: StrapiFiltersType<Md>[] = [];
 
-    for (const attributeQuery of attributeFilters) {
+    attributeFilters.forEach((attributeQuery) => {
       const parsedAttribute = SQBuilder._parseAttributeFilter(attributeQuery);
       if (parsedAttribute === undefined) {
-        continue;
+        return;
       }
 
       parsedFilters.push(parsedAttribute);
-    }
+    });
 
-    if (!parsedFilters.some((f) => !!f)) {
+    const totalParsedFilters = parsedFilters.length;
+    if (totalParsedFilters === 0) {
       return undefined;
     }
 
-    const withNegate = <T>(data: T): any => {
-      return negateRoot ? { ["$not"]: data } : data;
+    const filters = {
+      [rootLogical]: parsedFilters,
     };
 
-    if (this._isMoreThanOneFilter(parsedFilters)) {
-      return withNegate({
-        [rootLogical]: parsedFilters,
-      }) as StrapiFiltersType<Md>;
-    } else {
-      return withNegate(parsedFilters[0]);
-    }
-  }
-
-  private static _isMoreThanOneFilter<Md extends object>(
-    filters: StrapiFiltersType<Md>[]
-  ): filters is StrapiFiltersType<Md>[] {
-    return filters.length > 1;
+    return negateRoot
+      ? ({ ["$not"]: filters } as StrapiFiltersType<Md>)
+      : (filters as StrapiFiltersType<Md>);
   }
 
   private static _parsePopulate<Md extends object, Dt extends object>(
@@ -1383,7 +1398,7 @@ interface StrapiAttributesFilter<
 
 interface StrapiRawFilters<Model extends object> {
   rootLogical: FilterLogicalType;
-  negate?: boolean;
+  negate: boolean;
   attributeFilters: StrapiAttributesFilter<Model>[];
 }
 // </editor-fold>

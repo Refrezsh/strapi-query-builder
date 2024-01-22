@@ -26,8 +26,7 @@ for (let i = 0; i < times; i++) {
     .filters("RetailPriceWithDiscount")
     .between([1, 2])
     .filters("Slug", (b) => b.eq("slug"))
-    .filters("Deep")
-    .with((nestedBuilder) =>
+    .filterDeep("Deep", (nestedBuilder) =>
       nestedBuilder
         .or()
         .filters("RetailPrice")
@@ -36,7 +35,7 @@ for (let i = 0; i < times; i++) {
         .between([1, 2])
         .filters("Slug", (b) => b.eq("slug"))
     )
-    .sort([
+    .sortsRaw([
       { key: "RetailPriceWithDiscount", type: "asc" },
       { key: "RetailPrice", type: "asc" },
     ])
