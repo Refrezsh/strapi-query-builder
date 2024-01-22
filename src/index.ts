@@ -919,7 +919,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     this._query.publicationState = state;
-
     return this;
   }
 
@@ -934,7 +933,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     this._query.locale = code;
-
     return this;
   }
 
@@ -963,17 +961,25 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     const externalPagination = builder.getRawPagination();
 
     if (_isDefined(externalPagination?.pagination)) {
-      this._query.pagination = {
-        ...this._query.pagination,
-        ...externalPagination.pagination,
-      };
+      const current = this._query.pagination;
+
+      this._query.pagination = current
+        ? {
+            ...current,
+            ...externalPagination.pagination,
+          }
+        : { ...externalPagination.pagination };
     }
 
     if (_isDefined(externalPagination?.offsetPagination)) {
-      this._query.offsetPagination = {
-        ...this._query.offsetPagination,
-        ...externalPagination.offsetPagination,
-      };
+      const current = this._query.offsetPagination;
+
+      this._query.offsetPagination = current
+        ? {
+            ...current,
+            ...externalPagination.offsetPagination,
+          }
+        : { ...externalPagination.offsetPagination };
     }
 
     return this;
@@ -1107,7 +1113,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       rawQuery.offsetPagination
     );
 
-    if (pagination !== undefined) {
+    if (_isDefined(pagination)) {
       if (queryType === "strapiService") {
         parsedQuery.pagination = pagination;
       } else {
@@ -1125,25 +1131,25 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     const filters = SQBuilder._parseFilters<Md>(rawQuery.filters);
-    if (filters !== undefined) {
+    if (_isDefined(filters)) {
       parsedQuery[isQueryEngine ? "where" : "filters"] = filters;
     }
 
     // Populate calls build for nested query
     const populate = SQBuilder._parsePopulate(rawQuery.population, queryType);
-    if (populate !== undefined) {
+    if (_isDefined(populate)) {
       parsedQuery.populate = populate;
     }
 
-    if (rawQuery?.data !== undefined) {
+    if (_isDefined(rawQuery.data)) {
       parsedQuery.data = rawQuery.data;
     }
 
-    if (rawQuery?.publicationState !== undefined && !isQueryEngine) {
+    if (_isDefined(rawQuery.publicationState) && !isQueryEngine) {
       parsedQuery.publicationState = rawQuery.publicationState;
     }
 
-    if (rawQuery?.locale !== undefined && queryType === "strapiService") {
+    if (_isDefined(rawQuery.locale) && queryType === "strapiService") {
       parsedQuery.locale = rawQuery.locale;
     }
 
@@ -1198,21 +1204,21 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   ): StrapiFiltersType<Md> | undefined {
     if (filter.nested !== undefined) {
       const nestedFilters = this._parseFilters(filter.nested);
-      if (nestedFilters === undefined) {
+      if (!_isDefined(nestedFilters)) {
         return undefined;
       }
 
       return (
-        filter.key === undefined
+        !_isDefined(filter.key)
           ? nestedFilters
           : _set({}, filter.key, nestedFilters)
       ) as StrapiFiltersType<Md>;
     }
 
     if (
-      filter.value === undefined ||
-      filter.type === undefined ||
-      filter.key === undefined
+      !_isDefined(filter.value) ||
+      !_isDefined(filter.type) ||
+      !_isDefined(filter.key)
     ) {
       return undefined;
     }
@@ -1239,7 +1245,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
     attributeFilters.forEach((attributeQuery) => {
       const parsedAttribute = SQBuilder._parseAttributeFilter(attributeQuery);
-      if (parsedAttribute === undefined) {
+      if (!_isDefined(parsedAttribute)) {
         return;
       }
 
