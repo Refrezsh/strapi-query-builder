@@ -87,6 +87,7 @@ const entityService = {
     },
   },
   fields: ["attribute"],
+  publicationState: "preview",
   page: 5,
   pageSize: 24,
 };

@@ -771,27 +771,29 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
 
   // <editor-fold desc="Pagination">
   /**
-   * @description Add StrapiService like page
+   * @description Add page
    * @param {number} page
    * @param {boolean} withCount
    * @return {SQBuilder} This builder
    */
-  public page(page: number, withCount?: boolean): SQBuilder<Model, Data> {
+  public page(
+    page: number,
+    withCount: boolean = false
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
 
-    this._query.pagination = { ...this._query.pagination, page };
-
-    if (withCount !== undefined && withCount !== null) {
-      this._query.pagination.withCount = withCount;
-    }
+    const current = this._query.pagination;
+    this._query.pagination = current
+      ? { ...current, page, withCount }
+      : { page, withCount };
 
     return this;
   }
 
   /**
-   * @description Add StrapiService like page size
+   * @description Add page size
    * @param {number} pageSize
    * @return {SQBuilder} This builder
    */
@@ -799,31 +801,41 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     if (this._isReadonly) {
       return this;
     }
-    this._query.pagination = { ...this._query.pagination, pageSize };
+
+    const current = this._query.pagination;
+    this._query.pagination = current ? { ...current, pageSize } : { pageSize };
+
     return this;
   }
 
   /**
-   * @description Add Offset like page start
+   * @description Add offset pagination start
    * @param {number} start
    * @param {boolean} withCount
    * @return {SQBuilder} This builder
    */
-  public pageStart(start: number, withCount?: boolean): SQBuilder<Model, Data> {
+  public pageStart(
+    start: number,
+    withCount: boolean = false
+  ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
-    this._query.offsetPagination = { ...this._query.offsetPagination, start };
 
-    if (withCount !== undefined && withCount !== null) {
-      this._query.offsetPagination.withCount = withCount;
-    }
+    const current = this._query.offsetPagination;
+    this._query.offsetPagination = current
+      ? {
+          ...current,
+          start,
+          withCount,
+        }
+      : { start, withCount };
 
     return this;
   }
 
   /**
-   * @description Add Offset like page limit
+   * @description Add offset pagination limit
    * @param {number} limit
    * @return {SQBuilder} This builder
    */
@@ -831,10 +843,15 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     if (this._isReadonly) {
       return this;
     }
-    this._query.offsetPagination = {
-      ...this._query.offsetPagination,
-      limit,
-    };
+
+    const current = this._query.offsetPagination;
+    this._query.offsetPagination = current
+      ? {
+          ...current,
+          limit,
+        }
+      : { limit };
+
     return this;
   }
   // </editor-fold>
@@ -1084,6 +1101,20 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     const isQueryEngine = queryType === "queryEngine";
     let parsedQuery: StrapiBuiltQuery<Md, Dt> = {};
 
+    const pagination = this._parsePagination(
+      queryType,
+      rawQuery.pagination,
+      rawQuery.offsetPagination
+    );
+
+    if (pagination !== undefined) {
+      if (queryType === "strapiService") {
+        parsedQuery.pagination = pagination;
+      } else {
+        parsedQuery = { ...parsedQuery, ...pagination };
+      }
+    }
+
     if (rawQuery.sort.size > 0) {
       parsedQuery[isQueryEngine ? "orderBy" : "sort"] =
         SQBuilder._parseSort<Md>(rawQuery.sort);
@@ -1104,35 +1135,14 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
       parsedQuery.populate = populate;
     }
 
-    // Pagination for strapi service, entity service and query engine is different
-    const pagination = this._parsePagination(
-      queryType,
-      rawQuery.pagination,
-      rawQuery.offsetPagination
-    );
-
-    if (pagination !== undefined) {
-      if (queryType === "strapiService") {
-        parsedQuery.pagination = pagination;
-      } else {
-        Object.assign(parsedQuery, pagination);
-      }
-    }
-
-    // Data pass without any mods
     if (rawQuery?.data !== undefined) {
       parsedQuery.data = rawQuery.data;
     }
 
-    // Publication state only for strapi service
-    if (
-      rawQuery?.publicationState !== undefined &&
-      queryType === "strapiService"
-    ) {
+    if (rawQuery?.publicationState !== undefined && !isQueryEngine) {
       parsedQuery.publicationState = rawQuery.publicationState;
     }
 
-    // Locale property only for strapi service
     if (rawQuery?.locale !== undefined && queryType === "strapiService") {
       parsedQuery.locale = rawQuery.locale;
     }
@@ -1145,21 +1155,19 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     pagination?: StrapiPagination,
     offsetPagination?: StrapiOffsetPagination
   ): UnionPagination | undefined {
-    // All engines have limit pagination
     if (_isDefined(offsetPagination)) {
       if (queryType === "entityService" || queryType === "queryEngine") {
-        const { start, limit } = offsetPagination;
-        return { start, limit };
+        const { withCount, ...other } = offsetPagination;
+        return other;
       }
 
       return offsetPagination;
     }
 
-    // Page pagination works only for Service and Entity engines
-    if (pagination !== undefined && queryType !== "queryEngine") {
+    if (_isDefined(pagination) && queryType !== "queryEngine") {
       if (queryType === "entityService") {
-        const { page, pageSize } = pagination;
-        return { page, pageSize };
+        const { withCount, ...other } = pagination;
+        return other;
       }
 
       return pagination;
