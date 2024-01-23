@@ -1,21 +1,24 @@
 export function _set<
   Model extends { [key: string]: number | string | boolean | Model | {} }
 >(obj: Model, path: string | string[], value: any) {
-  const pathArray = (Array.isArray(path)
+  const pathArray: (keyof Model)[] = Array.isArray(path)
     ? path
-    : path.match(/([^[.\]])+/g)) as unknown as (keyof Model)[];
-  if (!pathArray) {
-    return obj;
-  }
+    : (path.split(".").filter(Boolean) as (keyof Model)[]);
 
-  pathArray.reduce<Model>((acc, key, i) => {
-    if (acc[key] === undefined) {
-      // @ts-ignore FIXME: Don't know how to fix it yet.
-      acc[key] = {};
+  let current: any = obj;
+
+  for (let i = 0; i < pathArray.length; i++) {
+    const key = pathArray[i];
+
+    if (i === pathArray.length - 1) {
+      current[key] = value;
+    } else {
+      if (typeof current[key] !== "object" || current[key] === null) {
+        current[key] = {};
+      }
+      current = current[key];
     }
-    if (i === pathArray.length - 1) acc[key] = value;
-    return acc[key] as Model;
-  }, obj);
+  }
 
   return obj;
 }
