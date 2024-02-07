@@ -745,10 +745,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @param {boolean} withCount
    * @return {SQBuilder} This builder
    */
-  public page(
-    page: number,
-    withCount: boolean = false
-  ): SQBuilder<Model, Data> {
+  public page(page: number, withCount: boolean = true): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
     }
@@ -785,7 +782,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    */
   public pageStart(
     start: number,
-    withCount: boolean = false
+    withCount: boolean = true
   ): SQBuilder<Model, Data> {
     if (this._isReadonly) {
       return this;
