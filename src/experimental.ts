@@ -1,6 +1,10 @@
 import { _isDefined, _set } from "./query-utils";
 
-export default class SQBuilder<Model extends object, Data extends object = {}> {
+export default class SQBuilder<
+  Model extends object,
+  Data extends object = {},
+  Config extends object = {}
+> {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
     filters: {
@@ -498,11 +502,47 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @param {StrapiSingleFieldInput[]} fields
    * @return {SQBuilder} This builder
    */
-  public fields(
-    fields: StrapiSingleFieldInput<Model>[]
-  ): SQBuilder<Model, Data> {
+  public fields<
+    F extends readonly [
+      StrapiSingleFieldInput<Model>,
+      ...StrapiSingleFieldInput<Model>[]
+    ]
+  >(
+    fields: F
+  ): SQBuilder<
+    Model,
+    Data,
+    Config extends { fields: infer ExistingFields }
+      ? {
+          fields: Deduplicate<
+            [
+              ...(ExistingFields extends readonly unknown[]
+                ? ExistingFields
+                : []),
+              ...F
+            ]
+          >;
+        }
+      : { fields: Deduplicate<[...F]> }
+  > {
     fields.forEach((f) => this._query.fields.add(f));
-    return this;
+
+    return this as unknown as SQBuilder<
+      Model,
+      Data,
+      Config extends { fields: infer ExistingFields }
+        ? {
+            fields: Deduplicate<
+              [
+                ...(ExistingFields extends readonly unknown[]
+                  ? ExistingFields
+                  : []),
+                ...F
+              ]
+            >;
+          }
+        : { fields: Deduplicate<[...F]> }
+    >;
   }
 
   /**
@@ -511,9 +551,42 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @param {StrapiSingleFieldInput} field
    * @return {SQBuilder} This builder
    */
-  public field(field: StrapiSingleFieldInput<Model>): SQBuilder<Model, Data> {
+  public field<F extends StrapiSingleFieldInput<Model>>(
+    field: F
+  ): SQBuilder<
+    Model,
+    Data,
+    Config extends { fields: infer ExistingFields }
+      ? {
+          fields: Deduplicate<
+            [
+              ...(ExistingFields extends readonly unknown[]
+                ? ExistingFields
+                : []),
+              F
+            ]
+          >;
+        }
+      : { fields: [F] }
+  > {
     this._query.fields.add(field);
-    return this;
+
+    return this as unknown as SQBuilder<
+      Model,
+      Data,
+      Config extends { fields: infer ExistingFields }
+        ? {
+            fields: Deduplicate<
+              [
+                ...(ExistingFields extends readonly unknown[]
+                  ? ExistingFields
+                  : []),
+                F
+              ]
+            >;
+          }
+        : { fields: [F] }
+    >;
   }
   //</editor-fold>
 
@@ -877,6 +950,16 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     return this;
   }
   //</editor-fold>
+
+  public buildTest() {
+    const result: any = {};
+
+    if (this._query.fields.size > 0) {
+      result.fields = Array.from(this._query.fields);
+    }
+
+    return result as Config;
+  }
 
   // <editor-fold desc="Query parsing utils">
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -1338,3 +1421,9 @@ type GetAttributes<Model extends object> = {
 type GetRelations<Model extends object> = {
   [Key in keyof Model]-?: IsNotAttribute<Key & string, Model[Key]>;
 }[keyof Model];
+
+type Deduplicate<T extends readonly any[]> = T extends [infer F, ...infer R]
+  ? F extends R[number]
+    ? Deduplicate<R>
+    : [F, ...Deduplicate<R>]
+  : [];
