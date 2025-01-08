@@ -37,16 +37,15 @@ describe("Fields types", () => {
       .field("id")
       .fields(["name", "description"])
       .field("options")
-      .field("id")
       .build();
-    const withUnionTypeName: "name" = withUnionTypes.fields[0];
-    const withUnionTypeDescription: "description" = withUnionTypes.fields[1];
-    const withUnionTypeOptions: "options" = withUnionTypes.fields[2];
-    const withUnionTypeID: "id" = withUnionTypes.fields[3];
+    const withUnionTypeID: "id" = withUnionTypes.fields[0];
+    const withUnionTypeName: "name" = withUnionTypes.fields[1];
+    const withUnionTypeDescription: "description" = withUnionTypes.fields[2];
+    const withUnionTypeOptions: "options" = withUnionTypes.fields[3];
 
-    expect(withUnionTypes.fields.includes("description")).toEqual(true);
-    expect(withUnionTypes.fields.includes("name")).toEqual(true);
-    expect(withUnionTypes.fields.includes("options")).toEqual(true);
-    expect(withUnionTypes.fields.includes("id")).toEqual(true);
+    expect(withUnionTypeID).toEqual("id");
+    expect(withUnionTypeName).toEqual("name");
+    expect(withUnionTypeDescription).toEqual("description");
+    expect(withUnionTypeOptions).toEqual("options");
   });
 });
