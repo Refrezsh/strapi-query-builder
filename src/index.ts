@@ -20,7 +20,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   private _nextAttributeNegate: boolean = false;
   private _prevPopulateKey?: PopulateKey<any>;
   private _prevSortKey?: SortKey<Model>;
-  private _isReadonly = false;
 
   constructor(builderConfig?: BuilderConfig) {
     if (builderConfig) {
@@ -76,16 +75,8 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     attribute: FilterKey<Model>,
     thisCallback?: FilterCallback<Model, any>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._prevFilterKey = attribute;
-
-    if (thisCallback !== undefined) {
-      thisCallback(this);
-    }
-
+    if (thisCallback !== undefined) thisCallback(this);
     return this;
   }
 
@@ -97,10 +88,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   public filterThis(
     nestedCallback: FilterCallback<Model, Data>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const nestedBuilder = new SQBuilder<Model, Data>();
     nestedCallback(nestedBuilder);
 
@@ -125,10 +112,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     attribute: FilterKey<Model>,
     nestedCallback: FilterCallback<NestedModel, any>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const nestedBuilder = new SQBuilder<NestedModel, any>();
     nestedCallback(nestedBuilder);
 
@@ -138,9 +121,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
         nested:
           nestedBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
       },
-      () => {
-        this._prevFilterKey = undefined;
-      }
+      () => (this._prevFilterKey = undefined)
     );
 
     return this;
@@ -152,10 +133,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public not(): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const target =
       this._prevFilterKey !== undefined ? "attribute" : "negateRoot";
 
@@ -171,10 +148,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public or(): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.filters.rootLogical = "$or";
     return this;
   }
@@ -184,10 +157,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public and(): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.filters.rootLogical = "$and";
     return this;
   }
@@ -361,13 +330,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     type: FilterAttributeType,
     value: AttributeValues
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    if (this._prevFilterKey === undefined) {
-      return this;
-    }
+    if (this._prevFilterKey === undefined) return this;
 
     this._addToFilter(
       {
@@ -401,10 +364,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public populateAll(): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._addToPopulate({ key: "*" });
     return this;
   }
@@ -415,10 +374,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public populate(key: StrapiInputPopulateKey<Model>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._addToPopulate({ key: key });
     return this;
   }
@@ -431,14 +386,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   public populates(
     keys: StrapiInputPopulateKey<Model>[]
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    keys.forEach((k) => {
-      this._addToPopulate({ key: k });
-    });
-
+    keys.forEach((k) => this._addToPopulate({ key: k }));
     return this;
   }
 
@@ -452,10 +400,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     key: StrapiInputPopulateKey<Model>,
     nestedCallback: PopulateCallback<PopulateModel>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const nestedBuilder: SQBuilder<PopulateModel, any> = new SQBuilder<
       PopulateModel,
       any
@@ -482,7 +426,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     }
 
     this._addToPopulate(populate);
-
     return this;
   }
 
@@ -497,17 +440,11 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     componentTypeKey: string,
     nestedCallback: PopulateCallback<PopulateModel>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const prevPopulateKey = this._prevPopulateKey as
       | PopulateKey<Model>
       | undefined;
 
-    if (!_isDefined(prevPopulateKey)) {
-      return this;
-    }
+    if (!_isDefined(prevPopulateKey)) return this;
 
     const nestedBuilder: SQBuilder<PopulateModel, any> = new SQBuilder<
       PopulateModel,
@@ -564,13 +501,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   public fields(
     fields: StrapiSingleFieldInput<Model>[]
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    if (fields.length > 0) {
-      fields.forEach((f) => this._query.fields.add(f));
-    }
+    fields.forEach((f) => this._query.fields.add(f));
     return this;
   }
 
@@ -581,10 +512,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public field(field: StrapiSingleFieldInput<Model>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.fields.add(field);
     return this;
   }
@@ -599,17 +526,12 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public sort(sortKey: SortKey<Model>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.sort.set(sortKey, {
       key: sortKey,
       type: this._builderConfig.defaultSort,
     });
 
     this._prevSortKey = sortKey;
-
     return this;
   }
 
@@ -620,21 +542,14 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public sorts(sortKeys: SortKey<Model>[]): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    if (sortKeys.length > 0) {
-      sortKeys.forEach((key) => {
-        this._query.sort.set(key, {
-          key: key,
-          type: this._builderConfig.defaultSort,
-        });
-      });
-    }
+    sortKeys.forEach((key) =>
+      this._query.sort.set(key, {
+        key: key,
+        type: this._builderConfig.defaultSort,
+      })
+    );
 
     this._prevSortKey = undefined;
-
     return this;
   }
 
@@ -646,10 +561,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public sortRaw(sort: StrapiSort<Model>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const sortKey = sort.key;
 
     this._query.sort.set(sortKey, sort);
@@ -665,18 +576,8 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public sortsRaw(sorts: StrapiSort<Model>[]): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    if (sorts.length > 0) {
-      sorts.forEach((sort) => {
-        this._query.sort.set(sort.key, sort);
-      });
-    }
-
+    sorts.forEach((sort) => this._query.sort.set(sort.key, sort));
     this._prevSortKey = undefined;
-
     return this;
   }
 
@@ -687,12 +588,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public asc(changeAll: boolean = false): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._changeSortDirection(changeAll, "asc");
-
     return this;
   }
 
@@ -703,12 +599,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public desc(changeAll: boolean = false): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._changeSortDirection(changeAll, "desc");
-
     return this;
   }
 
@@ -718,16 +609,14 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   ) {
     if (!changeAll) {
       const previousSortKey = this._prevSortKey;
-      if (!previousSortKey) {
-        return;
-      }
+      if (!previousSortKey) return;
 
       this._query.sort.set(previousSortKey, {
         key: previousSortKey,
         type: direction,
       });
-      this._prevSortKey = undefined;
 
+      this._prevSortKey = undefined;
       return;
     } else {
       this._query.sort.forEach((sort) => {
@@ -746,10 +635,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public page(page: number, withCount: boolean = true): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const current = this._query.pagination;
     this._query.pagination = current
       ? { ...current, page, withCount }
@@ -764,10 +649,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public pageSize(pageSize: number): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const current = this._query.pagination;
     this._query.pagination = current ? { ...current, pageSize } : { pageSize };
 
@@ -784,10 +665,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     start: number,
     withCount: boolean = true
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const current = this._query.offsetPagination;
     this._query.offsetPagination = current
       ? {
@@ -806,10 +683,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public pageLimit(limit: number): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const current = this._query.offsetPagination;
     this._query.offsetPagination = current
       ? {
@@ -829,10 +702,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public data(dataObject: Data): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.data = dataObject;
     return this;
   }
@@ -875,10 +744,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public publicationState(state: PublicationStates): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.publicationState = state;
     return this;
   }
@@ -889,21 +754,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public locale(code: string): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this._query.locale = code;
-    return this;
-  }
-
-  /**
-   * @description Make the builder read-only that all filter methods don't change query state
-   * @param {boolean} isReadonly
-   * @return {SQBuilder} This builder
-   */
-  public readonly(isReadonly?: boolean): SQBuilder<Model, Data> {
-    this._isReadonly = isReadonly === undefined ? true : isReadonly;
     return this;
   }
 
@@ -915,10 +766,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   public joinPagination<T extends object, F extends object>(
     builder: SQBuilder<T, F>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const externalPagination = builder.getRawPagination();
 
     if (_isDefined(externalPagination?.pagination)) {
@@ -954,20 +801,14 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
   public joinPopulation<T extends object, F extends object>(
     builder: SQBuilder<T, F>
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    const externalPopulation = builder.getRawPopulation();
-
-    if (externalPopulation.size > 0) {
-      externalPopulation.forEach((populate) => {
+    builder
+      .getRawPopulation()
+      .forEach((populate) =>
         this._query.population.set(
           populate.key as PopulateKey<Model>,
           populate as unknown as StrapiPopulate<Model, any>
-        );
-      });
-    }
+        )
+      );
 
     return this;
   }
@@ -982,10 +823,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
     builder: SQBuilder<T, F>,
     mergeRootLogical: boolean = false
   ): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     const externalFilters = builder.getRawFilters();
 
     this._query.filters.attributeFilters =
@@ -1007,16 +844,9 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public joinSort(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    const externalSort = builder.getRawSort();
-    if (externalSort.size > 0) {
-      externalSort.forEach((value, key) => {
-        this._query.sort.set(key, value);
-      });
-    }
+    builder
+      .getRawSort()
+      .forEach((value, key) => this._query.sort.set(key, value));
 
     return this;
   }
@@ -1027,16 +857,7 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public joinFields(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
-    const externalFields = builder.getRawFields();
-    if (externalFields.size > 0) {
-      externalFields.forEach((f) => {
-        this._query.fields.add(f);
-      });
-    }
+    builder.getRawFields().forEach((f) => this._query.fields.add(f));
 
     return this;
   }
@@ -1047,10 +868,6 @@ export default class SQBuilder<Model extends object, Data extends object = {}> {
    * @return {SQBuilder} This builder
    */
   public joinAll(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
-    if (this._isReadonly) {
-      return this;
-    }
-
     this.joinPagination(builder);
     this.joinPopulation(builder);
     this.joinFilters(builder);

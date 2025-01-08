@@ -21,38 +21,6 @@ const pubState = { publicationState: "preview" };
 const locale = { locale: "uk" };
 
 describe("Utils function", () => {
-  it("should read only block modification", () => {
-    const query = new SQBuilder()
-      .populateDeep(key1, (key1Builder) => {
-        key1Builder
-          .sorts([key1])
-          .sortRaw({ key: key2, type: "desc" })
-          .fields([key1, key2])
-          .and()
-          .filters(key1, (b) => b.eq(key1))
-          .filters(key2, (b) => b.contains(key2));
-      })
-      .readonly();
-
-    query
-      .sort("illegalKey")
-      .field("illegalKey")
-      .filters("key")
-      .eq("value")
-      .populate("key")
-      .page(1)
-      .pageSize(24)
-      .pageStart(0)
-      .pageLimit(24)
-      .joinFilters(query)
-      .joinFields(query)
-      .joinSort(query)
-      .joinPopulation(query)
-      .joinPagination(query);
-
-    expect(query.build()).toEqual(fullQuery);
-  });
-
   it("should publication state works", () => {
     const builtQuery = new SQBuilder().publicationState("preview").build();
 
