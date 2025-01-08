@@ -598,14 +598,30 @@ export default class SQBuilder<
    * @param {SortKey} sortKey
    * @return {SQBuilder} This builder
    */
-  public sort(sortKey: SortKey<Model>): SQBuilder<Model, Data> {
+  public sort<S extends SortEntry<Model>>(
+    sortKey: S
+  ): SQBuilder<
+    Model,
+    Data,
+    Config extends { sort: infer ExistingSorts }
+      ? { sort: Deduplicate<[...(ExistingSorts extends any[] ? ExistingSorts : []), { key: S; type: SortDirection }]>}
+      : { sort: [{ key: S; type: SortDirection }] }
+  > {
+    // @ts-ignore
     this._query.sort.set(sortKey, {
       key: sortKey,
       type: this._builderConfig.defaultSort,
     });
 
+    // @ts-ignore
     this._prevSortKey = sortKey;
-    return this;
+    return this as unknown as SQBuilder<
+      Model,
+      Data,
+      Config extends { sort: infer ExistingSorts }
+        ? { sort: Deduplicate<[...(ExistingSorts extends any[] ? ExistingSorts : []), { key: S; type: SortDirection }]>}
+        : { sort: [{ key: S; type: SortDirection }] }
+    >;
   }
 
   /**
@@ -660,9 +676,37 @@ export default class SQBuilder<
    * @param {boolean} changeAll
    * @return {SQBuilder} This builder
    */
-  public asc(changeAll: boolean = false): SQBuilder<Model, Data> {
-    this._changeSortDirection(changeAll, "asc");
-    return this;
+  public asc(): SQBuilder<
+    Model,
+    Data,
+    Config extends { sort: infer ExistingSorts }
+      ? {
+        sort: {
+          [K in keyof ExistingSorts]: ExistingSorts[K] extends {
+              key: infer Key;
+            }
+            ? { key: Key; type: "asc" }
+            : never;
+        };
+      }
+      : Config
+  > {
+    this._changeSortDirection(false, "asc");
+    return this as unknown as SQBuilder<
+      Model,
+      Data,
+      Config extends { sort: infer ExistingSorts }
+        ? {
+          sort: {
+            [K in keyof ExistingSorts]: ExistingSorts[K] extends {
+                key: infer Key;
+              }
+              ? { key: Key; type: "asc" }
+              : never;
+          };
+        }
+        : Config
+    >;
   }
 
   /**
@@ -1422,8 +1466,21 @@ type GetRelations<Model extends object> = {
   [Key in keyof Model]-?: IsNotAttribute<Key & string, Model[Key]>;
 }[keyof Model];
 
-type Deduplicate<T extends readonly any[]> = T extends [infer F, ...infer R]
-  ? F extends R[number]
-    ? Deduplicate<R>
-    : [F, ...Deduplicate<R>]
-  : [];
+type Deduplicate<T extends readonly any[]> = T extends [
+    infer F,
+    ...infer Rest
+  ]
+  ? F extends Rest[number]
+    ? Deduplicate<Rest>
+    : [F, ...Deduplicate<Rest>]
+  : T;
+
+type SortDirection = "asc" | "desc";
+
+type SortEntry<Model> =
+  | keyof Model
+  | {
+  [K in keyof Model]?: SortEntry<Model[K]>;
+};
+
+type SortConfig<Model> = { key: SortEntry<Model>; type: SortDirection };

@@ -29,3 +29,7 @@ const withUnionTypeName: "name" = withUnionTypes.fields[0];
 const withUnionTypeDescription: "description" = withUnionTypes.fields[1];
 const withUnionTypeOptions: "options" = withUnionTypes.fields[2];
 const withUnionTypeID: "id" = withUnionTypes.fields[3];
+
+
+
+const sortType = new SQBuilder<TestModel>().sort("id").asc().buildTest();
