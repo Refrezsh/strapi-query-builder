@@ -1,4 +1,4 @@
-import SQBuilder from "../../src/experimental";
+import EQBuilder from "../../src/experimental";
 
 interface TestModel {
   id: string;
@@ -7,10 +7,10 @@ interface TestModel {
   options: string;
 }
 
-const singleType = new SQBuilder<TestModel>().field("id").buildTest();
+const singleType = new EQBuilder<TestModel>().field("id").buildTest();
 const singleTypeId: "id" = singleType.fields[0];
 
-const multipleTypes = new SQBuilder<TestModel>()
+const multipleTypes = new EQBuilder<TestModel>()
   .field("id")
   .field("name")
   .field("description")
@@ -19,7 +19,7 @@ const multipleTypeID: "id" = multipleTypes.fields[0];
 const multipleTypeName: "name" = multipleTypes.fields[1];
 const multipleTypeDescription: "description" = multipleTypes.fields[2];
 
-const withUnionTypes = new SQBuilder<TestModel>()
+const withUnionTypes = new EQBuilder<TestModel>()
   .field("id")
   .fields(["name", "description"])
   .field("options")
@@ -32,4 +32,4 @@ const withUnionTypeID: "id" = withUnionTypes.fields[3];
 
 
 
-const sortType = new SQBuilder<TestModel>().sort("id").asc().buildTest();
+const sortType = new EQBuilder<TestModel>().sort("id").asc().buildTest();

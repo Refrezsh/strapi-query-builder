@@ -1,6 +1,6 @@
 import { _isDefined, _set } from "./query-utils";
 
-export default class SQBuilder<
+export default class EQBuilder<
   Model extends object,
   Data extends object = {},
   Config extends object = {}
@@ -40,7 +40,7 @@ export default class SQBuilder<
   public build(
     queryType: QueryTypes = "strapiService"
   ): StrapiBuiltQuery<Model, Data> {
-    return SQBuilder._buildQuery(this._query, queryType);
+    return EQBuilder._buildQuery(this._query, queryType);
   }
 
   /**
@@ -48,7 +48,7 @@ export default class SQBuilder<
    * @return {StrapiBuiltQuery} Built query
    */
   public buildStrapiService(): StrapiBuiltQuery<Model, Data> {
-    return SQBuilder._buildQuery(this._query, "strapiService");
+    return EQBuilder._buildQuery(this._query, "strapiService");
   }
 
   /**
@@ -56,7 +56,7 @@ export default class SQBuilder<
    * @return {StrapiBuiltQuery} Built query
    */
   public buildEntityService(): StrapiBuiltQuery<Model, Data> {
-    return SQBuilder._buildQuery(this._query, "entityService");
+    return EQBuilder._buildQuery(this._query, "entityService");
   }
 
   /**
@@ -64,7 +64,7 @@ export default class SQBuilder<
    * @return {StrapiBuiltQuery} Built query
    */
   public buildQueryEngine(): StrapiBuiltQuery<Model, Data> {
-    return SQBuilder._buildQuery(this._query, "queryEngine");
+    return EQBuilder._buildQuery(this._query, "queryEngine");
   }
   //</editor-fold>
 
@@ -73,12 +73,12 @@ export default class SQBuilder<
    * @description Start filter query
    * @param {FilterKey} attribute This model attribute key
    * @param {FilterCallback} thisCallback Provides same builder to group filters chains
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public filters(
     attribute: FilterKey<Model>,
     thisCallback?: FilterCallback<Model, any>
-  ): SQBuilder<Model, Data> {
+  ): EQBuilder<Model, Data> {
     this._prevFilterKey = attribute;
     if (thisCallback !== undefined) thisCallback(this);
     return this;
@@ -87,12 +87,12 @@ export default class SQBuilder<
   /**
    * @description Add deep nested filters to current Model
    * @param {FilterCallback} nestedCallback
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public filterThis(
     nestedCallback: FilterCallback<Model, Data>
-  ): SQBuilder<Model, Data> {
-    const nestedBuilder = new SQBuilder<Model, Data>();
+  ): EQBuilder<Model, Data> {
+    const nestedBuilder = new EQBuilder<Model, Data>();
     nestedCallback(nestedBuilder);
 
     this._addToFilter(
@@ -110,13 +110,13 @@ export default class SQBuilder<
    * @description Add deep nested filters to next Model
    * @param {FilterKey} attribute
    * @param {FilterCallback} nestedCallback
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public filterDeep<NestedModel extends object = {}>(
     attribute: FilterKey<Model>,
     nestedCallback: FilterCallback<NestedModel, any>
-  ): SQBuilder<Model, Data> {
-    const nestedBuilder = new SQBuilder<NestedModel, any>();
+  ): EQBuilder<Model, Data> {
+    const nestedBuilder = new EQBuilder<NestedModel, any>();
     nestedCallback(nestedBuilder);
 
     this._addToFilter(
@@ -134,9 +134,9 @@ export default class SQBuilder<
   //<editor-fold desc="Logical filters">
   /**
    * @description Negates current attribute or logical filter
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public not(): SQBuilder<Model, Data> {
+  public not(): EQBuilder<Model, Data> {
     const target =
       this._prevFilterKey !== undefined ? "attribute" : "negateRoot";
 
@@ -149,18 +149,18 @@ export default class SQBuilder<
 
   /**
    * @description Add root logical OR filter.
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public or(): SQBuilder<Model, Data> {
+  public or(): EQBuilder<Model, Data> {
     this._query.filters.rootLogical = "$or";
     return this;
   }
 
   /**
    * @description Add root logical AND filter.
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public and(): SQBuilder<Model, Data> {
+  public and(): EQBuilder<Model, Data> {
     this._query.filters.rootLogical = "$and";
     return this;
   }
@@ -170,162 +170,162 @@ export default class SQBuilder<
   /**
    * @description Add "Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public eq(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public eq(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$eq", value);
   }
 
   /**
    * @description Add "Equal insensitive" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public eqi(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public eqi(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$eqi", value);
   }
 
   /**
    * @description Add "Not Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public ne(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public ne(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$ne", value);
   }
 
   /**
    * @description Add "In" attribute filter
    * @param {MultipleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public in(value: MultipleAttributeType): SQBuilder<Model, Data> {
+  public in(value: MultipleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$in", value);
   }
 
   /**
    * @description Add "Not In" attribute filter
    * @param {MultipleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public notIn(value: MultipleAttributeType): SQBuilder<Model, Data> {
+  public notIn(value: MultipleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$notIn", value);
   }
 
   /**
    * @description Add "Less Than" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public lt(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public lt(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$lt", value);
   }
 
   /**
    * @description Add "Less Than or Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public lte(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public lte(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$lte", value);
   }
 
   /**
    * @description Add "Greater Than" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public gt(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public gt(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$gt", value);
   }
 
   /**
    * @description Add "Greater Than or Equal" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public gte(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public gte(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$gte", value);
   }
 
   /**
    * @description Add "Contains" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public contains(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public contains(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$contains", value);
   }
 
   /**
    * @description Add "Not Contains" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public notContains(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public notContains(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$notContains", value);
   }
 
   /**
    * @description Add "Contains case-insensitive" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public containsi(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public containsi(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$containsi", value);
   }
 
   /**
    * @description Add "Not Contains case-insensitive" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public notContainsi(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public notContainsi(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$notContainsi", value);
   }
 
   /**
    * @description Add "Start with" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public startsWith(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public startsWith(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$startsWith", value);
   }
 
   /**
    * @description Add "Ends with" attribute filter
    * @param {SingleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public endsWith(value: SingleAttributeType): SQBuilder<Model, Data> {
+  public endsWith(value: SingleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$endsWith", value);
   }
 
   /**
    * @description Add "Is null" attribute filter
    * @param {boolean} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public null(value: boolean): SQBuilder<Model, Data> {
+  public null(value: boolean): EQBuilder<Model, Data> {
     return this._addAttribute("$null", value);
   }
 
   /**
    * @description Add "Is not null" attribute filter
    * @param {boolean} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public notNull(value: boolean): SQBuilder<Model, Data> {
+  public notNull(value: boolean): EQBuilder<Model, Data> {
     return this._addAttribute("$notNull", value);
   }
 
   /**
    * @description Add "Between" attribute filter
    * @param {MultipleAttributeType} value
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public between(value: MultipleAttributeType): SQBuilder<Model, Data> {
+  public between(value: MultipleAttributeType): EQBuilder<Model, Data> {
     return this._addAttribute("$between", value);
   }
   //</editor-fold>
@@ -333,7 +333,7 @@ export default class SQBuilder<
   private _addAttribute(
     type: FilterAttributeType,
     value: AttributeValues
-  ): SQBuilder<Model, Data> {
+  ): EQBuilder<Model, Data> {
     if (this._prevFilterKey === undefined) return this;
 
     this._addToFilter(
@@ -365,9 +365,9 @@ export default class SQBuilder<
   /**
    * @description Add populate all
    * @summary Rewrites other populate queries
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public populateAll(): SQBuilder<Model, Data> {
+  public populateAll(): EQBuilder<Model, Data> {
     this._addToPopulate({ key: "*" });
     return this;
   }
@@ -375,9 +375,9 @@ export default class SQBuilder<
   /**
    * @description Add single key for populate
    * @param {StrapiInputPopulateKey} key
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public populate(key: StrapiInputPopulateKey<Model>): SQBuilder<Model, Data> {
+  public populate(key: StrapiInputPopulateKey<Model>): EQBuilder<Model, Data> {
     this._addToPopulate({ key: key });
     return this;
   }
@@ -385,11 +385,11 @@ export default class SQBuilder<
   /**
    * @description Add keys for populate
    * @param {StrapiInputPopulateKey[]} keys
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public populates(
     keys: StrapiInputPopulateKey<Model>[]
-  ): SQBuilder<Model, Data> {
+  ): EQBuilder<Model, Data> {
     keys.forEach((k) => this._addToPopulate({ key: k }));
     return this;
   }
@@ -398,13 +398,13 @@ export default class SQBuilder<
    * @description Start complex deep populate with .on() for dynamic zone or filters, sort etc.
    * @param {StrapiInputPopulateKey} key
    * @param {PopulateCallback} nestedCallback
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public populateDeep<PopulateModel extends object>(
     key: StrapiInputPopulateKey<Model>,
     nestedCallback: PopulateCallback<PopulateModel>
-  ): SQBuilder<Model, Data> {
-    const nestedBuilder: SQBuilder<PopulateModel, any> = new SQBuilder<
+  ): EQBuilder<Model, Data> {
+    const nestedBuilder: EQBuilder<PopulateModel, any> = new EQBuilder<
       PopulateModel,
       any
     >({
@@ -438,19 +438,19 @@ export default class SQBuilder<
    * @summary Works in combination of populateDeep
    * @param {string} componentTypeKey Component type key
    * @param {PopulateCallback} nestedCallback Dynamic component builder
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public on<PopulateModel extends object>(
     componentTypeKey: string,
     nestedCallback: PopulateCallback<PopulateModel>
-  ): SQBuilder<Model, Data> {
+  ): EQBuilder<Model, Data> {
     const prevPopulateKey = this._prevPopulateKey as
       | PopulateKey<Model>
       | undefined;
 
     if (!_isDefined(prevPopulateKey)) return this;
 
-    const nestedBuilder: SQBuilder<PopulateModel, any> = new SQBuilder<
+    const nestedBuilder: EQBuilder<PopulateModel, any> = new EQBuilder<
       PopulateModel,
       any
     >({
@@ -500,7 +500,7 @@ export default class SQBuilder<
    * @description Select specific fields
    * @summary Same keys will be merged
    * @param {StrapiSingleFieldInput[]} fields
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public fields<
     F extends readonly [
@@ -509,7 +509,7 @@ export default class SQBuilder<
     ]
   >(
     fields: F
-  ): SQBuilder<
+  ): EQBuilder<
     Model,
     Data,
     Config extends { fields: infer ExistingFields }
@@ -527,7 +527,7 @@ export default class SQBuilder<
   > {
     fields.forEach((f) => this._query.fields.add(f));
 
-    return this as unknown as SQBuilder<
+    return this as unknown as EQBuilder<
       Model,
       Data,
       Config extends { fields: infer ExistingFields }
@@ -549,11 +549,11 @@ export default class SQBuilder<
    * @description Select specific field
    * @summary Same keys will be merged
    * @param {StrapiSingleFieldInput} field
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public field<F extends StrapiSingleFieldInput<Model>>(
     field: F
-  ): SQBuilder<
+  ): EQBuilder<
     Model,
     Data,
     Config extends { fields: infer ExistingFields }
@@ -571,7 +571,7 @@ export default class SQBuilder<
   > {
     this._query.fields.add(field);
 
-    return this as unknown as SQBuilder<
+    return this as unknown as EQBuilder<
       Model,
       Data,
       Config extends { fields: infer ExistingFields }
@@ -596,11 +596,11 @@ export default class SQBuilder<
    * @summary Same keys will be merged
    * @summary With next chain call .asc() .desc()
    * @param {SortKey} sortKey
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public sort<S extends SortEntry<Model>>(
     sortKey: S
-  ): SQBuilder<
+  ): EQBuilder<
     Model,
     Data,
     Config extends { sort: infer ExistingSorts }
@@ -615,7 +615,7 @@ export default class SQBuilder<
 
     // @ts-ignore
     this._prevSortKey = sortKey;
-    return this as unknown as SQBuilder<
+    return this as unknown as EQBuilder<
       Model,
       Data,
       Config extends { sort: infer ExistingSorts }
@@ -628,9 +628,9 @@ export default class SQBuilder<
    * @description Add sort keys list
    * @summary Same keys will be merged
    * @param {SortKey[]} sortKeys
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public sorts(sortKeys: SortKey<Model>[]): SQBuilder<Model, Data> {
+  public sorts(sortKeys: SortKey<Model>[]): EQBuilder<Model, Data> {
     sortKeys.forEach((key) =>
       this._query.sort.set(key, {
         key: key,
@@ -647,9 +647,9 @@ export default class SQBuilder<
    * @summary Same keys will be merged
    * @summary With next chain call .asc() .desc()
    * @param {StrapiSort} sort
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public sortRaw(sort: StrapiSort<Model>): SQBuilder<Model, Data> {
+  public sortRaw(sort: StrapiSort<Model>): EQBuilder<Model, Data> {
     const sortKey = sort.key;
 
     this._query.sort.set(sortKey, sort);
@@ -662,9 +662,9 @@ export default class SQBuilder<
    * @description Add sorts as object description list
    * @summary Same keys will be merged
    * @param {StrapiSort[]} sorts
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public sortsRaw(sorts: StrapiSort<Model>[]): SQBuilder<Model, Data> {
+  public sortsRaw(sorts: StrapiSort<Model>[]): EQBuilder<Model, Data> {
     sorts.forEach((sort) => this._query.sort.set(sort.key, sort));
     this._prevSortKey = undefined;
     return this;
@@ -674,9 +674,9 @@ export default class SQBuilder<
    * @description Add sort ascending direction to last sort element or all sort chain
    * @summary Param changeAll changes all sorts to specified direction
    * @param {boolean} changeAll
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public asc(): SQBuilder<
+  public asc(): EQBuilder<
     Model,
     Data,
     Config extends { sort: infer ExistingSorts }
@@ -692,7 +692,7 @@ export default class SQBuilder<
       : Config
   > {
     this._changeSortDirection(false, "asc");
-    return this as unknown as SQBuilder<
+    return this as unknown as EQBuilder<
       Model,
       Data,
       Config extends { sort: infer ExistingSorts }
@@ -713,9 +713,9 @@ export default class SQBuilder<
    * @description Add sort descending direction to last sort element or all sort chain
    * @summary Param changeAll changes all sorts to specified direction
    * @param {boolean} changeAll
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public desc(changeAll: boolean = false): SQBuilder<Model, Data> {
+  public desc(changeAll: boolean = false): EQBuilder<Model, Data> {
     this._changeSortDirection(changeAll, "desc");
     return this;
   }
@@ -749,9 +749,9 @@ export default class SQBuilder<
    * @description Add page
    * @param {number} page
    * @param {boolean} withCount
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public page(page: number, withCount: boolean = true): SQBuilder<Model, Data> {
+  public page(page: number, withCount: boolean = true): EQBuilder<Model, Data> {
     const current = this._query.pagination;
     this._query.pagination = current
       ? { ...current, page, withCount }
@@ -763,9 +763,9 @@ export default class SQBuilder<
   /**
    * @description Add page size
    * @param {number} pageSize
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public pageSize(pageSize: number): SQBuilder<Model, Data> {
+  public pageSize(pageSize: number): EQBuilder<Model, Data> {
     const current = this._query.pagination;
     this._query.pagination = current ? { ...current, pageSize } : { pageSize };
 
@@ -776,12 +776,12 @@ export default class SQBuilder<
    * @description Add offset pagination start
    * @param {number} start
    * @param {boolean} withCount
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public pageStart(
     start: number,
     withCount: boolean = true
-  ): SQBuilder<Model, Data> {
+  ): EQBuilder<Model, Data> {
     const current = this._query.offsetPagination;
     this._query.offsetPagination = current
       ? {
@@ -797,9 +797,9 @@ export default class SQBuilder<
   /**
    * @description Add offset pagination limit
    * @param {number} limit
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public pageLimit(limit: number): SQBuilder<Model, Data> {
+  public pageLimit(limit: number): EQBuilder<Model, Data> {
     const current = this._query.offsetPagination;
     this._query.offsetPagination = current
       ? {
@@ -816,9 +816,9 @@ export default class SQBuilder<
   /**
    * @description Add Any input data to query
    * @param {object} dataObject
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public data(dataObject: Data): SQBuilder<Model, Data> {
+  public data(dataObject: Data): EQBuilder<Model, Data> {
     this._query.data = dataObject;
     return this;
   }
@@ -858,9 +858,9 @@ export default class SQBuilder<
   /**
    * @description Make the builder read-only that all filter methods don't change query state
    * @param {PublicationStates} state
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public publicationState(state: PublicationStates): SQBuilder<Model, Data> {
+  public publicationState(state: PublicationStates): EQBuilder<Model, Data> {
     this._query.publicationState = state;
     return this;
   }
@@ -868,21 +868,21 @@ export default class SQBuilder<
   /**
    * @description Make the builder read-only that all filter methods don't change query state
    * @param {string} code
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
-  public locale(code: string): SQBuilder<Model, Data> {
+  public locale(code: string): EQBuilder<Model, Data> {
     this._query.locale = code;
     return this;
   }
 
   /**
    * @description Join external builder pagination
-   * @param {SQBuilder} builder External builder
-   * @return {SQBuilder} This builder
+   * @param {EQBuilder} builder External builder
+   * @return {EQBuilder} This builder
    */
   public joinPagination<T extends object, F extends object>(
-    builder: SQBuilder<T, F>
-  ): SQBuilder<Model, Data> {
+    builder: EQBuilder<T, F>
+  ): EQBuilder<Model, Data> {
     const externalPagination = builder.getRawPagination();
 
     if (_isDefined(externalPagination?.pagination)) {
@@ -912,12 +912,12 @@ export default class SQBuilder<
 
   /**
    * @description Join external builder population
-   * @param {SQBuilder} builder External builder
-   * @return {SQBuilder} This builder
+   * @param {EQBuilder} builder External builder
+   * @return {EQBuilder} This builder
    */
   public joinPopulation<T extends object, F extends object>(
-    builder: SQBuilder<T, F>
-  ): SQBuilder<Model, Data> {
+    builder: EQBuilder<T, F>
+  ): EQBuilder<Model, Data> {
     builder
       .getRawPopulation()
       .forEach((populate) =>
@@ -932,14 +932,14 @@ export default class SQBuilder<
 
   /**
    * @description Join external builder filters
-   * @param {SQBuilder} builder External builder
+   * @param {EQBuilder} builder External builder
    * @param {boolean} mergeRootLogical If true, the main logic filter will be overwritten by the input
-   * @return {SQBuilder} This builder
+   * @return {EQBuilder} This builder
    */
   public joinFilters<T extends object, F extends object>(
-    builder: SQBuilder<T, F>,
+    builder: EQBuilder<T, F>,
     mergeRootLogical: boolean = false
-  ): SQBuilder<Model, Data> {
+  ): EQBuilder<Model, Data> {
     const externalFilters = builder.getRawFilters();
 
     this._query.filters.attributeFilters =
@@ -957,10 +957,10 @@ export default class SQBuilder<
 
   /**
    * @description Join external builder sorts
-   * @param {SQBuilder} builder External builder
-   * @return {SQBuilder} This builder
+   * @param {EQBuilder} builder External builder
+   * @return {EQBuilder} This builder
    */
-  public joinSort(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
+  public joinSort(builder: EQBuilder<Model, Data>): EQBuilder<Model, Data> {
     builder
       .getRawSort()
       .forEach((value, key) => this._query.sort.set(key, value));
@@ -970,10 +970,10 @@ export default class SQBuilder<
 
   /**
    * @description Join external builder fields
-   * @param {SQBuilder} builder External builder
-   * @return {SQBuilder} This builder
+   * @param {EQBuilder} builder External builder
+   * @return {EQBuilder} This builder
    */
-  public joinFields(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
+  public joinFields(builder: EQBuilder<Model, Data>): EQBuilder<Model, Data> {
     builder.getRawFields().forEach((f) => this._query.fields.add(f));
 
     return this;
@@ -981,10 +981,10 @@ export default class SQBuilder<
 
   /**
    * @description Join all state
-   * @param {SQBuilder} builder External builder
-   * @return {SQBuilder} This builder
+   * @param {EQBuilder} builder External builder
+   * @return {EQBuilder} This builder
    */
-  public joinAll(builder: SQBuilder<Model, Data>): SQBuilder<Model, Data> {
+  public joinAll(builder: EQBuilder<Model, Data>): EQBuilder<Model, Data> {
     this.joinPagination(builder);
     this.joinPopulation(builder);
     this.joinFilters(builder);
@@ -1029,19 +1029,19 @@ export default class SQBuilder<
 
     if (rawQuery.sort.size > 0) {
       parsedQuery[isQueryEngine ? "orderBy" : "sort"] =
-        SQBuilder._parseSort<Md>(rawQuery.sort);
+        EQBuilder._parseSort<Md>(rawQuery.sort);
     }
 
     if (rawQuery.fields.size > 0) {
       parsedQuery[isQueryEngine ? "select" : "fields"] = [...rawQuery.fields];
     }
 
-    const filters = SQBuilder._parseFilters<Md>(rawQuery.filters);
+    const filters = EQBuilder._parseFilters<Md>(rawQuery.filters);
     if (_isDefined(filters)) {
       parsedQuery[isQueryEngine ? "where" : "filters"] = filters;
     }
 
-    const populate = SQBuilder._parsePopulate(rawQuery.population, queryType);
+    const populate = EQBuilder._parsePopulate(rawQuery.population, queryType);
     if (_isDefined(populate)) {
       parsedQuery.populate = populate;
     }
@@ -1142,7 +1142,7 @@ export default class SQBuilder<
     const parsedFilters: StrapiFiltersType<Md>[] = [];
 
     attributeFilters.forEach((attributeQuery) => {
-      const parsedAttribute = SQBuilder._parseAttributeFilter(attributeQuery);
+      const parsedAttribute = EQBuilder._parseAttributeFilter(attributeQuery);
       if (!_isDefined(parsedAttribute)) return;
 
       parsedFilters.push(parsedAttribute);
@@ -1176,12 +1176,12 @@ export default class SQBuilder<
       if (populate.dynamicQuery) {
         const dynamicZoneQuery: any = {};
         Object.entries(populate.dynamicQuery).forEach(([key, query]) => {
-          dynamicZoneQuery[key] = SQBuilder._buildQuery(query, queryType);
+          dynamicZoneQuery[key] = EQBuilder._buildQuery(query, queryType);
         });
 
         parsedPopulates[populate.key] = { on: dynamicZoneQuery };
       } else if (populate.nestedQuery) {
-        parsedPopulates[populate.key] = SQBuilder._buildQuery(
+        parsedPopulates[populate.key] = EQBuilder._buildQuery(
           populate.nestedQuery,
           queryType
         );
@@ -1257,7 +1257,7 @@ type SingleAttributeType = string | number | boolean;
 type MultipleAttributeType = string[] | number[];
 
 type FilterCallback<Model extends object, Data extends object> = (
-  builder: SQBuilder<Model, Data>
+  builder: EQBuilder<Model, Data>
 ) => void;
 
 type FilterKey<Model extends object> = GetStrictOrWeak<
@@ -1316,7 +1316,7 @@ interface StrapiPopulate<
 }
 
 type PopulateCallback<PopulationModel extends object> = (
-  builder: SQBuilder<PopulationModel, any>
+  builder: EQBuilder<PopulationModel, any>
 ) => void;
 
 type StrapiPopulations<
