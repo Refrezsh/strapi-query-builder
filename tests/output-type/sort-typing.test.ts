@@ -49,4 +49,12 @@ describe("Sort types", () => {
     expect(combinedWithOtherSortAscendingName).toBe("asc");
     expect(combinedWithOtherSortAscendingOptions).toBe("asc");
   });
+
+  it("should create cross type", () => {
+    const withFields = new EQBuilder<TestModel>().sortAsc("name").field("options").build();
+    const withFieldsOptions: "options" = withFields.fields[0]
+    const withFieldSort: "asc" = withFields.sort[0].name;
+    expect(withFieldsOptions).toBe("options");
+    expect(withFieldSort).toBe("asc");
+  })
 });
