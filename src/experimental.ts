@@ -28,44 +28,10 @@ export default class EQBuilder<
       StrapiSingleFieldInput<Model>,
       ...StrapiSingleFieldInput<Model>[]
     ]
-  >(
-    fields: F
-  ): EQBuilder<
-    Model,
-    Data,
-    {
-      fields: Deduplicate<
-        [
-          ...(Config extends { fields: infer ExistingFields }
-            ? ExistingFields extends readonly unknown[]
-              ? ExistingFields
-              : []
-            : []),
-          ...F
-        ]
-      >;
-      sort: Config extends { sort: infer ExistingSort } ? ExistingSort : [];
-    }
-  > {
+  >(fields: F): EQBuilder<Model, Data, UpdateConfig<Config, F>> {
     fields.forEach((f) => this._query.fields.add(f));
 
-    return this as unknown as EQBuilder<
-      Model,
-      Data,
-      {
-        fields: Deduplicate<
-          [
-            ...(Config extends { fields: infer ExistingFields }
-              ? ExistingFields extends readonly unknown[]
-                ? ExistingFields
-                : []
-              : []),
-            ...F
-          ]
-        >;
-        sort: Config extends { sort: infer ExistingSort } ? ExistingSort : [];
-      }
-    >;
+    return this as unknown as EQBuilder<Model, Data, UpdateConfig<Config, F>>;
   }
 
   /**
@@ -77,42 +43,10 @@ export default class EQBuilder<
    */
   public field<F extends StrapiSingleFieldInput<Model>>(
     field: F
-  ): EQBuilder<
-    Model,
-    Data,
-    {
-      fields: Deduplicate<
-        [
-          ...(Config extends { fields: infer ExistingFields }
-            ? ExistingFields extends readonly unknown[]
-              ? ExistingFields
-              : []
-            : []),
-          F
-        ]
-      >;
-      sort: Config extends { sort: infer ExistingSort } ? ExistingSort : [];
-    }
-  > {
+  ): EQBuilder<Model, Data, UpdateConfig<Config, [F]>> {
     this._query.fields.add(field);
 
-    return this as unknown as EQBuilder<
-      Model,
-      Data,
-      {
-        fields: Deduplicate<
-          [
-            ...(Config extends { fields: infer ExistingFields }
-              ? ExistingFields extends readonly unknown[]
-                ? ExistingFields
-                : []
-              : []),
-            F
-          ]
-        >;
-        sort: Config extends { sort: infer ExistingSort } ? ExistingSort : [];
-      }
-    >;
+    return this as unknown as EQBuilder<Model, Data, UpdateConfig<Config, [F]>>;
   }
   //</editor-fold>
 
@@ -130,42 +64,14 @@ export default class EQBuilder<
   ): EQBuilder<
     Model,
     Data,
-    {
-      fields: Config extends { fields: infer ExistingFields }
-        ? ExistingFields
-        : [];
-      sort: Deduplicate<
-        [
-          ...(Config extends { sort: infer ExistingSorts }
-            ? ExistingSorts extends readonly unknown[]
-              ? ExistingSorts
-              : []
-            : []),
-          TransformNestedKey<K, "asc">
-        ]
-      >;
-    }
+    UpdateConfig<Config, [], [TransformNestedKey<K, "asc">]>
   > {
     this._query.sort.set(sortKey, "asc");
 
     return this as unknown as EQBuilder<
       Model,
       Data,
-      {
-        fields: Config extends { fields: infer ExistingFields }
-          ? ExistingFields
-          : [];
-        sort: Deduplicate<
-          [
-            ...(Config extends { sort: infer ExistingSorts }
-              ? ExistingSorts extends readonly unknown[]
-                ? ExistingSorts
-                : []
-              : []),
-            TransformNestedKey<K, "asc">
-          ]
-        >;
-      }
+      UpdateConfig<Config, [], [TransformNestedKey<K, "asc">]>
     >;
   }
 
@@ -182,21 +88,7 @@ export default class EQBuilder<
   ): EQBuilder<
     Model,
     Data,
-    {
-      fields: Config extends { fields: infer ExistingFields }
-        ? ExistingFields
-        : [];
-      sort: Deduplicate<
-        [
-          ...(Config extends { sort: infer ExistingSorts }
-            ? ExistingSorts extends readonly unknown[]
-              ? ExistingSorts
-              : []
-            : []),
-          ...TransformNestedKeys<K, "asc">
-        ]
-      >;
-    }
+    UpdateConfig<Config, [], TransformNestedKeys<K, "asc">>
   > {
     sortKeys.forEach((key) => {
       this._query.sort.set(key, "asc");
@@ -205,21 +97,7 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      {
-        fields: Config extends { fields: infer ExistingFields }
-          ? ExistingFields
-          : [];
-        sort: Deduplicate<
-          [
-            ...(Config extends { sort: infer ExistingSorts }
-              ? ExistingSorts extends readonly unknown[]
-                ? ExistingSorts
-                : []
-              : []),
-            ...TransformNestedKeys<K, "asc">
-          ]
-        >;
-      }
+      UpdateConfig<Config, [], TransformNestedKeys<K, "asc">>
     >;
   }
   //</editor-fold>
@@ -230,7 +108,10 @@ export default class EQBuilder<
     builtQuery.fields = Array.from(this._query.fields);
     builtQuery.sort = EQBuilder._parseSort(this._query.sort);
 
-    return builtQuery as Config;
+    return builtQuery as {
+      fields: Config extends { fields: infer F } ? F : [];
+      sort: Config extends { sort: infer S } ? S : [];
+    };
   }
 
   private static _parseSort<Md extends object>(sorts: StrapiSorts<Md>) {
@@ -382,4 +263,27 @@ type TransformNestedKey<
 > = K extends `${infer Key}.${infer Rest}`
   ? { [P in Key]: TransformNestedKey<Rest, V> }
   : { [P in K]: V };
+
+type Flatten<T> = {
+  [K in keyof T]: T[K];
+};
+
+type UpdateConfig<
+  Config extends { fields?: unknown[]; sort?: unknown[] },
+  NewFields extends readonly unknown[] = [],
+  NewSorts extends readonly unknown[] = []
+> = Flatten<{
+  fields: Deduplicate<
+    [
+      ...(Config["fields"] extends readonly unknown[] ? Config["fields"] : []),
+      ...NewFields
+    ]
+  >;
+  sort: Deduplicate<
+    [
+      ...(Config["sort"] extends readonly unknown[] ? Config["sort"] : []),
+      ...NewSorts
+    ]
+  >;
+}>;
 // </editor-fold>
