@@ -117,8 +117,12 @@ describe("Filter types", () => {
   });
 
   it("should produce type for deep filters", () => {
-    const nestedBuilder = new EQBuilder<TestModel>().filterDeep(() => {
-      return new EQBuilder<TestModel>().or().eq("name", "1").eq("name", "2");
-    });
+    const nestedBuilder = new EQBuilder<TestModel>()
+      .or()
+      .eq("options", "1")
+      .filterDeep(() =>
+        new EQBuilder<TestModel>().or().eq("name", "1").eq("nested.name", "2")
+      )
+      .build();
   });
 });

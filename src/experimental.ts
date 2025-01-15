@@ -118,19 +118,33 @@ export default class EQBuilder<
     >;
   }
 
-  public filterDeep<DeepBuilderConfig extends InternalBuilderConfig = {}>(
-    builderFactory: BuilderCallback<Model, Data, DeepBuilderConfig>
+  public filterDeep<DeepConfig extends InternalBuilderConfig>(
+    builderFactory: BuilderCallback<Model, Data, DeepConfig>
   ) {
     const deepBuilder = builderFactory();
     this._query.filters.attributeFilters.push({
       nested: deepBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
 
-    // Need to parse filters and past to current builder as object with parsed filter
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [], []>
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [
+          ParseFilters<
+            DeepConfig["filters"] extends readonly unknown[]
+              ? DeepConfig["filters"]
+              : [],
+            DeepConfig["rootLogical"] extends "$and" | "$or"
+              ? DeepConfig["rootLogical"]
+              : "$and",
+            DeepConfig["negate"] extends true ? true : false
+          >
+        ]
+      >
     >;
   }
 
@@ -191,14 +205,14 @@ export default class EQBuilder<
     }
 
     return builtQuery as Config extends {
-      fields: infer Filters;
+      fields: infer Fields;
       sort: infer Sorts;
       filters: infer Filters;
       rootLogical: infer RootLogical;
       negate: infer Not;
     }
       ? {
-          fields: ParseFields<Filters>;
+          fields: ParseFields<Fields>;
           sort: ParseSorts<Sorts>;
           filters: ParseFilters<Filters, RootLogical, Not>;
         } extends infer Result
