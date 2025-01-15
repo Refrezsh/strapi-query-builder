@@ -115,4 +115,10 @@ describe("Filter types", () => {
     expect(dynamicFilter).toBeDefined();
     expect(dynamicFilter.nested.name.$eq).toBe(dynamic);
   });
+
+  it("should produce type for deep filters", () => {
+    const nestedBuilder = new EQBuilder<TestModel>().filterDeep(() => {
+      return new EQBuilder<TestModel>().or().eq("name", "1").eq("name", "2");
+    });
+  });
 });

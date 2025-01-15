@@ -3,13 +3,7 @@ import { _isDefined, _set } from "./query-utils";
 export default class EQBuilder<
   Model extends object,
   Data extends object = {},
-  Config extends {
-    fields?: unknown[];
-    sort?: unknown[];
-    filters?: unknown;
-    rootLogical?: "$and" | "$or";
-    negate?: boolean;
-  } = {}
+  Config extends InternalBuilderConfig = {}
 > {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
@@ -29,16 +23,14 @@ export default class EQBuilder<
    * @description Same keys will be merged
    * @example new EQBuilder<Model>().fields(["name", "type"]); // Produce { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields keys
-   * @return {EQBuilder} This builder
    */
   public fields<
     F extends readonly [
       StrapiSingleFieldInput<Model>,
       ...StrapiSingleFieldInput<Model>[]
     ]
-  >(fields: F): EQBuilder<Model, Data, UpdateConfig<Config, F>> {
+  >(fields: F) {
     fields.forEach((f) => this._query.fields.add(f));
-
     return this as unknown as EQBuilder<Model, Data, UpdateConfig<Config, F>>;
   }
 
@@ -47,13 +39,9 @@ export default class EQBuilder<
    * @description Same keys will be merged
    * @example new EQBuilder<Model>().field("key"); // Produce { fields: ["key"] }
    * @param {StrapiSingleFieldInput} field Field key
-   * @return {EQBuilder} This builder
    */
-  public field<F extends StrapiSingleFieldInput<Model>>(
-    field: F
-  ): EQBuilder<Model, Data, UpdateConfig<Config, [F]>> {
+  public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
     this._query.fields.add(field);
-
     return this as unknown as EQBuilder<Model, Data, UpdateConfig<Config, [F]>>;
   }
   //</editor-fold>
@@ -65,17 +53,9 @@ export default class EQBuilder<
    * @param {SortKey} sortKey Sort key
    * @example new EQBuilder<Model>().sortAsc("key"); // Produce: { sort: [{"key": "asc"}] }
    * @example new EQBuilder<Model>().sortAsc("parentKey.childKey"); // Produce: { sort: [{"parentKey": { "childKey": "asc" }}] }
-   * @return EQBuilder
    */
-  public sortAsc<K extends SortKey<Model>>(
-    sortKey: K
-  ): EQBuilder<
-    Model,
-    Data,
-    UpdateConfig<Config, [], [TransformNestedKey<K, "asc">]>
-  > {
+  public sortAsc<K extends SortKey<Model>>(sortKey: K) {
     this._query.sort.set(sortKey, "asc");
-
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -89,15 +69,10 @@ export default class EQBuilder<
    * @param {SortKey[]} sortKeys List of sort keys
    * @example new EQBuilder<Model>().sortsAsc(["key1", "key2"]); // Produce: { sort: [{"key1": "asc"}, {"key2": "asc"}] }
    * @example new EQBuilder<Model>().sortsAsc(["parentKey.childKey", "anotherKey"]); // Produce: { sort: [{"parentKey": { "childKey": "asc" }}, {"anotherKey": "asc"}] }
-   * @return EQBuilder
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
     sortKeys: K
-  ): EQBuilder<
-    Model,
-    Data,
-    UpdateConfig<Config, [], TransformNestedKeys<K, "asc">>
-  > {
+  ) {
     sortKeys.forEach((key) => this._query.sort.set(key, "asc"));
 
     return this as unknown as EQBuilder<
@@ -109,7 +84,7 @@ export default class EQBuilder<
   //</editor-fold>
 
   //<editor-fold desc="Filters">
-  public or(): EQBuilder<Model, Data, UpdateConfig<Config, [], [], [], "$or">> {
+  public or() {
     this._query.filters.rootLogical = "$or";
     return this as unknown as EQBuilder<
       Model,
@@ -118,11 +93,7 @@ export default class EQBuilder<
     >;
   }
 
-  public and(): EQBuilder<
-    Model,
-    Data,
-    UpdateConfig<Config, [], [], [], "$and">
-  > {
+  public and() {
     this._query.filters.rootLogical = "$and";
     return this as unknown as EQBuilder<
       Model,
@@ -131,18 +102,7 @@ export default class EQBuilder<
     >;
   }
 
-  public not(): EQBuilder<
-    Model,
-    Data,
-    UpdateConfig<
-      Config,
-      [],
-      [],
-      [],
-      Config["rootLogical"] extends "$or" ? "$or" : "$and",
-      true
-    >
-  > {
+  public not() {
     this._query.filters.negate = true;
     return this as unknown as EQBuilder<
       Model,
@@ -158,33 +118,32 @@ export default class EQBuilder<
     >;
   }
 
+  public filterDeep<DeepBuilderConfig extends InternalBuilderConfig = {}>(
+    builderFactory: BuilderCallback<Model, Data, DeepBuilderConfig>
+  ) {
+    const deepBuilder = builderFactory();
+    this._query.filters.attributeFilters.push({
+      nested: deepBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
+    });
+
+    // Need to parse filters and past to current builder as object with parsed filter
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<Config, [], [], []>
+    >;
+  }
+
   /**
    * @description Add eq filter for attribute
    * @description Same keys will not be merged
    * @param {FilterKey} key Filter key
    * @param {SingleAttributeType} value Filter value
-   * @return EQBuilder
    */
   public eq<K extends FilterKey<Model>, V extends SingleAttributeType>(
     key: K,
     value: V
-  ): EQBuilder<
-    Model,
-    Data,
-    UpdateConfig<
-      Config,
-      [],
-      [],
-      [
-        {
-          [P in keyof TransformNestedKey<K, { $eq: V }>]: TransformNestedKey<
-            K,
-            { $eq: V }
-          >[P];
-        }
-      ]
-    >
-  > {
+  ) {
     this._query.filters.attributeFilters.push({
       key: key,
       type: "$eq",
@@ -212,6 +171,7 @@ export default class EQBuilder<
   }
   //</editor-fold>
 
+  //<editor-fold desc="Build process">
   public build() {
     const builtQuery: any = {};
 
@@ -335,6 +295,11 @@ export default class EQBuilder<
     };
     return negateRoot ? { ["$not"]: filters } : filters;
   }
+
+  protected getRawFilters(): StrapiRawFilters<Model> {
+    return this._query.filters;
+  }
+  //</editor-fold>
 }
 
 // <editor-fold desc="Field types">
@@ -388,6 +353,12 @@ type FilterKey<Model extends object> = GetStrictOrWeak<
   FieldPath<Model> | string
 >;
 
+type BuilderCallback<
+  Model extends object,
+  Data extends object,
+  Config extends InternalBuilderConfig
+> = () => EQBuilder<Model, Data, Config>;
+
 type AttributeValues = string | string[] | number | number[] | boolean;
 
 interface StrapiAttributesFilter<
@@ -409,6 +380,14 @@ interface StrapiRawFilters<Model extends object> {
 // </editor-fold>
 
 // <editor-fold desc="Query shapes">
+type InternalBuilderConfig = {
+  fields?: unknown[];
+  sort?: unknown[];
+  filters?: unknown;
+  rootLogical?: "$and" | "$or";
+  negate?: boolean;
+};
+
 interface QueryRawInfo<Model extends object, Data extends object> {
   sort: StrapiSorts<Model>;
   fields: StrapiFields<Model>;
@@ -529,13 +508,7 @@ type Flatten<T> = {
 };
 
 type UpdateConfig<
-  Config extends {
-    fields?: unknown[];
-    sort?: unknown[];
-    filters?: unknown;
-    rootLogical?: "$and" | "$or";
-    negate?: boolean;
-  },
+  Config extends InternalBuilderConfig,
   NewFields extends readonly unknown[] = [],
   NewSorts extends readonly unknown[] = [],
   NewFilters extends readonly unknown[] = [],
