@@ -1,13 +1,17 @@
 import EQBuilder from "../../src/experimental";
 
+interface NestedModel {
+  id: string;
+  name: string;
+}
+
 export interface TestModel {
   id: string;
   name: string;
   description: string;
   options: string;
-  nested: {
-    name: string;
-  };
+  nested: NestedModel;
+  notNestedEnumeration: string[];
 }
 
 describe("Fields types", () => {

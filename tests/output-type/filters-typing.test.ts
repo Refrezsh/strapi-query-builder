@@ -134,14 +134,36 @@ describe("Filter types", () => {
       .or()
       .eq("options", "1")
       .filterDeep(() =>
-        new EQBuilder<TestModel>().or().eq("name", "1").eq("nested.name", "2")
+        new EQBuilder<TestModel>()
+          .or()
+          .notEq("name", "1")
+          .eq("nested.name", "2")
       )
       .build();
 
-    const notEq = new EQBuilder<TestModel>()
-      .notEq("name", "1")
-      .field("name")
-      .sortAsc("name")
-      .build();
+    const filters: {
+      $or: [
+        { options: { $eq: "1" } },
+        {
+          $or: [
+            { name: { $not: { $eq: "1" } } },
+            { nested: { name: { $eq: "2" } } }
+          ];
+        }
+      ];
+    } = nestedBuilder.filters;
+
+    const singleFilter = filters.$or[0];
+    expect(singleFilter).toBeDefined();
+    expect(singleFilter.options.$eq).toBe("1");
+
+    const deepNestedFilters = filters.$or[1];
+    const nameFilter = deepNestedFilters.$or[0];
+    expect(nameFilter).toBeDefined();
+    expect(nameFilter.name.$not.$eq).toBe("1");
+
+    const nestedNameFilter = deepNestedFilters.$or[1];
+    expect(nestedNameFilter).toBeDefined();
+    expect(nestedNameFilter.nested.name.$eq).toBe("2");
   });
 });
