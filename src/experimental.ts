@@ -1,4 +1,4 @@
-import { _set } from "./query-utils";
+import { _isDefined, _set } from "./query-utils";
 
 export default class EQBuilder<
   Model extends object,
@@ -6,11 +6,19 @@ export default class EQBuilder<
   Config extends {
     fields?: unknown[];
     sort?: unknown[];
+    filters?: unknown;
+    rootLogical?: "$and" | "$or";
+    negate?: boolean;
   } = {}
 > {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
     fields: new Set(),
+    filters: {
+      rootLogical: "$and",
+      negate: false,
+      attributeFilters: [],
+    },
   };
 
   constructor() {}
@@ -90,9 +98,7 @@ export default class EQBuilder<
     Data,
     UpdateConfig<Config, [], TransformNestedKeys<K, "asc">>
   > {
-    sortKeys.forEach((key) => {
-      this._query.sort.set(key, "asc");
-    });
+    sortKeys.forEach((key) => this._query.sort.set(key, "asc"));
 
     return this as unknown as EQBuilder<
       Model,
@@ -102,16 +108,167 @@ export default class EQBuilder<
   }
   //</editor-fold>
 
+  //<editor-fold desc="Filters">
+  public or(): EQBuilder<Model, Data, UpdateConfig<Config, [], [], [], "$or">> {
+    this._query.filters.rootLogical = "$or";
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<Config, [], [], [], "$or">
+    >;
+  }
+
+  public and(): EQBuilder<
+    Model,
+    Data,
+    UpdateConfig<Config, [], [], [], "$and">
+  > {
+    this._query.filters.rootLogical = "$and";
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<Config, [], [], [], "$and">
+    >;
+  }
+
+  public not(): EQBuilder<
+    Model,
+    Data,
+    UpdateConfig<
+      Config,
+      [],
+      [],
+      [],
+      Config["rootLogical"] extends "$or" ? "$or" : "$and",
+      true
+    >
+  > {
+    this._query.filters.negate = true;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [],
+        Config["rootLogical"] extends "$or" ? "$or" : "$and",
+        true
+      >
+    >;
+  }
+
+  /**
+   * @description Add eq filter for attribute
+   * @description Same keys will not be merged
+   * @param {FilterKey} key Filter key
+   * @param {SingleAttributeType} value Filter value
+   * @return EQBuilder
+   */
+  public eq<K extends FilterKey<Model>, V extends SingleAttributeType>(
+    key: K,
+    value: V
+  ): EQBuilder<
+    Model,
+    Data,
+    UpdateConfig<
+      Config,
+      [],
+      [],
+      [
+        {
+          [P in keyof TransformNestedKey<K, { $eq: V }>]: TransformNestedKey<
+            K,
+            { $eq: V }
+          >[P];
+        }
+      ]
+    >
+  > {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$eq",
+      value: value,
+      negate: false,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [
+          {
+            [P in keyof TransformNestedKey<K, { $eq: V }>]: TransformNestedKey<
+              K,
+              { $eq: V }
+            >[P];
+          }
+        ]
+      >
+    >;
+  }
+  //</editor-fold>
+
   public build() {
     const builtQuery: any = {};
 
-    builtQuery.fields = Array.from(this._query.fields);
-    builtQuery.sort = EQBuilder._parseSort(this._query.sort);
+    const parsedFields = Array.from(this._query.fields);
+    if (parsedFields.length > 0) {
+      builtQuery.fields = parsedFields;
+    }
 
-    return builtQuery as {
-      fields: Config extends { fields: infer F } ? F : [];
-      sort: Config extends { sort: infer S } ? S : [];
-    };
+    const parsedSort = EQBuilder._parseSort(this._query.sort);
+    if (parsedSort.length > 0) {
+      builtQuery.sort = parsedSort;
+    }
+
+    const parsedFilters = EQBuilder._parseFilters(this._query.filters);
+    if (_isDefined(parsedFilters)) {
+      builtQuery.filters = parsedFilters;
+    }
+
+    return builtQuery as Config extends {
+      fields: infer F;
+      sort: infer S;
+      filters: infer Filters;
+      rootLogical: infer RootLogical;
+      negate: infer Not;
+    }
+      ? {
+          fields: F extends readonly unknown[]
+            ? F["length"] extends 0
+              ? never
+              : F
+            : never;
+          sort: S extends readonly unknown[]
+            ? S["length"] extends 0
+              ? never
+              : S
+            : never;
+          filters: Filters extends readonly unknown[]
+            ? Filters["length"] extends 0
+              ? never
+              : Not extends true
+              ? {
+                  $not: RootLogical extends "$and" | "$or"
+                    ? { [K in RootLogical]: Filters }
+                    : never;
+                }
+              : RootLogical extends "$and" | "$or"
+              ? { [K in RootLogical]: Filters }
+              : never
+            : never;
+        } extends infer Result
+        ? {
+            [K in keyof Result as Result[K] extends never
+              ? never
+              : K]: Result[K];
+          }
+        : never
+      : {};
   }
 
   private static _parseSort<Md extends object>(sorts: StrapiSorts<Md>) {
@@ -124,6 +281,59 @@ export default class EQBuilder<
     }
 
     return sortQuery;
+  }
+
+  private static _parseAttributeFilter<Md extends object>(
+    filter: StrapiAttributesFilter<Md>
+  ): any | undefined {
+    if (filter.nested !== undefined) {
+      const nestedFilters = this._parseFilters(filter.nested);
+      if (!_isDefined(nestedFilters)) return undefined;
+
+      return !_isDefined(filter.key)
+        ? nestedFilters
+        : _set({}, filter.key, nestedFilters);
+    }
+
+    if (
+      !_isDefined(filter.value) ||
+      !_isDefined(filter.type) ||
+      !_isDefined(filter.key)
+    ) {
+      return undefined;
+    }
+
+    const filterValue = {
+      [filter.type]: filter.value,
+    };
+
+    return _set(
+      {},
+      filter.key,
+      filter.negate ? { ["$not"]: filterValue } : filterValue
+    );
+  }
+
+  private static _parseFilters<Md extends object>(
+    rawFilters: StrapiRawFilters<Md>
+  ): any | undefined {
+    const attributeFilters = rawFilters?.attributeFilters || [];
+    const rootLogical = rawFilters?.rootLogical || "$and";
+    const negateRoot = rawFilters?.negate || false;
+
+    const parsedFilters: any[] = [];
+    attributeFilters.forEach((attributeQuery) => {
+      const parsedAttribute = EQBuilder._parseAttributeFilter(attributeQuery);
+      if (!_isDefined(parsedAttribute)) return;
+      parsedFilters.push(parsedAttribute);
+    });
+
+    if (parsedFilters.length === 0) return undefined;
+
+    const filters = {
+      [rootLogical]: parsedFilters,
+    };
+    return negateRoot ? { ["$not"]: filters } : filters;
   }
 }
 
@@ -149,10 +359,60 @@ type SortKey<Model extends object> = GetStrictOrWeak<
 type StrapiSorts<Model extends object> = Map<SortKey<Model>, StrapiSortOptions>;
 // </editor-fold>
 
+// <editor-fold desc="Filter types">
+type SingleAttributeType = string | number | boolean;
+type FilterLogicalType = "$and" | "$or" | "$not";
+type EntityFilterAttributes =
+  | "$eq"
+  | "$eqi"
+  | "$ne"
+  | "$in"
+  | "$notIn"
+  | "$lt"
+  | "$lte"
+  | "$gt"
+  | "$gte"
+  | "$between"
+  | "$contains"
+  | "$notContains"
+  | "$containsi"
+  | "$notContainsi"
+  | "$startsWith"
+  | "$endsWith"
+  | "$null"
+  | "$notNull";
+
+type FilterKey<Model extends object> = GetStrictOrWeak<
+  Model,
+  FieldPath<Model>,
+  FieldPath<Model> | string
+>;
+
+type AttributeValues = string | string[] | number | number[] | boolean;
+
+interface StrapiAttributesFilter<
+  Model extends object,
+  NestedModel extends object = {}
+> {
+  key?: FilterKey<Model>;
+  type?: EntityFilterAttributes;
+  value?: AttributeValues;
+  negate?: boolean;
+  nested?: StrapiRawFilters<NestedModel>;
+}
+
+interface StrapiRawFilters<Model extends object> {
+  rootLogical: FilterLogicalType;
+  negate: boolean;
+  attributeFilters: StrapiAttributesFilter<Model>[];
+}
+// </editor-fold>
+
 // <editor-fold desc="Query shapes">
 interface QueryRawInfo<Model extends object, Data extends object> {
   sort: StrapiSorts<Model>;
   fields: StrapiFields<Model>;
+  filters: StrapiRawFilters<Model>;
 }
 // </editor-fold>
 
@@ -269,9 +529,22 @@ type Flatten<T> = {
 };
 
 type UpdateConfig<
-  Config extends { fields?: unknown[]; sort?: unknown[] },
+  Config extends {
+    fields?: unknown[];
+    sort?: unknown[];
+    filters?: unknown;
+    rootLogical?: "$and" | "$or";
+    negate?: boolean;
+  },
   NewFields extends readonly unknown[] = [],
-  NewSorts extends readonly unknown[] = []
+  NewSorts extends readonly unknown[] = [],
+  NewFilters extends readonly unknown[] = [],
+  RootLogical extends "$and" | "$or" = Config["rootLogical"] extends
+    | "$and"
+    | "$or"
+    ? Config["rootLogical"]
+    : "$and",
+  Negate extends boolean = Config["negate"] extends true ? true : false
 > = Flatten<{
   fields: Deduplicate<
     [
@@ -285,5 +558,11 @@ type UpdateConfig<
       ...NewSorts
     ]
   >;
+  filters: [
+    ...(Config["filters"] extends readonly unknown[] ? Config["filters"] : []),
+    ...NewFilters
+  ];
+  rootLogical: RootLogical;
+  negate: Negate;
 }>;
 // </editor-fold>
