@@ -191,36 +191,16 @@ export default class EQBuilder<
     }
 
     return builtQuery as Config extends {
-      fields: infer F;
-      sort: infer S;
+      fields: infer Filters;
+      sort: infer Sorts;
       filters: infer Filters;
       rootLogical: infer RootLogical;
       negate: infer Not;
     }
       ? {
-          fields: F extends readonly unknown[]
-            ? F["length"] extends 0
-              ? never
-              : F
-            : never;
-          sort: S extends readonly unknown[]
-            ? S["length"] extends 0
-              ? never
-              : S
-            : never;
-          filters: Filters extends readonly unknown[]
-            ? Filters["length"] extends 0
-              ? never
-              : Not extends true
-              ? {
-                  $not: RootLogical extends "$and" | "$or"
-                    ? { [K in RootLogical]: Filters }
-                    : never;
-                }
-              : RootLogical extends "$and" | "$or"
-              ? { [K in RootLogical]: Filters }
-              : never
-            : never;
+          fields: ParseFields<Filters>;
+          sort: ParseSorts<Sorts>;
+          filters: ParseFilters<Filters, RootLogical, Not>;
         } extends infer Result
         ? {
             [K in keyof Result as Result[K] extends never
@@ -538,4 +518,31 @@ type UpdateConfig<
   rootLogical: RootLogical;
   negate: Negate;
 }>;
+
+type ParseFields<F> = F extends readonly unknown[]
+  ? F["length"] extends 0
+    ? never
+    : F
+  : never;
+
+type ParseSorts<S> = S extends readonly unknown[]
+  ? S["length"] extends 0
+    ? never
+    : S
+  : never;
+
+type ParseFilters<Filters, RootLogical, Negate> =
+  Filters extends readonly unknown[]
+    ? Filters["length"] extends 0
+      ? never
+      : Negate extends true
+      ? {
+          $not: RootLogical extends "$and" | "$or"
+            ? { [K in RootLogical]: Filters }
+            : never;
+        }
+      : RootLogical extends "$and" | "$or"
+      ? { [K in RootLogical]: Filters }
+      : never
+    : never;
 // </editor-fold>
