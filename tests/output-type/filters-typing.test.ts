@@ -14,6 +14,19 @@ describe("Filter types", () => {
     expect(idFilter.nested.$eq).toBe("1");
   });
 
+  it("should create single not eq", () => {
+    const eqFilter = new EQBuilder<TestModel>().notEq("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $not: { $eq: "1" } } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$not.$eq).toBe("1");
+  });
+
   it("should create empty filters", () => {
     const eqFilter: {} = new EQBuilder<TestModel>()
       .or()
@@ -123,6 +136,12 @@ describe("Filter types", () => {
       .filterDeep(() =>
         new EQBuilder<TestModel>().or().eq("name", "1").eq("nested.name", "2")
       )
+      .build();
+
+    const notEq = new EQBuilder<TestModel>()
+      .notEq("name", "1")
+      .field("name")
+      .sortAsc("name")
       .build();
   });
 });

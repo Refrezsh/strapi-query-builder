@@ -183,6 +183,36 @@ export default class EQBuilder<
       >
     >;
   }
+
+  public notEq<K extends FilterKey<Model>, V extends SingleAttributeType>(
+    key: K,
+    value: V
+  ) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$eq",
+      value: value,
+      negate: true,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [
+          {
+            [P in keyof TransformNestedKey<
+              K,
+              { $not: { $eq: V } }
+            >]: TransformNestedKey<K, { $not: { $eq: V } }>[P];
+          }
+        ]
+      >
+    >;
+  }
   //</editor-fold>
 
   //<editor-fold desc="Build process">
@@ -560,3 +590,6 @@ type ParseFilters<Filters, RootLogical, Negate> =
       : never
     : never;
 // </editor-fold>
+
+// TODO: string[] number[] boolean[] is primitive type
+// TODO: filter keys of relationTypes must be excluded to prevent errors when we trying to filter for example Category, we can only filter Category.id and etc.
