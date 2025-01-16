@@ -13,6 +13,7 @@ export default class EQBuilder<
       negate: false,
       attributeFilters: [],
     },
+    population: new Map(),
   };
 
   constructor() {}
@@ -325,24 +326,74 @@ export default class EQBuilder<
   }
   //</editor-fold>
 
+  //<editor-fold desc="Populate">
+  public populateRelation<
+    PopulateModel extends object,
+    K extends StrapiInputPopulateKey<Model>,
+    RelationConfig extends InternalBuilderConfig
+  >(
+    key: K,
+    builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
+  ) {
+    const populateBuilder = builderFactory();
+
+    const populate: StrapiPopulate<Model, PopulateModel> = {
+      key: key,
+      nestedQuery: {
+        fields: new Set(),
+        sort: new Map(),
+        population: new Map(),
+        filters: populateBuilder.getRawFilters(),
+      },
+    };
+
+    this._addToPopulate(populate);
+    return this;
+  }
+
+  public populateDynamic<
+    PopulateModel extends object,
+    K extends StrapiInputPopulateKey<Model>,
+    RelationConfig extends InternalBuilderConfig
+  >(
+    key: K,
+    componentTypeKey: string,
+    builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
+  ) {
+    const populateBuilder = builderFactory();
+    const newQuery: MorphOnPopulate<PopulateModel> = {
+      [componentTypeKey]: {
+        fields: new Set(),
+        population: new Map(),
+        sort: new Map(),
+        filters: populateBuilder.getRawFilters(),
+      },
+    };
+
+    const currentQuery = this._query.population.get(key);
+    if (!_isDefined(currentQuery)) {
+      this._addToPopulate({ key: key, dynamicQuery: newQuery });
+    } else {
+      const currentDynamic = currentQuery.dynamicQuery || {};
+      this._addToPopulate({
+        key: key,
+        dynamicQuery: { ...currentDynamic, ...newQuery },
+      });
+    }
+
+    return this;
+  }
+
+  private _addToPopulate<PopulateModel extends object>(
+    populate: StrapiPopulate<Model, PopulateModel>
+  ) {
+    this._query.population.set(populate.key, populate);
+  }
+  //</editor-fold>
+
   //<editor-fold desc="Build process">
   public build() {
-    const builtQuery: any = {};
-
-    const parsedFields = Array.from(this._query.fields);
-    if (parsedFields.length > 0) {
-      builtQuery.fields = parsedFields;
-    }
-
-    const parsedSort = EQBuilder._parseSort(this._query.sort);
-    if (parsedSort.length > 0) {
-      builtQuery.sort = parsedSort;
-    }
-
-    const parsedFilters = EQBuilder._parseFilters(this._query.filters);
-    if (_isDefined(parsedFilters)) {
-      builtQuery.filters = parsedFilters;
-    }
+    const builtQuery = EQBuilder._buildQuery(this._query);
 
     return builtQuery as Config extends {
       fields: infer Fields;
@@ -363,6 +414,34 @@ export default class EQBuilder<
           }
         : never
       : {};
+  }
+
+  private static _buildQuery<Md extends object, Dt extends object>(
+    rawQuery: QueryRawInfo<Md, Dt>
+  ) {
+    const builtQuery: any = {};
+
+    const parsedFields = Array.from(rawQuery.fields);
+    if (parsedFields.length > 0) {
+      builtQuery.fields = parsedFields;
+    }
+
+    const parsedSort = EQBuilder._parseSort(rawQuery.sort);
+    if (parsedSort.length > 0) {
+      builtQuery.sort = parsedSort;
+    }
+
+    const parsedFilters = EQBuilder._parseFilters(rawQuery.filters);
+    if (_isDefined(parsedFilters)) {
+      builtQuery.filters = parsedFilters;
+    }
+
+    const parsedPopulation = EQBuilder._parsePopulate(rawQuery.population);
+    if (_isDefined(parsedPopulation)) {
+      builtQuery.populate = parsedPopulation;
+    }
+
+    return builtQuery;
   }
 
   private static _parseSort<Md extends object>(sorts: StrapiSorts<Md>) {
@@ -430,6 +509,38 @@ export default class EQBuilder<
     return negateRoot ? { ["$not"]: filters } : filters;
   }
 
+  private static _parsePopulate<Md extends object, Dt extends object>(
+    populates: StrapiPopulations<Md, Dt>
+  ): any | undefined {
+    if (populates.size === 0) return undefined;
+
+    const allPopulate = populates.get("*");
+    if (_isDefined(allPopulate)) return "*";
+
+    let parsedPopulates: any = {};
+
+    populates.forEach((populate) => {
+      if (populate.dynamicQuery) {
+        const dynamicZoneQuery: any = {};
+        Object.entries(populate.dynamicQuery).forEach(([key, query]) => {
+          dynamicZoneQuery[key] = EQBuilder._buildQuery(query);
+        });
+
+        parsedPopulates[populate.key] = { on: dynamicZoneQuery };
+      } else if (populate.nestedQuery) {
+        parsedPopulates[populate.key] = EQBuilder._buildQuery(
+          populate.nestedQuery
+        );
+      } else {
+        parsedPopulates[populate.key] = true;
+      }
+    });
+
+    return parsedPopulates;
+  }
+  //</editor-fold>
+
+  //<editor-fold desc="Protected utils">
   protected getRawFilters(): StrapiRawFilters<Model> {
     return this._query.filters;
   }
@@ -513,6 +624,41 @@ interface StrapiRawFilters<Model extends object> {
 }
 // </editor-fold>
 
+// <editor-fold desc="Population Types">
+type StrapiInputPopulateKey<Model extends object> = GetStrictOrWeak<
+  Model,
+  GetRelations<Model>,
+  GetRelations<Model> | string
+>;
+
+type PopulateKey<Model extends object> =
+  | GetStrictOrWeak<Model, GetRelations<Model>, GetRelations<Model> | string>
+  | "*";
+
+type MorphOnPopulate<PopulateModel extends object> = {
+  [key: string]: DefaultPopulate<PopulateModel>;
+};
+
+type DefaultPopulate<PopulateModel extends object> = Omit<
+  QueryRawInfo<PopulateModel, object>,
+  "pagination"
+>;
+
+interface StrapiPopulate<
+  ParentModel extends object,
+  PopulateModel extends object
+> {
+  key: PopulateKey<ParentModel>;
+  nestedQuery?: DefaultPopulate<PopulateModel>;
+  dynamicQuery?: MorphOnPopulate<PopulateModel>;
+}
+
+type StrapiPopulations<
+  ParentModel extends object,
+  PopulateModel extends object
+> = Map<PopulateKey<ParentModel>, StrapiPopulate<ParentModel, PopulateModel>>;
+// </editor-fold>
+
 // <editor-fold desc="Query shapes">
 type InternalBuilderConfig = {
   fields?: unknown[];
@@ -526,6 +672,7 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   sort: StrapiSorts<Model>;
   fields: StrapiFields<Model>;
   filters: StrapiRawFilters<Model>;
+  population: StrapiPopulations<Model, any>;
 }
 // </editor-fold>
 
