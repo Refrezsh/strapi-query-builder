@@ -11,6 +11,7 @@ export interface TestModel {
   description: string;
   options: string;
   nested: NestedModel;
+  nestedList: NestedModel[];
   notNestedEnumeration: string[];
 }
 
@@ -51,5 +52,21 @@ describe("Fields types", () => {
     expect(withUnionTypeName).toEqual("name");
     expect(withUnionTypeDescription).toEqual("description");
     expect(withUnionTypeOptions).toEqual("options");
+  });
+
+  it("should work with primitive arrays", () => {
+    const primitiveFilters: {
+      fields: ["notNestedEnumeration"];
+      filters: { $and: [{ notNestedEnumeration: { $eq: "value" } }] };
+    } = new EQBuilder<TestModel>()
+      .field("notNestedEnumeration")
+      .eq("notNestedEnumeration", "value")
+      .build();
+
+    expect(primitiveFilters).toBeDefined();
+    expect(primitiveFilters.fields[0]).toEqual("notNestedEnumeration");
+    expect(primitiveFilters.filters.$and[0].notNestedEnumeration.$eq).toEqual(
+      "value"
+    );
   });
 });

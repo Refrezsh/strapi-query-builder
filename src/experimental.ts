@@ -192,12 +192,12 @@ export default class EQBuilder<
    *         $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
    *       }
    * }
-   * @param {FilterKey} attribute
+   * @param {FilterOperatorKey} attribute
    * @param {BuilderCallback} builderFactory
    */
   public filterRelation<
     RelationModel extends object,
-    K extends FilterKey<Model>,
+    K extends FilterOperatorKey<Model>,
     RelationConfig extends InternalBuilderConfig
   >(
     attribute: K,
@@ -253,10 +253,10 @@ export default class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
    * @example new EQBuilder<Model>().eq("key", "value"); // Produce { filters: { $and: [{ key: { $eq: "value" }} ] }}
-   * @param {FilterKey} key Filter key
+   * @param {FilterOperatorKey} key Filter key
    * @param {SingleAttributeType} value Filter value
    */
-  public eq<K extends FilterKey<Model>, V extends SingleAttributeType>(
+  public eq<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
     key: K,
     value: V
   ) {
@@ -291,13 +291,13 @@ export default class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
    * @example new EQBuilder<Model>().notEq("key", "value"); // Produce { filters: { $and: [{ key: { $not: { $eq: "value" } }} ] }}
-   * @param {FilterKey} key Filter key
+   * @param {FilterOperatorKey} key Filter key
    * @param {SingleAttributeType} value Filter value
    */
-  public notEq<K extends FilterKey<Model>, V extends SingleAttributeType>(
-    key: K,
-    value: V
-  ) {
+  public notEq<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(key: K, value: V) {
     this._query.filters.attributeFilters.push({
       key: key,
       type: "$eq",
@@ -481,7 +481,7 @@ type EntityFilterAttributes =
   | "$null"
   | "$notNull";
 
-type FilterKey<Model extends object> = GetStrictOrWeak<
+type FilterOperatorKey<Model extends object> = GetStrictOrWeak<
   Model,
   FieldPath<Model>,
   FieldPath<Model> | string
@@ -499,7 +499,7 @@ interface StrapiAttributesFilter<
   Model extends object,
   NestedModel extends object = {}
 > {
-  key?: FilterKey<Model>;
+  key?: FilterOperatorKey<Model>;
   type?: EntityFilterAttributes;
   value?: AttributeValues;
   negate?: boolean;
@@ -530,7 +530,17 @@ interface QueryRawInfo<Model extends object, Data extends object> {
 // </editor-fold>
 
 // <editor-fold desc="Input type check utils">
-type Primitive = null | undefined | string | number | boolean | symbol | bigint;
+type Primitive =
+  | null
+  | undefined
+  | string
+  | number
+  | boolean
+  | symbol
+  | bigint
+  | string[]
+  | number[]
+  | boolean[];
 
 type IsTuple<T extends ReadonlyArray<any>> = number extends T["length"]
   ? false
@@ -590,7 +600,15 @@ type ArrayPath<Model> = Model extends ReadonlyArray<infer V>
       [Key in keyof Model]-?: ArrayPathImpl<Key & string, Model[Key], Model>;
     }[keyof Model];
 
-type ModelPrimitive = string | number | boolean | symbol | bigint;
+type ModelPrimitive =
+  | string
+  | number
+  | boolean
+  | symbol
+  | bigint
+  | string[]
+  | number[]
+  | boolean[];
 
 type IsAttribute<
   Key extends string | number,
@@ -701,5 +719,4 @@ type ParseFilters<Filters, RootLogical, Negate> =
     : never;
 // </editor-fold>
 
-// TODO: string[] number[] boolean[] is primitive type
 // TODO: filter keys of relationTypes must be excluded to prevent errors when we trying to filter for example Category, we can only filter Category.id and etc.
