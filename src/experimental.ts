@@ -219,31 +219,18 @@ export default class EQBuilder<
         [],
         [],
         [
-          {
-            [P in keyof TransformNestedKey<
-              K,
-              ParseFilters<
-                RelationConfig["filters"] extends readonly unknown[]
-                  ? RelationConfig["filters"]
-                  : [],
-                RelationConfig["rootLogical"] extends "$and" | "$or"
-                  ? RelationConfig["rootLogical"]
-                  : "$and",
-                RelationConfig["negate"] extends true ? true : false
-              >
-            >]: TransformNestedKey<
-              K,
-              ParseFilters<
-                RelationConfig["filters"] extends readonly unknown[]
-                  ? RelationConfig["filters"]
-                  : [],
-                RelationConfig["rootLogical"] extends "$and" | "$or"
-                  ? RelationConfig["rootLogical"]
-                  : "$and",
-                RelationConfig["negate"] extends true ? true : false
-              >
-            >[P];
-          }
+          TransformNestedKey<
+            K,
+            ParseFilters<
+              RelationConfig["filters"] extends readonly unknown[]
+                ? RelationConfig["filters"]
+                : [],
+              RelationConfig["rootLogical"] extends "$and" | "$or"
+                ? RelationConfig["rootLogical"]
+                : "$and",
+              RelationConfig["negate"] extends true ? true : false
+            >
+          >
         ]
       >
     >;
@@ -271,19 +258,7 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [
-          {
-            [P in keyof TransformNestedKey<K, { $eq: V }>]: TransformNestedKey<
-              K,
-              { $eq: V }
-            >[P];
-          }
-        ]
-      >
+      UpdateConfig<Config, [], [], [TransformNestedKey<K, { $eq: V }>]>
     >;
   }
 
@@ -313,14 +288,7 @@ export default class EQBuilder<
         Config,
         [],
         [],
-        [
-          {
-            [P in keyof TransformNestedKey<
-              K,
-              { $not: { $eq: V } }
-            >]: TransformNestedKey<K, { $not: { $eq: V } }>[P];
-          }
-        ]
+        [TransformNestedKey<K, { $not: { $eq: V } }>]
       >
     >;
   }
@@ -340,32 +308,46 @@ export default class EQBuilder<
     const populate: StrapiPopulate<Model, PopulateModel> = {
       key: key,
       nestedQuery: {
-        fields: new Set(),
-        sort: new Map(),
-        population: new Map(),
+        fields: populateBuilder.getRawFields(),
+        sort: populateBuilder.getRawSort(),
+        population: populateBuilder.getRawPopulation(),
         filters: populateBuilder.getRawFilters(),
       },
     };
 
     this._addToPopulate(populate);
-    return this;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [],
+        Config["rootLogical"] extends "$or" ? "$or" : "$and",
+        Config["negate"] extends true ? true : false,
+        Config["populateAll"] extends true ? true : false,
+        { [P in K]: BuildCallbackOutput<RelationConfig> }
+      >
+    >;
   }
 
   public populateDynamic<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
+    C extends string,
     RelationConfig extends InternalBuilderConfig
   >(
     key: K,
-    componentTypeKey: string,
+    componentTypeKey: C,
     builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
     const newQuery: MorphOnPopulate<PopulateModel> = {
       [componentTypeKey]: {
-        fields: new Set(),
-        population: new Map(),
-        sort: new Map(),
+        fields: populateBuilder.getRawFields(),
+        sort: populateBuilder.getRawSort(),
+        population: populateBuilder.getRawPopulation(),
         filters: populateBuilder.getRawFilters(),
       },
     };
@@ -381,7 +363,25 @@ export default class EQBuilder<
       });
     }
 
-    return this;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [],
+        Config["rootLogical"] extends "$or" ? "$or" : "$and",
+        Config["negate"] extends true ? true : false,
+        Config["populateAll"] extends true ? true : false,
+        MergePopulate<
+          Config["populates"],
+          {
+            [P in K]: { on: { [D in C]: BuildCallbackOutput<RelationConfig> } };
+          }
+        >
+      >
+    >;
   }
 
   private _addToPopulate<PopulateModel extends object>(
@@ -394,26 +394,7 @@ export default class EQBuilder<
   //<editor-fold desc="Build process">
   public build() {
     const builtQuery = EQBuilder._buildQuery(this._query);
-
-    return builtQuery as Config extends {
-      fields: infer Fields;
-      sort: infer Sorts;
-      filters: infer Filters;
-      rootLogical: infer RootLogical;
-      negate: infer Not;
-    }
-      ? {
-          fields: ParseFields<Fields>;
-          sort: ParseSorts<Sorts>;
-          filters: ParseFilters<Filters, RootLogical, Not>;
-        } extends infer Result
-        ? {
-            [K in keyof Result as Result[K] extends never
-              ? never
-              : K]: Result[K];
-          }
-        : never
-      : {};
+    return builtQuery as BuildOutput<Config>;
   }
 
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -544,6 +525,15 @@ export default class EQBuilder<
   protected getRawFilters(): StrapiRawFilters<Model> {
     return this._query.filters;
   }
+  protected getRawFields(): StrapiFields<Model> {
+    return this._query.fields;
+  }
+  protected getRawSort(): StrapiSorts<Model> {
+    return this._query.sort;
+  }
+  protected getRawPopulation(): StrapiPopulations<Model, any> {
+    return this._query.population;
+  }
   //</editor-fold>
 }
 
@@ -663,9 +653,11 @@ type StrapiPopulations<
 type InternalBuilderConfig = {
   fields?: unknown[];
   sort?: unknown[];
-  filters?: unknown;
+  filters?: unknown[];
   rootLogical?: "$and" | "$or";
   negate?: boolean;
+  populateAll?: boolean;
+  populates?: unknown;
 };
 
 interface QueryRawInfo<Model extends object, Data extends object> {
@@ -806,6 +798,32 @@ type Flatten<T> = {
   [K in keyof T]: T[K];
 };
 
+type MergeDeep<T, U> = T extends object
+  ? U extends object
+    ? {
+        [K in keyof T | keyof U]: K extends keyof U
+          ? K extends keyof T
+            ? MergeDeep<T[K], U[K]>
+            : U[K]
+          : K extends keyof T
+          ? T[K]
+          : never;
+      }
+    : T
+  : U;
+
+type MergePopulate<Existing, New> = Existing extends Record<string, any>
+  ? {
+      [K in keyof Existing | keyof New]: K extends keyof New
+        ? K extends keyof Existing
+          ? MergeDeep<Existing[K], New[K]>
+          : New[K]
+        : K extends keyof Existing
+        ? Existing[K]
+        : never;
+    }
+  : New;
+
 type UpdateConfig<
   Config extends InternalBuilderConfig,
   NewFields extends readonly unknown[] = [],
@@ -816,7 +834,11 @@ type UpdateConfig<
     | "$or"
     ? Config["rootLogical"]
     : "$and",
-  Negate extends boolean = Config["negate"] extends true ? true : false
+  Negate extends boolean = Config["negate"] extends true ? true : false,
+  PopulateAll extends boolean = Config["populateAll"] extends true
+    ? true
+    : false,
+  NewPopulates extends Record<string, any> = {}
 > = Flatten<{
   fields: Deduplicate<
     [
@@ -836,6 +858,22 @@ type UpdateConfig<
   ];
   rootLogical: RootLogical;
   negate: Negate;
+  populates: {
+    [K in
+      | keyof (Config["populates"] extends Record<string, any>
+          ? Config["populates"]
+          : {})
+      | keyof NewPopulates]: K extends keyof NewPopulates
+      ? NewPopulates[K]
+      : K extends keyof (Config["populates"] extends Record<string, any>
+          ? Config["populates"]
+          : {})
+      ? (Config["populates"] extends Record<string, any>
+          ? Config["populates"]
+          : {})[K]
+      : never;
+  };
+  populateAll: PopulateAll;
 }>;
 
 type ParseFields<F> = F extends readonly unknown[]
@@ -864,6 +902,56 @@ type ParseFilters<Filters, RootLogical, Negate> =
       ? { [K in RootLogical]: Filters }
       : never
     : never;
+
+type ParsePopulates<P, PopulateAll> = PopulateAll extends true
+  ? "*"
+  : P extends Record<string, any>
+  ? keyof P extends never
+    ? never
+    : P
+  : never;
+
+type BuildCallbackOutput<Config> = Config extends {
+  fields: infer Fields;
+  sort: infer Sorts;
+  filters: infer Filters;
+  rootLogical: infer RootLogical;
+  negate: infer Not;
+  populates: infer Populates;
+  populateAll: infer PopulateAll;
+}
+  ? {
+      fields: ParseFields<Fields>;
+      sort: ParseSorts<Sorts>;
+      filters: ParseFilters<Filters, RootLogical, Not>;
+      populate: ParsePopulates<Populates, PopulateAll>;
+    } extends infer Result
+    ? {
+        [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
+      }
+    : never
+  : {};
+
+type BuildOutput<Config> = Config extends {
+  fields: infer Fields;
+  sort: infer Sorts;
+  filters: infer Filters;
+  rootLogical: infer RootLogical;
+  negate: infer Not;
+  populates: infer Populates;
+  populateAll: infer PopulateAll;
+}
+  ? {
+      fields: ParseFields<Fields>;
+      sort: ParseSorts<Sorts>;
+      filters: ParseFilters<Filters, RootLogical, Not>;
+      populate: ParsePopulates<Populates, PopulateAll>;
+    } extends infer Result
+    ? {
+        [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
+      }
+    : never
+  : {};
 // </editor-fold>
 
 // TODO: filter keys of relationTypes must be excluded to prevent errors when we trying to filter for example Category, we can only filter Category.id and etc.

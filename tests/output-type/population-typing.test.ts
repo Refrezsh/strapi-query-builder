@@ -2,24 +2,74 @@ import EQBuilder from "../../src/experimental";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("population types", () => {
-  it("should create right type", () => {
+  it("should create right populateRelation type", () => {
     const population = new EQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new EQBuilder<NestedModel>().eq("id", "value")
+        new EQBuilder<NestedModel>().eq("id", "value").field("id")
+      )
+      .populateRelation("nestedList", () =>
+        new EQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .build();
 
-    console.log(JSON.stringify(population, null, 2));
+    expect(population).toBeDefined();
 
+    const populateWithType: {
+      populate: {
+        nested: {
+          fields: ["id"];
+          filters: { $and: [{ id: { $eq: "value" } }] };
+        };
+        nestedList: {
+          fields: ["name"];
+          filters: { $and: [{ name: { $eq: "value2" } }] };
+        };
+      };
+    } = population;
+
+    expect(populateWithType.populate.nested).toBeDefined();
+    expect(populateWithType.populate.nested.fields[0]).toBe("id");
+    expect(populateWithType.populate.nested.filters.$and[0].id.$eq).toBe(
+      "value"
+    );
+
+    expect(populateWithType.populate.nestedList).toBeDefined();
+    expect(populateWithType.populate.nestedList.fields[0]).toBe("name");
+    expect(populateWithType.populate.nestedList.filters.$and[0].name.$eq).toBe(
+      "value2"
+    );
+  });
+
+  it("should merge same keys", () => {
+    const populate = new EQBuilder<TestModel>()
+      .populateRelation("nested", () =>
+        new EQBuilder<NestedModel>().eq("id", "value").field("id")
+      )
+      .populateRelation("nested", () =>
+        new EQBuilder<NestedModel>().notEq("name", "value2")
+      )
+      .build();
+
+    const populateWithType: {
+      populate: {
+        nested: { filters: { $and: [{ name: { $not: { $eq: "value2" } } }] } };
+      };
+    } = populate;
+
+    expect(populateWithType).toBeDefined();
+    expect(populateWithType.populate.nested.filters.$and[0].name.$not.$eq).toBe(
+      "value2"
+    );
+  });
+
+  it("should create right populateDynamic type", () => {
     const dynamicZone = new EQBuilder<TestModel>()
       .populateDynamic("nested", "component.1", () =>
         new EQBuilder<NestedModel>().eq("id", "value")
       )
       .populateDynamic("nested", "component.2", () =>
-        new EQBuilder<NestedModel>().eq("id", "value")
+        new EQBuilder<NestedModel>().eq("id", "value2")
       )
       .build();
-
-    console.log(JSON.stringify(dynamicZone, null, 2));
   });
 });
