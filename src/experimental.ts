@@ -150,7 +150,7 @@ export default class EQBuilder<
    * @param {BuilderCallback} builderFactory
    */
   public filterDeep<DeepConfig extends InternalBuilderConfig>(
-    builderFactory: BuilderCallback<Model, Data, DeepConfig>
+    builderFactory: BuilderCallback<Model, {}, DeepConfig>
   ) {
     const deepBuilder = builderFactory();
     this._query.filters.attributeFilters.push({
@@ -174,6 +174,75 @@ export default class EQBuilder<
               : "$and",
             DeepConfig["negate"] extends true ? true : false
           >
+        ]
+      >
+    >;
+  }
+
+  /**
+   * @description Add related model filters
+   * @example
+   * new EQBuilder<TestModel>()
+   *       .filterRelation("nested", () =>
+   *         new EQBuilder<NestedModel>().eq("id", "value")
+   *       )
+   * // Produces
+   * {
+   *       filters: {
+   *         $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
+   *       }
+   * }
+   * @param {FilterKey} attribute
+   * @param {BuilderCallback} builderFactory
+   */
+  public filterRelation<
+    RelationModel extends object,
+    K extends FilterKey<Model>,
+    RelationConfig extends InternalBuilderConfig
+  >(
+    attribute: K,
+    builderFactory: BuilderCallback<RelationModel, {}, RelationConfig>
+  ) {
+    const relationBuilder = builderFactory();
+    this._query.filters.attributeFilters.push({
+      key: attribute,
+      nested:
+        relationBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      UpdateConfig<
+        Config,
+        [],
+        [],
+        [
+          {
+            [P in keyof TransformNestedKey<
+              K,
+              ParseFilters<
+                RelationConfig["filters"] extends readonly unknown[]
+                  ? RelationConfig["filters"]
+                  : [],
+                RelationConfig["rootLogical"] extends "$and" | "$or"
+                  ? RelationConfig["rootLogical"]
+                  : "$and",
+                RelationConfig["negate"] extends true ? true : false
+              >
+            >]: TransformNestedKey<
+              K,
+              ParseFilters<
+                RelationConfig["filters"] extends readonly unknown[]
+                  ? RelationConfig["filters"]
+                  : [],
+                RelationConfig["rootLogical"] extends "$and" | "$or"
+                  ? RelationConfig["rootLogical"]
+                  : "$and",
+                RelationConfig["negate"] extends true ? true : false
+              >
+            >[P];
+          }
         ]
       >
     >;

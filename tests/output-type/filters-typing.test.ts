@@ -1,5 +1,5 @@
 import EQBuilder from "../../src/experimental";
-import { TestModel } from "./fields-typing.test";
+import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("Filter types", () => {
   it("should create single eq", () => {
@@ -165,5 +165,25 @@ describe("Filter types", () => {
     const nestedNameFilter = deepNestedFilters.$or[1];
     expect(nestedNameFilter).toBeDefined();
     expect(nestedNameFilter.nested.name.$eq).toBe("2");
+  });
+
+  it("should produce type for relation filter", () => {
+    const nestedFilter = new EQBuilder<TestModel>()
+      .filterRelation("nested", () =>
+        new EQBuilder<NestedModel>().eq("id", "value")
+      )
+      .build();
+
+    const filters: {
+      $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
+    } = nestedFilter.filters;
+
+    const nestedFilters = filters.$and[0];
+    expect(nestedFilters).toBeDefined();
+    expect(nestedFilters.nested.$and.length).toBe(1);
+
+    const relationFilter = nestedFilters.nested.$and[0];
+    expect(relationFilter).toBeDefined();
+    expect(relationFilter.id.$eq).toBe("value");
   });
 });

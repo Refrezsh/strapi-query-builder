@@ -1,6 +1,6 @@
 import EQBuilder from "../../src/experimental";
 
-interface NestedModel {
+export interface NestedModel {
   id: string;
   name: string;
 }
