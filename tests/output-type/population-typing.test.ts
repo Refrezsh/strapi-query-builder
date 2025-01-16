@@ -68,8 +68,32 @@ describe("population types", () => {
         new EQBuilder<NestedModel>().eq("id", "value")
       )
       .populateDynamic("nested", "component.2", () =>
-        new EQBuilder<NestedModel>().eq("id", "value2")
+        new EQBuilder<NestedModel>().notEq("id", "value1")
+      )
+      .populateDynamic("nested", "component.2", () =>
+        new EQBuilder<NestedModel>().notEq("id", "value3")
       )
       .build();
+
+    const typedTest: {
+      populate: {
+        nested: {
+          on: {
+            "component.1": { filters: { $and: [{ id: { $eq: "value" } }] } };
+            "component.2": {
+              filters: { $and: [{ id: { $not: { $eq: "value3" } } }] };
+            };
+          };
+        };
+      };
+    } = dynamicZone;
+
+    expect(typedTest).toBeDefined();
+    expect(
+      typedTest.populate.nested.on["component.1"].filters.$and[0].id.$eq
+    ).toBe("value");
+    expect(
+      typedTest.populate.nested.on["component.2"].filters.$and[0].id.$not.$eq
+    ).toBe("value3");
   });
 });

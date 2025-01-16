@@ -94,7 +94,7 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [], [], "$or">
+      UpdateConfig<Config, [], [], [], {}, "$or">
     >;
   }
 
@@ -107,7 +107,7 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [], [], "$and">
+      UpdateConfig<Config, [], [], [], {}, "$and">
     >;
   }
 
@@ -125,6 +125,7 @@ export default class EQBuilder<
         [],
         [],
         [],
+        {},
         Config["rootLogical"] extends "$or" ? "$or" : "$and",
         true
       >
@@ -324,9 +325,6 @@ export default class EQBuilder<
         [],
         [],
         [],
-        Config["rootLogical"] extends "$or" ? "$or" : "$and",
-        Config["negate"] extends true ? true : false,
-        Config["populateAll"] extends true ? true : false,
         { [P in K]: BuildCallbackOutput<RelationConfig> }
       >
     >;
@@ -371,11 +369,10 @@ export default class EQBuilder<
         [],
         [],
         [],
-        Config["rootLogical"] extends "$or" ? "$or" : "$and",
-        Config["negate"] extends true ? true : false,
-        Config["populateAll"] extends true ? true : false,
         MergePopulate<
-          Config["populates"],
+          Config["populates"] extends Record<string, any>
+            ? Config["populates"]
+            : {},
           {
             [P in K]: { on: { [D in C]: BuildCallbackOutput<RelationConfig> } };
           }
@@ -798,30 +795,32 @@ type Flatten<T> = {
   [K in keyof T]: T[K];
 };
 
-type MergeDeep<T, U> = T extends object
-  ? U extends object
+type MergePopulate<Existing, New> = Existing extends Record<string, any>
+  ? New extends Record<string, any>
     ? {
-        [K in keyof T | keyof U]: K extends keyof U
-          ? K extends keyof T
-            ? MergeDeep<T[K], U[K]>
-            : U[K]
-          : K extends keyof T
-          ? T[K]
+        [P in keyof Existing | keyof New]: P extends keyof New
+          ? P extends keyof Existing
+            ? MergeOnKeys<Existing[P], New[P]>
+            : New[P]
+          : P extends keyof Existing
+          ? Existing[P]
           : never;
       }
-    : T
-  : U;
+    : Existing
+  : New;
 
-type MergePopulate<Existing, New> = Existing extends Record<string, any>
-  ? {
-      [K in keyof Existing | keyof New]: K extends keyof New
-        ? K extends keyof Existing
-          ? MergeDeep<Existing[K], New[K]>
-          : New[K]
-        : K extends keyof Existing
-        ? Existing[K]
-        : never;
-    }
+type MergeOnKeys<Existing, New> = Existing extends { on: infer E }
+  ? New extends { on: infer N }
+    ? {
+        on: {
+          [D in keyof E | keyof N]: D extends keyof N
+            ? N[D]
+            : D extends keyof E
+            ? E[D]
+            : never;
+        };
+      }
+    : Existing & New
   : New;
 
 type UpdateConfig<
@@ -829,6 +828,7 @@ type UpdateConfig<
   NewFields extends readonly unknown[] = [],
   NewSorts extends readonly unknown[] = [],
   NewFilters extends readonly unknown[] = [],
+  NewPopulates extends Record<string, any> = {},
   RootLogical extends "$and" | "$or" = Config["rootLogical"] extends
     | "$and"
     | "$or"
@@ -837,8 +837,7 @@ type UpdateConfig<
   Negate extends boolean = Config["negate"] extends true ? true : false,
   PopulateAll extends boolean = Config["populateAll"] extends true
     ? true
-    : false,
-  NewPopulates extends Record<string, any> = {}
+    : false
 > = Flatten<{
   fields: Deduplicate<
     [
