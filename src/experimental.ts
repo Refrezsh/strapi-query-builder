@@ -84,6 +84,10 @@ export default class EQBuilder<
   //</editor-fold>
 
   //<editor-fold desc="Filters">
+  /**
+   * @description Change root logical to or, default and
+   * @example new EQBuilder<Model>().or(); // Produce { filters: { $or: [...] }}
+   */
   public or() {
     this._query.filters.rootLogical = "$or";
     return this as unknown as EQBuilder<
@@ -93,6 +97,10 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Change root logical to and, default and
+   * @example new EQBuilder<Model>().and(); // Produce { filters: { $and: [...] }}
+   */
   public and() {
     this._query.filters.rootLogical = "$and";
     return this as unknown as EQBuilder<
@@ -102,6 +110,10 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Negates the nested conditions
+   * @example new EQBuilder<Model>().not(); // Produce { filters: { $not: { $and: [...] }}}
+   */
   public not() {
     this._query.filters.negate = true;
     return this as unknown as EQBuilder<
@@ -118,6 +130,25 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Add deep filters for current model
+   * @example
+   * new EQBuilder<TestModel>()
+   *     .eq("options", "value")
+   *     .filterDeep(() =>
+   *       new EQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
+   *     )
+   * // Produces
+   * {
+   *     filters: {
+   *       $and: [
+   *         { options: { $eq: "value" } },
+   *         { $or: [{ name: { $eq: "value1" } }, { name: { $eq: "value2" } }] }
+   *       ];
+   *     };
+   * }
+   * @param {BuilderCallback} builderFactory
+   */
   public filterDeep<DeepConfig extends InternalBuilderConfig>(
     builderFactory: BuilderCallback<Model, Data, DeepConfig>
   ) {
@@ -151,6 +182,8 @@ export default class EQBuilder<
   /**
    * @description Add eq filter for attribute
    * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example new EQBuilder<Model>().eq("key", "value"); // Produce { filters: { $and: [{ key: { $eq: "value" }} ] }}
    * @param {FilterKey} key Filter key
    * @param {SingleAttributeType} value Filter value
    */
@@ -184,6 +217,14 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Add $not $eq filter for attribute
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example new EQBuilder<Model>().notEq("key", "value"); // Produce { filters: { $and: [{ key: { $not: { $eq: "value" } }} ] }}
+   * @param {FilterKey} key Filter key
+   * @param {SingleAttributeType} value Filter value
+   */
   public notEq<K extends FilterKey<Model>, V extends SingleAttributeType>(
     key: K,
     value: V
