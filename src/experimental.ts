@@ -366,6 +366,69 @@ export default class EQBuilder<
   //</editor-fold>
 
   //<editor-fold desc="Populate">
+  public populateAll() {
+    this._addToPopulate({ key: "*" });
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: true;
+        populates: Config["populates"];
+      }
+    >;
+  }
+
+  public populate<K extends StrapiInputPopulateKey<Model>>(key: K) {
+    this._addToPopulate({ key: key });
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: {
+          [P in keyof Config["populates"] | K]: P extends K
+            ? true
+            : P extends keyof Config["populates"]
+            ? Config["populates"][P]
+            : never;
+        };
+      }
+    >;
+  }
+
+  public populates<K extends StrapiInputPopulateKey<Model>[]>(keys: K) {
+    keys.forEach((k) => this._addToPopulate({ key: k }));
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: {
+          [P in keyof Config["populates"] | K[number]]: P extends K[number]
+            ? true
+            : P extends keyof Config["populates"]
+            ? Config["populates"][P]
+            : never;
+        };
+      }
+    >;
+  }
+
   public populateRelation<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,

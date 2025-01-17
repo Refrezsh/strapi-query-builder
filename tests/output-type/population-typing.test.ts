@@ -40,6 +40,48 @@ describe("population types", () => {
     );
   });
 
+  it("should override prev populates wen populate all", () => {
+    const population = new EQBuilder<TestModel>()
+      .populateRelation("nested", () =>
+        new EQBuilder<NestedModel>().eq("id", "value").field("id")
+      )
+      .populateRelation("nestedList", () =>
+        new EQBuilder<NestedModel>().eq("name", "value2").field("name")
+      )
+      .populateAll()
+      .build();
+
+    const populateWithType: { populate: "*" } = population;
+    expect(populateWithType).toBeDefined();
+    expect(populateWithType.populate).toBe("*");
+  });
+
+  it("should add populate all for key", () => {
+    const populate = new EQBuilder<TestModel>()
+      .populate("nested")
+      .populate("nestedList")
+      .build();
+    const populateWithType: { populate: { nested: true; nestedList: true } } =
+      populate;
+
+    expect(populateWithType).toBeDefined();
+    expect(populateWithType.populate.nested).toBe(true);
+    expect(populateWithType.populate.nestedList).toBe(true);
+  });
+
+  it("should add populate all for key list", () => {
+    const populate = new EQBuilder<TestModel>()
+      .populates(["nested", "nestedList"])
+      .build();
+
+    const populateWithType: { populate: { nested: true; nestedList: true } } =
+      populate;
+
+    expect(populateWithType).toBeDefined();
+    expect(populateWithType.populate.nested).toBe(true);
+    expect(populateWithType.populate.nestedList).toBe(true);
+  });
+
   it("should merge same keys", () => {
     const populate = new EQBuilder<TestModel>()
       .populateRelation("nested", () =>
