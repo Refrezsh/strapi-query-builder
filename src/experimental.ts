@@ -20,8 +20,8 @@ export default class EQBuilder<
   /**
    * @description Select specific fields
    * @description Same keys will be merged
-   * @example new EQBuilder<Model>().fields(["name", "type"]); // Produce { fields: ["name", "type"] }
-   * @param {StrapiSingleFieldInput[]} fields List of fields keys
+   * @example new EQBuilder<Model>().fields(["name", "type"]); // { fields: ["name", "type"] }
+   * @param {StrapiSingleFieldInput[]} fields List of fields
    */
   public fields<
     F extends readonly [
@@ -52,8 +52,8 @@ export default class EQBuilder<
   /**
    * @description Select specific field
    * @description Same keys will be merged
-   * @example new EQBuilder<Model>().field("key"); // Produce { fields: ["key"] }
-   * @param {StrapiSingleFieldInput} field Field key
+   * @example new EQBuilder<Model>().field("key"); // { fields: ["key"] }
+   * @param {StrapiSingleFieldInput} field Single field
    */
   public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
     this._query.fields.add(field);
@@ -82,8 +82,8 @@ export default class EQBuilder<
    * @description Add ascending sort key
    * @description Same keys will be merged
    * @param {SortKey} sortKey Sort key
-   * @example new EQBuilder<Model>().sortAsc("key"); // Produce: { sort: [{"key": "asc"}] }
-   * @example new EQBuilder<Model>().sortAsc("parentKey.childKey"); // Produce: { sort: [{"parentKey": { "childKey": "asc" }}] }
+   * @example new EQBuilder<Model>().sortAsc("key"); // { sort: [{"key": "asc"}] }
+   * @example new EQBuilder<Model>().sortAsc("parentKey.childKey"); // { sort: [{"parentKey": { "childKey": "asc" }}]}
    */
   public sortAsc<K extends SortKey<Model>>(sortKey: K) {
     this._query.sort.set(sortKey, "asc");
@@ -110,8 +110,8 @@ export default class EQBuilder<
    * @description Add ascending sort keys
    * @description Same keys will be merged
    * @param {SortKey[]} sortKeys List of sort keys
-   * @example new EQBuilder<Model>().sortsAsc(["key1", "key2"]); // Produce: { sort: [{"key1": "asc"}, {"key2": "asc"}] }
-   * @example new EQBuilder<Model>().sortsAsc(["parentKey.childKey", "anotherKey"]); // Produce: { sort: [{"parentKey": { "childKey": "asc" }}, {"anotherKey": "asc"}] }
+   * @example new EQBuilder<Model>().sortsAsc(["key1", "key2"]); // { sort: [{"key1": "asc"}, {"key2": "asc"}] }
+   * @example new EQBuilder<Model>().sortsAsc(["parentKey.childKey", "anotherKey"]); // { sort: [{"parentKey": { "childKey": "asc" }}, {"anotherKey": "asc"}] }
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
     sortKeys: K
@@ -140,8 +140,9 @@ export default class EQBuilder<
 
   //<editor-fold desc="Filters">
   /**
-   * @description Change root logical to or, default and
-   * @example new EQBuilder<Model>().or(); // Produce { filters: { $or: [...] }}
+   * @description Change root logical to "$or"
+   * @description Default - "$and"
+   * @example new EQBuilder<Model>().or(); // { filters: { $or: [...] }}
    */
   public or() {
     this._query.filters.rootLogical = "$or";
@@ -165,8 +166,9 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Change root logical to and, default and
-   * @example new EQBuilder<Model>().and(); // Produce { filters: { $and: [...] }}
+   * @description Change root logical to "$and"
+   * @description Default - "$and"
+   * @example new EQBuilder<Model>().and(); // { filters: { $and: [...] }}
    */
   public and() {
     this._query.filters.rootLogical = "$and";
@@ -190,8 +192,9 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Negates the nested conditions
-   * @example new EQBuilder<Model>().not(); // Produce { filters: { $not: { $and: [...] }}}
+   * @description Add "$not" before root logical
+   * @description Default - false
+   * @example new EQBuilder<Model>().not(); // { filters: { $not: { $and: [...] }}}
    */
   public not() {
     this._query.filters.negate = true;
@@ -222,16 +225,17 @@ export default class EQBuilder<
    *     .filterDeep(() =>
    *       new EQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
    *     )
-   * // Produces
-   * {
-   *     filters: {
-   *       $and: [
-   *         { options: { $eq: "value" } },
-   *         { $or: [{ name: { $eq: "value1" } }, { name: { $eq: "value2" } }] }
-   *       ];
-   *     };
-   * }
-   * @param {EQBuilder} builderFactory
+   * // {
+   * //    filters: {
+   * //      $and: [
+   * //        { options: { $eq: "value" } },
+   * //        { $or: [{ name: { $eq: "value1" } }, { name: { $eq: "value2" } }] }
+   * //      ];
+   * //    };
+   * // }
+   *
+   * // Reads like model.options === "value" && (model.name === "value1" || model.name === "value2")
+   * @param {BuilderCallback} builderFactory Fabric function that returns builder with filters for current model
    */
   public filterDeep<DeepConfig extends InternalBuilderConfig>(
     builderFactory: BuilderCallback<Model, {}, DeepConfig>
@@ -274,26 +278,25 @@ export default class EQBuilder<
    *       .filterRelation("nested", () =>
    *         new EQBuilder<NestedModel>().eq("id", "value")
    *       )
-   * // Produces
-   * {
-   *       filters: {
-   *         $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
-   *       }
-   * }
-   * @param {FilterOperatorKey} attribute
-   * @param {BuilderCallback} builderFactory
+   * // {
+   * //      filters: {
+   * //        $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
+   * //      }
+   * // }
+   * @param {FilterOperatorKey} relationKey Key of relation model
+   * @param {BuilderCallback} builderFactory Fabric function that returns builder with filters for relation model
    */
   public filterRelation<
     RelationModel extends object,
     K extends FilterOperatorKey<Model>,
     RelationConfig extends InternalBuilderConfig
   >(
-    attribute: K,
+    relationKey: K,
     builderFactory: BuilderCallback<RelationModel, {}, RelationConfig>
   ) {
     const relationBuilder = builderFactory();
     this._query.filters.attributeFilters.push({
-      key: attribute,
+      key: relationKey,
       nested:
         relationBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
@@ -328,12 +331,12 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Add eq filter for attribute
+   * @description Add "$eq" filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
-   * @example new EQBuilder<Model>().eq("key", "value"); // Produce { filters: { $and: [{ key: { $eq: "value" }} ] }}
+   * @example new EQBuilder<Model>().eq("key", "value"); // { filters: { $and: [{ key: { $eq: "value" }} ] }}
    * @param {FilterOperatorKey} key Filter key
-   * @param {SingleAttributeType} value Filter value
+   * @param {SingleAttributeType} value Filter by value
    */
   public eq<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
     key: K,
@@ -366,12 +369,12 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Add $not $eq filter for attribute
+   * @description Add "$not" "$eq" filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
-   * @example new EQBuilder<Model>().notEq("key", "value"); // Produce { filters: { $and: [{ key: { $not: { $eq: "value" } }} ] }}
+   * @example new EQBuilder<Model>().notEq("key", "value"); // { filters: { $and: [{ key: { $not: { $eq: "value" } }} ] }}
    * @param {FilterOperatorKey} key Filter key
-   * @param {SingleAttributeType} value Filter value
+   * @param {SingleAttributeType} value Filter by value
    */
   public notEq<
     K extends FilterOperatorKey<Model>,
@@ -408,6 +411,11 @@ export default class EQBuilder<
   //</editor-fold>
 
   //<editor-fold desc="Populate">
+  /**
+   * @description Populate all relations of model
+   * @description If any other populate presented, it will be ignored
+   * @example new EQBuilder<Model>().populateAll(); // { populate: "*" }
+   */
   public populateAll() {
     this._addToPopulate({ key: "*" });
     return this as unknown as EQBuilder<
@@ -429,6 +437,12 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Populate all model by key
+   * @description Same keys will be overriding by last operator
+   * @param {StrapiInputPopulateKey} key Populate key
+   * @example new EQBuilder<Model>().populate("relation"); // { populate: { relation: true } }
+   */
   public populate<K extends StrapiInputPopulateKey<Model>>(key: K) {
     this._addToPopulate({ key: key });
     return this as unknown as EQBuilder<
@@ -456,6 +470,12 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Populate all models  by key list
+   * @description Same keys will be overriding by last operator
+   * @param {StrapiInputPopulateKey[]} keys Populate key list
+   * @example new EQBuilder<Model>().populates(["relation1", "relation2"]); // { populate: { relation1: true, relation2: true } }
+   */
   public populates<K extends StrapiInputPopulateKey<Model>[]>(keys: K) {
     keys.forEach((k) => this._addToPopulate({ key: k }));
     return this as unknown as EQBuilder<
@@ -483,6 +503,23 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Populate relation model, with specific deep config
+   * @description Same keys will be overwritten by last operator
+   * @param {StrapiInputPopulateKey} key Populate key
+   * @param {BuilderCallback} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Relation Model
+   * @example
+   * new EQBuilder<TestModel>()
+   *       .populateRelation("nested", () =>
+   *         new EQBuilder<NestedModel>().eq("id", "value").field("id")
+   *       )
+   * //     populate: {
+   * //       nested: {
+   * //         fields: ["id"];
+   * //         filters: { $and: [{ id: { $eq: "value" } }] };
+   * //       }
+   * //     }
+   */
   public populateRelation<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
@@ -529,6 +566,32 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Populate relation with dynamic zone.
+   * @description Same relation model keys will be overwritten
+   * @description Same dynamic zone component keys will be overwritten
+   * @param {StrapiInputPopulateKey} key Relation model key
+   * @param {string} componentKey Dynamic zone component key
+   * @param {builderFactory} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Dynamic zone component
+   * @example
+   * new EQBuilder<TestModel>()
+   *       .populateDynamic("nested", "component.1", () =>
+   *         new EQBuilder<NestedModel>().eq("id", "value")
+   *       )
+   *       .populateDynamic("nested", "component.2", () =>
+   *         new EQBuilder<NestedModel>().notEq("id", "value3")
+   *       )
+   * //      populate: {
+   * //       nested: {
+   * //         on: {
+   * //           "component.1": { filters: { $and: [{ id: { $eq: "value" } }] } };
+   * //           "component.2": {
+   * //             filters: { $and: [{ id: { $not: { $eq: "value3" } } }] };
+   * //           };
+   * //         };
+   * //       };
+   * //     };
+   */
   public populateDynamic<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
@@ -536,12 +599,12 @@ export default class EQBuilder<
     RelationConfig extends InternalBuilderConfig
   >(
     key: K,
-    componentTypeKey: C,
+    componentKey: C,
     builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
     const newQuery: MorphOnPopulate<PopulateModel> = {
-      [componentTypeKey]: {
+      [componentKey]: {
         fields: populateBuilder.getRawFields(),
         sort: populateBuilder.getRawSort(),
         population: populateBuilder.getRawPopulation(),
