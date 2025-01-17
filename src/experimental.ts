@@ -901,7 +901,7 @@ type ParseFilters<
 type ParsePopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
-> = PopulateAll extends true ? "*" : P;
+> = keyof P extends never ? never : PopulateAll extends true ? "*" : P;
 
 type BuildCallbackOutput<Config extends InternalBuilderConfig> = {
   fields: ParseList<Config["fields"]>;
