@@ -538,6 +538,28 @@ export default class EQBuilder<
   }
   //</editor-fold>
 
+  //<editor-fold desc="Join utils">
+  public joinFields<DeepConfig extends InternalBuilderConfig>(
+    builder: EQBuilder<Model, {}, DeepConfig>
+  ) {
+    builder.getRawFields().forEach((f) => this._query.fields.add(f));
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: [...Config["fields"], ...DeepConfig["fields"]];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
+    >;
+  }
+
+  //</editor-fold>
+
   //<editor-fold desc="Build process">
   public build() {
     const builtQuery = EQBuilder._buildQuery(this._query);
