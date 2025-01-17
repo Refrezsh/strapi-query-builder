@@ -1,4 +1,4 @@
-import EQBuilder from "../../src/experimental";
+import EQBuilder from "../../../src/experimental";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("population types", () => {

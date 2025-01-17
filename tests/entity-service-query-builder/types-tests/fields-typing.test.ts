@@ -1,4 +1,4 @@
-import EQBuilder from "../../src/experimental";
+import EQBuilder from "../../../src/experimental";
 
 export interface NestedModel {
   id: string;

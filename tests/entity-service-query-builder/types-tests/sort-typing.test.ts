@@ -1,4 +1,4 @@
-import EQBuilder from "../../src/experimental";
+import EQBuilder from "../../../src/experimental";
 import { TestModel } from "./fields-typing.test";
 
 describe("Sort types", () => {
