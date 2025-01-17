@@ -558,6 +558,136 @@ export default class EQBuilder<
     >;
   }
 
+  public joinSort<DeepConfig extends InternalBuilderConfig>(
+    builder: EQBuilder<Model, {}, DeepConfig>
+  ) {
+    builder
+      .getRawSort()
+      .forEach((value, key) => this._query.sort.set(key, value));
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: [...Config["sort"], ...DeepConfig["sort"]];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
+    >;
+  }
+
+  public joinFilters<
+    DeepConfig extends InternalBuilderConfig,
+    JoinRootLogical extends boolean = false,
+    JoinRootNegate extends boolean = false
+  >(
+    builder: EQBuilder<Model, {}, DeepConfig>,
+    joinRootLogical?: JoinRootLogical,
+    joinRootNegate?: JoinRootNegate
+  ) {
+    const externalFilters = builder.getRawFilters();
+
+    this._query.filters.attributeFilters =
+      this._query.filters.attributeFilters.concat(
+        externalFilters.attributeFilters as unknown as StrapiAttributesFilter<Model>[]
+      );
+
+    if (joinRootLogical) {
+      this._query.filters.rootLogical = externalFilters.rootLogical;
+    }
+
+    if (joinRootNegate) {
+      this._query.filters.negate = externalFilters.negate;
+    }
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], ...DeepConfig["filters"]];
+        rootLogical: JoinRootLogical extends true
+          ? DeepConfig["rootLogical"]
+          : Config["rootLogical"];
+        negate: JoinRootNegate extends true
+          ? DeepConfig["negate"]
+          : Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
+    >;
+  }
+
+  public joinPopulate<DeepConfig extends InternalBuilderConfig>(
+    builder: EQBuilder<Model, {}, DeepConfig>
+  ) {
+    builder
+      .getRawPopulation()
+      .forEach((populate) =>
+        this._query.population.set(
+          populate.key as PopulateKey<Model>,
+          populate as unknown as StrapiPopulate<Model, any>
+        )
+      );
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: {
+          [P in
+            | keyof Config["populates"]
+            | keyof DeepConfig["populates"]]: P extends keyof DeepConfig["populates"]
+            ? DeepConfig["populates"][P]
+            : P extends keyof Config["populates"]
+            ? Config["populates"][P]
+            : never;
+        };
+      }
+    >;
+  }
+
+  public joinQuery<DeepConfig extends InternalBuilderConfig>(
+    builder: EQBuilder<Model, {}, DeepConfig>
+  ) {
+    this.joinPopulate(builder);
+    this.joinFilters(builder);
+    this.joinSort(builder);
+    this.joinFields(builder);
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: [...Config["fields"], ...DeepConfig["fields"]];
+        sort: [...Config["sort"], ...DeepConfig["sort"]];
+        filters: [...Config["filters"], ...DeepConfig["filters"]];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: {
+          [P in
+            | keyof Config["populates"]
+            | keyof DeepConfig["populates"]]: P extends keyof DeepConfig["populates"]
+            ? DeepConfig["populates"][P]
+            : P extends keyof Config["populates"]
+            ? Config["populates"][P]
+            : never;
+        };
+      }
+    >;
+  }
   //</editor-fold>
 
   //<editor-fold desc="Build process">

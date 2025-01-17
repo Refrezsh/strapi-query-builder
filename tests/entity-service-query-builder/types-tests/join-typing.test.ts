@@ -1,8 +1,8 @@
 import EQBuilder from "../../../src/experimental";
-import { TestModel } from "./fields-typing.test";
+import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("Join functions", () => {
-  it("should join filters", () => {
+  it("should join fields", () => {
     const secondBuilder = new EQBuilder<TestModel>().fields([
       "options",
       "name",
@@ -18,5 +18,166 @@ describe("Join functions", () => {
     expect(typedQuery.fields[0]).toEqual("id");
     expect(typedQuery.fields[1]).toEqual("options");
     expect(typedQuery.fields[2]).toEqual("name");
+  });
+
+  it("should join sorts", () => {
+    const secondBuilder = new EQBuilder<TestModel>().sortAsc("nested.id");
+
+    const query = new EQBuilder<TestModel>()
+      .sortAsc("name")
+      .joinSort(secondBuilder)
+      .build();
+
+    const typedQuery: { sort: [{ name: "asc" }, { nested: { id: "asc" } }] } =
+      query;
+
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.sort[0].name).toEqual("asc");
+    expect(typedQuery.sort[1].nested.id).toEqual("asc");
+  });
+
+  it("should join filters without merging root logical", () => {
+    const secondBuilder = new EQBuilder<TestModel>()
+      .not()
+      .or()
+      .filterRelation("nested", () =>
+        new EQBuilder<NestedModel>().not().or().eq("id", "1")
+      );
+
+    const query = new EQBuilder<TestModel>()
+      .eq("description", "value")
+      .joinFilters(secondBuilder)
+      .build();
+
+    const typedQuery: {
+      filters: {
+        $and: [
+          { description: { $eq: "value" } },
+          { nested: { $not: { $or: [{ id: { $eq: "1" } }] } } }
+        ];
+      };
+    } = query;
+
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.filters.$and[0].description.$eq).toEqual("value");
+    expect(typedQuery.filters.$and[1].nested.$not.$or[0].id.$eq).toEqual("1");
+  });
+
+  it("should join filters with merging root logical", () => {
+    const secondBuilder = new EQBuilder<TestModel>()
+      .not()
+      .or()
+      .filterRelation("nested", () =>
+        new EQBuilder<NestedModel>().not().or().eq("id", "1")
+      );
+
+    const query = new EQBuilder<TestModel>()
+      .eq("description", "value")
+      .joinFilters(secondBuilder, true, true)
+      .build();
+
+    const typedQuery: {
+      filters: {
+        $not: {
+          $or: [
+            { description: { $eq: "value" } },
+            { nested: { $not: { $or: [{ id: { $eq: "1" } }] } } }
+          ];
+        };
+      };
+    } = query;
+
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.filters.$not.$or[0].description.$eq).toEqual("value");
+    expect(typedQuery.filters.$not.$or[1].nested.$not.$or[0].id.$eq).toEqual(
+      "1"
+    );
+  });
+
+  it("should join populate", () => {
+    const secondBuilder = new EQBuilder<TestModel>().populateDynamic(
+      "nestedList",
+      "component.1",
+      () => new EQBuilder<NestedModel>().field("name")
+    );
+
+    const query = new EQBuilder<TestModel>()
+      .populateRelation("nested", () =>
+        new EQBuilder<NestedModel>().field("id")
+      )
+      .joinPopulate(secondBuilder)
+      .build();
+
+    const typedQuery: {
+      populate: {
+        nested: { fields: ["id"] };
+        nestedList: { on: { "component.1": { fields: ["name"] } } };
+      };
+    } = query;
+
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.populate.nested.fields[0]).toEqual("id");
+    expect(typedQuery.populate.nestedList.on["component.1"].fields[0]).toEqual(
+      "name"
+    );
+  });
+
+  it("should join all", () => {
+    const joinQuery = new EQBuilder<TestModel>()
+      .field("id")
+      .sortAsc("id")
+      .eq("id", "1")
+      .filterRelation("nested", () =>
+        new EQBuilder<NestedModel>().eq("name", "value")
+      )
+      .populate("nested");
+
+    const query = new EQBuilder<TestModel>()
+      .field("description")
+      .sortAsc("options")
+      .eq("notNestedEnumeration", "test")
+      .filterDeep(() =>
+        new EQBuilder<TestModel>().or().eq("name", "test").eq("name", "test2")
+      )
+      .populateRelation("nestedList", () =>
+        new EQBuilder<NestedModel>().field("name")
+      )
+      .joinQuery(joinQuery)
+      .build();
+
+    const typedQuery: {
+      fields: ["description", "id"];
+      sort: [{ options: "asc" }, { id: "asc" }];
+      filters: {
+        $and: [
+          { notNestedEnumeration: { $eq: "test" } },
+          { $or: [{ name: { $eq: "test" } }, { name: { $eq: "test2" } }] },
+          { id: { $eq: "1" } },
+          { nested: { $and: [{ name: { $eq: "value" } }] } }
+        ];
+      };
+      populate: {
+        nestedList: {
+          fields: ["name"];
+        };
+        nested: true;
+      };
+    } = query;
+
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.fields[0]).toEqual("description");
+    expect(typedQuery.fields[1]).toEqual("id");
+
+    expect(typedQuery.sort[0].options).toEqual("asc");
+    expect(typedQuery.sort[1].id).toEqual("asc");
+
+    expect(typedQuery.filters.$and[0].notNestedEnumeration.$eq).toEqual("test");
+    expect(typedQuery.filters.$and[1].$or[0].name.$eq).toEqual("test");
+    expect(typedQuery.filters.$and[1].$or[1].name.$eq).toEqual("test2");
+    expect(typedQuery.filters.$and[2].id.$eq).toEqual("1");
+    expect(typedQuery.filters.$and[3].nested.$and[0].name.$eq).toEqual("value");
+
+    expect(typedQuery.populate.nestedList.fields[0]).toEqual("name");
+    expect(typedQuery.populate.nested).toEqual(true);
   });
 });
