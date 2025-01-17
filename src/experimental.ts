@@ -43,6 +43,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -68,6 +70,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -96,6 +100,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -125,6 +131,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -150,6 +158,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -173,6 +183,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -196,6 +208,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -247,6 +261,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -305,6 +321,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -341,6 +359,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -380,6 +400,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -401,6 +423,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -426,6 +450,8 @@ export default class EQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -451,6 +477,8 @@ export default class EQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -495,6 +523,8 @@ export default class EQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -557,6 +587,8 @@ export default class EQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -586,6 +618,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -610,6 +644,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -655,6 +691,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -692,6 +730,8 @@ export default class EQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -718,6 +758,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: DeepConfig["pagination"];
         paginationType: DeepConfig["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -751,6 +793,8 @@ export default class EQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -779,6 +823,8 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: { page: Page; pageSize: PageSize };
         paginationType: "page";
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
       }
     >;
   }
@@ -805,6 +851,52 @@ export default class EQBuilder<
         populates: Config["populates"];
         pagination: { page: Start; pageSize: limit };
         paginationType: "limit";
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+  //</editor-fold>
+
+  //<editor-fold desc="Service specific">
+  public locale<L extends string>(code: L) {
+    this._query.locale = code;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: L;
+      }
+    >;
+  }
+
+  public publicationState<P extends PublicationStates>(state: P) {
+    this._query.publicationState = state;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: P;
+        locale: Config["locale"];
       }
     >;
   }
@@ -850,6 +942,16 @@ export default class EQBuilder<
         builtQuery.start = pagination.page;
         builtQuery.limit = pagination.pageSize;
       }
+    }
+
+    const publicationState = rawQuery.publicationState;
+    if (_isDefined(publicationState)) {
+      builtQuery.publicationState = publicationState;
+    }
+
+    const locale = rawQuery.locale;
+    if (_isDefined(locale)) {
+      builtQuery.locale = locale;
     }
 
     return builtQuery;
@@ -1090,6 +1192,10 @@ interface StrapiPagination {
 }
 // </editor-fold>
 
+// <editor-fold desc="Service specific types">
+type PublicationStates = "live" | "preview";
+// </editor-fold>
+
 // <editor-fold desc="Query shapes">
 type InternalBuilderConfig = {
   fields: unknown[];
@@ -1101,6 +1207,8 @@ type InternalBuilderConfig = {
   populates: Record<string, any>;
   pagination: { page: number; pageSize: number };
   paginationType: "page" | "limit";
+  publicationState: PublicationStates;
+  locale: string;
 };
 
 type InitialBuildConfig = {
@@ -1113,6 +1221,8 @@ type InitialBuildConfig = {
   populates: {};
   pagination: never;
   paginationType: never;
+  publicationState: never;
+  locale: never;
 };
 
 interface QueryRawInfo<Model extends object, Data extends object> {
@@ -1121,6 +1231,8 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   filters: StrapiRawFilters<Model>;
   population: StrapiPopulations<Model, any>;
   pagination?: StrapiPagination;
+  locale?: string;
+  publicationState?: PublicationStates;
 }
 // </editor-fold>
 
@@ -1301,6 +1413,10 @@ type BuildOutput<Config extends InternalBuilderConfig> = {
   limit: Config["paginationType"] extends "limit"
     ? Config["pagination"]["pageSize"]
     : never;
+  publicationState: Config["publicationState"] extends PublicationStates
+    ? Config["publicationState"]
+    : never;
+  locale: Config["locale"] extends string ? Config["locale"] : never;
 } extends infer Result
   ? {
       [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
@@ -1308,5 +1424,3 @@ type BuildOutput<Config extends InternalBuilderConfig> = {
   : never;
 
 // </editor-fold>
-
-// TODO: filter keys of relationTypes must be excluded to prevent errors when we trying to filter for example Category, we can only filter Category.id and etc.
