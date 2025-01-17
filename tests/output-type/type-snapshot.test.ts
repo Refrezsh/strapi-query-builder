@@ -68,5 +68,36 @@ describe("type snapshot", () => {
     } = query;
 
     expect(assignedQuery).toBeDefined();
+    expect(assignedQuery.fields[0]).toBe("name");
+    expect(assignedQuery.fields[1]).toBe("id");
+    expect(assignedQuery.fields[2]).toBe("options");
+    expect(assignedQuery.fields[3]).toBe("description");
+
+    expect(assignedQuery.sort[0].name).toBe("asc");
+    expect(assignedQuery.sort[1].options).toBe("asc");
+
+    expect(assignedQuery.filters.$and[0].name.$eq).toBe("test");
+    expect(assignedQuery.filters.$and[1].$and[0].name.$eq).toBe("value");
+    expect(assignedQuery.filters.$and[1].$and[1].options.$not.$eq).toBe(
+      "test32332"
+    );
+    expect(
+      assignedQuery.filters.$and[1].$and[2].$and[0].description.$not.$eq
+    ).toBe("test32332");
+    expect(assignedQuery.filters.$and[1].$and[2].$and[1].nested.name.$eq).toBe(
+      "value"
+    );
+
+    expect(
+      assignedQuery.populate.nested.on["component.1"].filters.$and[0].id.$eq
+    ).toBe("value");
+    expect(
+      assignedQuery.populate.nested.on["component.2"].filters.$and[0].id.$not
+        .$eq
+    ).toBe("value3");
+    expect(assignedQuery.populate.nestedList.fields[0]).toBe("name");
+    expect(assignedQuery.populate.nestedList.filters.$and[0].name.$eq).toBe(
+      "value2"
+    );
   });
 });
