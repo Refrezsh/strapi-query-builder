@@ -16,8 +16,6 @@ export default class EQBuilder<
     population: new Map(),
   };
 
-  constructor() {}
-
   //<editor-fold desc="Fields">
   /**
    * @description Select specific fields
@@ -43,6 +41,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -66,6 +66,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -92,6 +94,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -119,6 +123,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -142,6 +148,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -163,6 +171,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -184,6 +194,8 @@ export default class EQBuilder<
         negate: true;
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -233,6 +245,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -289,6 +303,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -323,6 +339,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -360,6 +378,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -379,6 +399,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: true;
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -402,6 +424,8 @@ export default class EQBuilder<
             ? Config["populates"][P]
             : never;
         };
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -425,6 +449,8 @@ export default class EQBuilder<
             ? Config["populates"][P]
             : never;
         };
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -467,6 +493,8 @@ export default class EQBuilder<
             ? Config["populates"][P]
             : never;
         };
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -527,6 +555,8 @@ export default class EQBuilder<
             ? Config["populates"][P]
             : never;
         };
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -554,6 +584,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -576,6 +608,8 @@ export default class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -619,6 +653,8 @@ export default class EQBuilder<
           : Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
       }
     >;
   }
@@ -654,6 +690,34 @@ export default class EQBuilder<
             ? Config["populates"][P]
             : never;
         };
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+      }
+    >;
+  }
+
+  public joinPagination<DeepConfig extends InternalBuilderConfig>(
+    builder: EQBuilder<Model, {}, DeepConfig>
+  ) {
+    const externalPagination = builder.getRawPagination();
+
+    if (_isDefined(externalPagination)) {
+      this._query.pagination = externalPagination;
+    }
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: DeepConfig["pagination"];
+        paginationType: DeepConfig["paginationType"];
       }
     >;
   }
@@ -685,6 +749,62 @@ export default class EQBuilder<
             ? Config["populates"][P]
             : never;
         };
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+      }
+    >;
+  }
+  //</editor-fold>
+
+  //<editor-fold desc="Pagination">
+  public page<Page extends number, PageSize extends number>(
+    page: Page,
+    pageSize: PageSize
+  ) {
+    this._query.pagination = {
+      page: page,
+      pageSize: pageSize,
+      paginationType: "page",
+    };
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Page; pageSize: PageSize };
+        paginationType: "page";
+      }
+    >;
+  }
+
+  public pageLimit<Start extends number, limit extends number>(
+    start: Start,
+    limit: limit
+  ) {
+    this._query.pagination = {
+      page: start,
+      pageSize: limit,
+      paginationType: "limit",
+    };
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Start; pageSize: limit };
+        paginationType: "limit";
       }
     >;
   }
@@ -719,6 +839,17 @@ export default class EQBuilder<
     const parsedPopulation = EQBuilder._parsePopulate(rawQuery.population);
     if (_isDefined(parsedPopulation)) {
       builtQuery.populate = parsedPopulation;
+    }
+
+    const pagination = rawQuery.pagination;
+    if (_isDefined(pagination)) {
+      if (pagination.paginationType === "page") {
+        builtQuery.page = pagination.page;
+        builtQuery.pageSize = pagination.pageSize;
+      } else {
+        builtQuery.start = pagination.page;
+        builtQuery.limit = pagination.pageSize;
+      }
     }
 
     return builtQuery;
@@ -832,6 +963,9 @@ export default class EQBuilder<
   }
   protected getRawPopulation(): StrapiPopulations<Model, any> {
     return this._query.population;
+  }
+  protected getRawPagination(): StrapiPagination | undefined {
+    return this._query.pagination;
   }
   //</editor-fold>
 }
@@ -948,6 +1082,14 @@ type StrapiPopulations<
 > = Map<PopulateKey<ParentModel>, StrapiPopulate<ParentModel, PopulateModel>>;
 // </editor-fold>
 
+// <editor-fold desc="Pagination Types">
+interface StrapiPagination {
+  page: number;
+  pageSize: number;
+  paginationType: "page" | "limit";
+}
+// </editor-fold>
+
 // <editor-fold desc="Query shapes">
 type InternalBuilderConfig = {
   fields: unknown[];
@@ -957,6 +1099,8 @@ type InternalBuilderConfig = {
   negate: boolean;
   populateAll: boolean;
   populates: Record<string, any>;
+  pagination: { page: number; pageSize: number };
+  paginationType: "page" | "limit";
 };
 
 type InitialBuildConfig = {
@@ -967,6 +1111,8 @@ type InitialBuildConfig = {
   negate: false;
   populateAll: false;
   populates: {};
+  pagination: never;
+  paginationType: never;
 };
 
 interface QueryRawInfo<Model extends object, Data extends object> {
@@ -974,6 +1120,7 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   fields: StrapiFields<Model>;
   filters: StrapiRawFilters<Model>;
   population: StrapiPopulations<Model, any>;
+  pagination?: StrapiPagination;
 }
 // </editor-fold>
 
@@ -1142,6 +1289,18 @@ type BuildOutput<Config extends InternalBuilderConfig> = {
     Config["negate"]
   >;
   populate: ParsePopulates<Config["populates"], Config["populateAll"]>;
+  page: Config["paginationType"] extends "page"
+    ? Config["pagination"]["page"]
+    : never;
+  pageSize: Config["paginationType"] extends "page"
+    ? Config["pagination"]["pageSize"]
+    : never;
+  start: Config["paginationType"] extends "limit"
+    ? Config["pagination"]["page"]
+    : never;
+  limit: Config["paginationType"] extends "limit"
+    ? Config["pagination"]["pageSize"]
+    : never;
 } extends infer Result
   ? {
       [K in keyof Result as Result[K] extends never ? never : K]: Result[K];

@@ -122,6 +122,35 @@ describe("Join functions", () => {
     );
   });
 
+  it("should join pagination on query", () => {
+    const secondQuery = new EQBuilder<TestModel>().page(1, 26);
+    const query = new EQBuilder<TestModel>()
+      .field("id")
+      .joinPagination(secondQuery)
+      .build();
+
+    const typedQuery: { fields: ["id"]; page: 1; pageSize: 26 } = query;
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.fields[0]).toEqual("id");
+    expect(typedQuery.page).toBe(1);
+    expect(typedQuery.pageSize).toBe(26);
+  });
+
+  it("should join and override pagination on query", () => {
+    const secondQuery = new EQBuilder<TestModel>().pageLimit(1, 26);
+    const query = new EQBuilder<TestModel>()
+      .field("id")
+      .page(1, 40)
+      .joinPagination(secondQuery)
+      .build();
+
+    const typedQuery: { fields: ["id"]; start: 1; limit: 26 } = query;
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.fields[0]).toEqual("id");
+    expect(typedQuery.start).toBe(1);
+    expect(typedQuery.limit).toBe(26);
+  });
+
   it("should join all", () => {
     const joinQuery = new EQBuilder<TestModel>()
       .field("id")
