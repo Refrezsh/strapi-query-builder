@@ -1,5 +1,5 @@
 import EQBuilder from "../../src/experimental";
-import { TestModel } from "./fields-typing.test";
+import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("type snapshot", () => {
   it("should create right type", () => {
@@ -19,6 +19,15 @@ describe("type snapshot", () => {
               .notEq("description", "test32332")
               .eq("nested.name", "value")
           )
+      )
+      .populateDynamic("nested", "component.1", () =>
+        new EQBuilder<NestedModel>().eq("id", "value")
+      )
+      .populateDynamic("nested", "component.2", () =>
+        new EQBuilder<NestedModel>().notEq("id", "value3")
+      )
+      .populateRelation("nestedList", () =>
+        new EQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .build();
 
@@ -41,6 +50,20 @@ describe("type snapshot", () => {
             ];
           }
         ];
+      };
+      populate: {
+        nested: {
+          on: {
+            "component.1": { filters: { $and: [{ id: { $eq: "value" } }] } };
+            "component.2": {
+              filters: { $and: [{ id: { $not: { $eq: "value3" } } }] };
+            };
+          };
+        };
+        nestedList: {
+          fields: ["name"];
+          filters: { $and: [{ name: { $eq: "value2" } }] };
+        };
       };
     } = query;
 

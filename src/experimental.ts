@@ -3,7 +3,7 @@ import { _isDefined, _set } from "./query-utils";
 export default class EQBuilder<
   Model extends object,
   Data extends object = {},
-  Config extends InternalBuilderConfig = {}
+  Config extends InternalBuilderConfig = InitialBuildConfig
 > {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
@@ -32,7 +32,19 @@ export default class EQBuilder<
     ]
   >(fields: F) {
     fields.forEach((f) => this._query.fields.add(f));
-    return this as unknown as EQBuilder<Model, Data, UpdateConfig<Config, F>>;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: [...Config["fields"], ...F];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
+    >;
   }
 
   /**
@@ -43,7 +55,19 @@ export default class EQBuilder<
    */
   public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
     this._query.fields.add(field);
-    return this as unknown as EQBuilder<Model, Data, UpdateConfig<Config, [F]>>;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: [...Config["fields"], F];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
+    >;
   }
   //</editor-fold>
 
@@ -60,7 +84,15 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [TransformNestedKey<K, "asc">]>
+      {
+        fields: Config["fields"];
+        sort: [...Config["sort"], TransformNestedKey<K, "asc">];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -79,7 +111,15 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], TransformNestedKeys<K, "asc">>
+      {
+        fields: Config["fields"];
+        sort: [...Config["sort"], ...TransformNestedKeys<K, "asc">];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
   //</editor-fold>
@@ -94,7 +134,15 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [], [], {}, "$or">
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: "$or";
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -107,7 +155,15 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [], [], {}, "$and">
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: "$and";
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -120,15 +176,15 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [],
-        {},
-        Config["rootLogical"] extends "$or" ? "$or" : "$and",
-        true
-      >
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: true;
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -149,7 +205,7 @@ export default class EQBuilder<
    *       ];
    *     };
    * }
-   * @param {BuilderCallback} builderFactory
+   * @param {EQBuilder} builderFactory
    */
   public filterDeep<DeepConfig extends InternalBuilderConfig>(
     builderFactory: BuilderCallback<Model, {}, DeepConfig>
@@ -162,22 +218,22 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [
+          ...Config["filters"],
           ParseFilters<
-            DeepConfig["filters"] extends readonly unknown[]
-              ? DeepConfig["filters"]
-              : [],
-            DeepConfig["rootLogical"] extends "$and" | "$or"
-              ? DeepConfig["rootLogical"]
-              : "$and",
-            DeepConfig["negate"] extends true ? true : false
+            DeepConfig["filters"],
+            DeepConfig["rootLogical"],
+            DeepConfig["negate"]
           >
-        ]
-      >
+        ];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -215,25 +271,25 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [
+          ...Config["filters"],
           TransformNestedKey<
             K,
             ParseFilters<
-              RelationConfig["filters"] extends readonly unknown[]
-                ? RelationConfig["filters"]
-                : [],
-              RelationConfig["rootLogical"] extends "$and" | "$or"
-                ? RelationConfig["rootLogical"]
-                : "$and",
-              RelationConfig["negate"] extends true ? true : false
+              RelationConfig["filters"],
+              RelationConfig["rootLogical"],
+              RelationConfig["negate"]
             >
           >
-        ]
-      >
+        ];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -259,7 +315,15 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<Config, [], [], [TransformNestedKey<K, { $eq: V }>]>
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], TransformNestedKey<K, { $eq: V }>];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
 
@@ -285,12 +349,18 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [TransformNestedKey<K, { $not: { $eq: V } }>]
-      >
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [
+          ...Config["filters"],
+          TransformNestedKey<K, { $not: { $eq: V } }>
+        ];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+      }
     >;
   }
   //</editor-fold>
@@ -320,13 +390,21 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [],
-        { [P in K]: BuildCallbackOutput<RelationConfig> }
-      >
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: {
+          [P in keyof Config["populates"] | K]: P extends K
+            ? BuildCallbackOutput<RelationConfig>
+            : P extends keyof Config["populates"]
+            ? Config["populates"][P]
+            : never;
+        };
+      }
     >;
   }
 
@@ -364,20 +442,29 @@ export default class EQBuilder<
     return this as unknown as EQBuilder<
       Model,
       Data,
-      UpdateConfig<
-        Config,
-        [],
-        [],
-        [],
-        MergePopulate<
-          Config["populates"] extends Record<string, any>
-            ? Config["populates"]
-            : {},
-          {
-            [P in K]: { on: { [D in C]: BuildCallbackOutput<RelationConfig> } };
-          }
-        >
-      >
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: {
+          [P in keyof Config["populates"] | K]: P extends K
+            ? {
+                on: {
+                  [D in keyof OnType<Config["populates"][P]> | C]: D extends C
+                    ? BuildCallbackOutput<RelationConfig>
+                    : D extends keyof OnType<Config["populates"][P]>
+                    ? OnType<Config["populates"][P]>[D]
+                    : never;
+                };
+              }
+            : P extends keyof Config["populates"]
+            ? Config["populates"][P]
+            : never;
+        };
+      }
     >;
   }
 
@@ -648,13 +735,23 @@ type StrapiPopulations<
 
 // <editor-fold desc="Query shapes">
 type InternalBuilderConfig = {
-  fields?: unknown[];
-  sort?: unknown[];
-  filters?: unknown[];
-  rootLogical?: "$and" | "$or";
-  negate?: boolean;
-  populateAll?: boolean;
-  populates?: unknown;
+  fields: unknown[];
+  sort: unknown[];
+  filters: unknown[];
+  rootLogical: "$and" | "$or";
+  negate: boolean;
+  populateAll: boolean;
+  populates: Record<string, any>;
+};
+
+type InitialBuildConfig = {
+  fields: [];
+  sort: [];
+  filters: [];
+  rootLogical: "$and";
+  negate: false;
+  populateAll: false;
+  populates: {};
 };
 
 interface QueryRawInfo<Model extends object, Data extends object> {
@@ -772,12 +869,6 @@ type GetRelations<Model extends object> = {
 // </editor-fold>
 
 // <editor-fold desc="Output type utils">
-type Deduplicate<T extends readonly any[]> = T extends [infer F, ...infer Rest]
-  ? F extends Rest[number]
-    ? Deduplicate<Rest>
-    : [F, ...Deduplicate<Rest>]
-  : T;
-
 type TransformNestedKeys<Keys extends readonly string[], V> = {
   [K in keyof Keys]: Keys[K] extends string
     ? TransformNestedKey<Keys[K], V>
@@ -791,166 +882,57 @@ type TransformNestedKey<
   ? { [P in Key]: TransformNestedKey<Rest, V> }
   : { [P in K]: V };
 
-type Flatten<T> = {
-  [K in keyof T]: T[K];
-};
+type OnType<T> = T extends { on: infer O } ? O : {};
 
-type MergePopulate<Existing, New> = Existing extends Record<string, any>
-  ? New extends Record<string, any>
-    ? {
-        [P in keyof Existing | keyof New]: P extends keyof New
-          ? P extends keyof Existing
-            ? MergeOnKeys<Existing[P], New[P]>
-            : New[P]
-          : P extends keyof Existing
-          ? Existing[P]
-          : never;
-      }
-    : Existing
-  : New;
+type ParseList<F extends readonly unknown[]> = F["length"] extends 0
+  ? never
+  : F;
 
-type MergeOnKeys<Existing, New> = Existing extends { on: infer E }
-  ? New extends { on: infer N }
-    ? {
-        on: {
-          [D in keyof E | keyof N]: D extends keyof N
-            ? N[D]
-            : D extends keyof E
-            ? E[D]
-            : never;
-        };
-      }
-    : Existing & New
-  : New;
+type ParseFilters<
+  Filters extends unknown[],
+  RootLogical extends "$and" | "$or",
+  Negate extends boolean
+> = Filters["length"] extends 0
+  ? never
+  : Negate extends true
+  ? { $not: { [K in RootLogical]: Filters } }
+  : { [K in RootLogical]: Filters };
 
-type UpdateConfig<
-  Config extends InternalBuilderConfig,
-  NewFields extends readonly unknown[] = [],
-  NewSorts extends readonly unknown[] = [],
-  NewFilters extends readonly unknown[] = [],
-  NewPopulates extends Record<string, any> = {},
-  RootLogical extends "$and" | "$or" = Config["rootLogical"] extends
-    | "$and"
-    | "$or"
-    ? Config["rootLogical"]
-    : "$and",
-  Negate extends boolean = Config["negate"] extends true ? true : false,
-  PopulateAll extends boolean = Config["populateAll"] extends true
-    ? true
-    : false
-> = Flatten<{
-  fields: Deduplicate<
-    [
-      ...(Config["fields"] extends readonly unknown[] ? Config["fields"] : []),
-      ...NewFields
-    ]
+type ParsePopulates<
+  P extends Record<string, any>,
+  PopulateAll extends boolean
+> = PopulateAll extends true ? "*" : P;
+
+type BuildCallbackOutput<Config extends InternalBuilderConfig> = {
+  fields: ParseList<Config["fields"]>;
+  sort: ParseList<Config["sort"]>;
+  filters: ParseFilters<
+    Config["filters"],
+    Config["rootLogical"],
+    Config["negate"]
   >;
-  sort: Deduplicate<
-    [
-      ...(Config["sort"] extends readonly unknown[] ? Config["sort"] : []),
-      ...NewSorts
-    ]
+  populate: ParsePopulates<Config["populates"], Config["populateAll"]>;
+} extends infer Result
+  ? {
+      [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
+    }
+  : never;
+
+type BuildOutput<Config extends InternalBuilderConfig> = {
+  fields: ParseList<Config["fields"]>;
+  sort: ParseList<Config["sort"]>;
+  filters: ParseFilters<
+    Config["filters"],
+    Config["rootLogical"],
+    Config["negate"]
   >;
-  filters: [
-    ...(Config["filters"] extends readonly unknown[] ? Config["filters"] : []),
-    ...NewFilters
-  ];
-  rootLogical: RootLogical;
-  negate: Negate;
-  populates: {
-    [K in
-      | keyof (Config["populates"] extends Record<string, any>
-          ? Config["populates"]
-          : {})
-      | keyof NewPopulates]: K extends keyof NewPopulates
-      ? NewPopulates[K]
-      : K extends keyof (Config["populates"] extends Record<string, any>
-          ? Config["populates"]
-          : {})
-      ? (Config["populates"] extends Record<string, any>
-          ? Config["populates"]
-          : {})[K]
-      : never;
-  };
-  populateAll: PopulateAll;
-}>;
-
-type ParseFields<F> = F extends readonly unknown[]
-  ? F["length"] extends 0
-    ? never
-    : F
-  : never;
-
-type ParseSorts<S> = S extends readonly unknown[]
-  ? S["length"] extends 0
-    ? never
-    : S
-  : never;
-
-type ParseFilters<Filters, RootLogical, Negate> =
-  Filters extends readonly unknown[]
-    ? Filters["length"] extends 0
-      ? never
-      : Negate extends true
-      ? {
-          $not: RootLogical extends "$and" | "$or"
-            ? { [K in RootLogical]: Filters }
-            : never;
-        }
-      : RootLogical extends "$and" | "$or"
-      ? { [K in RootLogical]: Filters }
-      : never
-    : never;
-
-type ParsePopulates<P, PopulateAll> = PopulateAll extends true
-  ? "*"
-  : P extends Record<string, any>
-  ? keyof P extends never
-    ? never
-    : P
-  : never;
-
-type BuildCallbackOutput<Config> = Config extends {
-  fields: infer Fields;
-  sort: infer Sorts;
-  filters: infer Filters;
-  rootLogical: infer RootLogical;
-  negate: infer Not;
-  populates: infer Populates;
-  populateAll: infer PopulateAll;
-}
+  populate: ParsePopulates<Config["populates"], Config["populateAll"]>;
+} extends infer Result
   ? {
-      fields: ParseFields<Fields>;
-      sort: ParseSorts<Sorts>;
-      filters: ParseFilters<Filters, RootLogical, Not>;
-      populate: ParsePopulates<Populates, PopulateAll>;
-    } extends infer Result
-    ? {
-        [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-      }
-    : never
-  : {};
+      [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
+    }
+  : never;
 
-type BuildOutput<Config> = Config extends {
-  fields: infer Fields;
-  sort: infer Sorts;
-  filters: infer Filters;
-  rootLogical: infer RootLogical;
-  negate: infer Not;
-  populates: infer Populates;
-  populateAll: infer PopulateAll;
-}
-  ? {
-      fields: ParseFields<Fields>;
-      sort: ParseSorts<Sorts>;
-      filters: ParseFilters<Filters, RootLogical, Not>;
-      populate: ParsePopulates<Populates, PopulateAll>;
-    } extends infer Result
-    ? {
-        [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-      }
-    : never
-  : {};
 // </editor-fold>
 
 // TODO: filter keys of relationTypes must be excluded to prevent errors when we trying to filter for example Category, we can only filter Category.id and etc.
