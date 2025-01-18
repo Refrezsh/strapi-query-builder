@@ -390,7 +390,7 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Add "$eq" filter for attribute
+   * @description Add "$eq" (Equal) filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
    * @example new EQBuilder<Model>().eq("key", "value"); // { filters: { $and: [{ key: { $eq: "value" }} ] }}
@@ -428,7 +428,7 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Add "$not" "$eq" filter for attribute
+   * @description Add "$not" "$eq" (Not Equal) filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
    * @example new EQBuilder<Model>().notEq("key", "value"); // { filters: { $and: [{ key: { $not: { $eq: "value" } }} ] }}
@@ -456,6 +456,161 @@ export default class EQBuilder<
           ...Config["filters"],
           TransformNestedKey<K, { $not: { $eq: V } }>
         ];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Add "eqi" (Equal case-insensitive) filter for attribute
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example new EQBuilder<Model>().eqi("key", "value"); // { filters: { $and: [{ key: { $eqi: "value" }} ] }}
+   * @param {FilterOperatorKey} key Filter key
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public eqi<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
+    key: K,
+    value: V
+  ) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$eqi",
+      value: value,
+      negate: false,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], TransformNestedKey<K, { $eqi: V }>];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Add "not" and "eqi" (Not Equal case-insensitive) filter for attribute
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example new EQBuilder<Model>().eqi("key", "value"); // { filters: { $and: [{ key: { $not: { $eqi: "value" }}} ] }}
+   * @param {FilterOperatorKey} key Filter key
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notEqi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(key: K, value: V) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$eqi",
+      value: value,
+      negate: true,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [
+          ...Config["filters"],
+          TransformNestedKey<K, { $not: { $eqi: V } }>
+        ];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Add "$ne" (Not Equal) filter for attribute
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example new EQBuilder<Model>().eq("key", "value"); // { filters: { $and: [{ key: { $ne: "value" }} ] }}
+   * @param {FilterOperatorKey} key Filter key
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public ne<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
+    key: K,
+    value: V
+  ) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$ne",
+      value: value,
+      negate: false,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], TransformNestedKey<K, { $ne: V }>];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Add "$nei" (Not Equal case-insensitive) filter for attribute
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example new EQBuilder<Model>().eq("key", "value"); // { filters: { $and: [{ key: { $nei: "value" }} ] }}
+   * @param {FilterOperatorKey} key Filter key
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public nei<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
+    key: K,
+    value: V
+  ) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$nei",
+      value: value,
+      negate: false,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], TransformNestedKey<K, { $nei: V }>];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
         populateAll: Config["populateAll"];

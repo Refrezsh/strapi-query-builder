@@ -2,31 +2,6 @@ import EQBuilder from "../../../src/experimental";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("Filter types", () => {
-  it("should create single eq", () => {
-    const eqFilter = new EQBuilder<TestModel>().eq("nested", "1").build();
-
-    const filters = eqFilter.filters.$and;
-    expect(filters).toBeDefined();
-    expect(filters.length).toBe(1);
-
-    const idFilter: { nested: { $eq: "1" } } = eqFilter.filters.$and[0];
-    expect(idFilter).toBeDefined();
-    expect(idFilter.nested.$eq).toBe("1");
-  });
-
-  it("should create single not eq", () => {
-    const eqFilter = new EQBuilder<TestModel>().notEq("nested", "1").build();
-
-    const filters = eqFilter.filters.$and;
-    expect(filters).toBeDefined();
-    expect(filters.length).toBe(1);
-
-    const idFilter: { nested: { $not: { $eq: "1" } } } =
-      eqFilter.filters.$and[0];
-    expect(idFilter).toBeDefined();
-    expect(idFilter.nested.$not.$eq).toBe("1");
-  });
-
   it("should create empty filters", () => {
     const eqFilter: {} = new EQBuilder<TestModel>()
       .or()
@@ -185,5 +160,79 @@ describe("Filter types", () => {
     const relationFilter = nestedFilters.nested.$and[0];
     expect(relationFilter).toBeDefined();
     expect(relationFilter.id.$eq).toBe("value");
+  });
+
+  it("should create single eq", () => {
+    const eqFilter = new EQBuilder<TestModel>().eq("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $eq: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$eq).toBe("1");
+  });
+
+  it("should create single not eq", () => {
+    const eqFilter = new EQBuilder<TestModel>().notEq("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $not: { $eq: "1" } } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$not.$eq).toBe("1");
+  });
+
+  it("should create single eqi", () => {
+    const eqFilter = new EQBuilder<TestModel>().eqi("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $eqi: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$eqi).toBe("1");
+  });
+
+  it("should create single not eqi", () => {
+    const eqFilter = new EQBuilder<TestModel>().notEqi("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $not: { $eqi: "1" } } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$not.$eqi).toBe("1");
+  });
+
+  it("should create single ne", () => {
+    const eqFilter = new EQBuilder<TestModel>().ne("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $ne: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$ne).toBe("1");
+  });
+
+  it("should create single nei", () => {
+    const eqFilter = new EQBuilder<TestModel>().nei("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $nei: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$nei).toBe("1");
   });
 });
