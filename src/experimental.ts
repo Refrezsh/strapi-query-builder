@@ -663,7 +663,83 @@ export default class EQBuilder<
   }
   //</editor-fold>
 
+  //<editor-fold desc="Pagination">
+  /**
+   * @description Pagination by page, when defining the page and pageSize parameters
+   * @param {number} page Current page
+   * @param {number} pageSize Page size
+   * @example
+   * new EQBuilder<TestModel>().page(1, 26) // { page: 1; pageSize: 26 }
+   */
+  public page<Page extends number, PageSize extends number>(
+    page: Page,
+    pageSize: PageSize
+  ) {
+    this._query.pagination = {
+      page: page,
+      pageSize: pageSize,
+      paginationType: "page",
+    };
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Page; pageSize: PageSize };
+        paginationType: "page";
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Pagination by offset, when defining the start and limit parameters
+   * @param {number} start
+   * @param {number} limit
+   * @example new EQBuilder<TestModel>().pageLimit(0, 26) // { start: 0; limit: 26 }
+   */
+  public pageLimit<Start extends number, limit extends number>(
+    start: Start,
+    limit: limit
+  ) {
+    this._query.pagination = {
+      page: start,
+      pageSize: limit,
+      paginationType: "limit",
+    };
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Start; pageSize: limit };
+        paginationType: "limit";
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+  //</editor-fold>
+
   //<editor-fold desc="Join utils">
+  /**
+   * @description Attach fields from other query builder
+   * @description Same keys will be merged
+   * @param {EQBuilder} builder Embedded builder
+   */
   public joinFields<DeepConfig extends InternalBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
@@ -687,6 +763,11 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Attach sorts from other query builder
+   * @description Same keys will be merged
+   * @param {EQBuilder} builder Embedded builder
+   */
   public joinSort<DeepConfig extends InternalBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
@@ -713,6 +794,12 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Attach filters from other query builder
+   * @param {EQBuilder} builder Embedded builder
+   * @param {boolean} joinRootLogical Override root logical ?
+   * @param {boolean} joinRootNegate Override root negate ?
+   */
   public joinFilters<
     DeepConfig extends InternalBuilderConfig,
     JoinRootLogical extends boolean = false,
@@ -760,6 +847,11 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Attach populates from other query builder
+   * @description Same keys will be overwritten
+   * @param {EQBuilder} builder Embedded builder
+   */
   public joinPopulate<DeepConfig extends InternalBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
@@ -799,6 +891,10 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Attach pagination from other query builder
+   * @param {EQBuilder} builder Embedded builder
+   */
   public joinPagination<DeepConfig extends InternalBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
@@ -827,6 +923,10 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Join query from other query builder to current query builder
+   * @param {EQBuilder} builder Embedded builder
+   */
   public joinQuery<DeepConfig extends InternalBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
@@ -863,65 +963,13 @@ export default class EQBuilder<
   }
   //</editor-fold>
 
-  //<editor-fold desc="Pagination">
-  public page<Page extends number, PageSize extends number>(
-    page: Page,
-    pageSize: PageSize
-  ) {
-    this._query.pagination = {
-      page: page,
-      pageSize: pageSize,
-      paginationType: "page",
-    };
-    return this as unknown as EQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: { page: Page; pageSize: PageSize };
-        paginationType: "page";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-      }
-    >;
-  }
-
-  public pageLimit<Start extends number, limit extends number>(
-    start: Start,
-    limit: limit
-  ) {
-    this._query.pagination = {
-      page: start,
-      pageSize: limit,
-      paginationType: "limit",
-    };
-    return this as unknown as EQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: { page: Start; pageSize: limit };
-        paginationType: "limit";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-      }
-    >;
-  }
-  //</editor-fold>
-
   //<editor-fold desc="Service specific">
+  /**
+   * @description Set locale filter
+   * @description Entity Service Specific
+   * @param {string} code - Locale code
+   * @example new EQBuilder<TestModel>().locale("ua") // { locale: "ua" }
+   */
   public locale<L extends string>(code: L) {
     this._query.locale = code;
     return this as unknown as EQBuilder<
@@ -943,6 +991,12 @@ export default class EQBuilder<
     >;
   }
 
+  /**
+   * @description Set publication state for draft & publish
+   * @description Entity Service Specific
+   * @param {PublicationStates} state Publication state
+   * @example new EQBuilder<TestModel>().publicationState("live") // { publicationState: "live" }
+   */
   public publicationState<P extends PublicationStates>(state: P) {
     this._query.publicationState = state;
     return this as unknown as EQBuilder<
@@ -966,6 +1020,10 @@ export default class EQBuilder<
   //</editor-fold>
 
   //<editor-fold desc="Build process">
+  /**
+   * @description Build the current query into the final Strapi Entity Service format
+   * @return Dynamically generated query type
+   */
   public build() {
     const builtQuery = EQBuilder._buildQuery(this._query);
     return builtQuery as BuildOutput<Config>;
@@ -1164,6 +1222,7 @@ type EntityFilterAttributes =
   | "$eq"
   | "$eqi"
   | "$ne"
+  | "$nei"
   | "$in"
   | "$notIn"
   | "$lt"
