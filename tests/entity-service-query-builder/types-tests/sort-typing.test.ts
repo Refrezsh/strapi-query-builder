@@ -17,19 +17,19 @@ describe("Sort types", () => {
     const combinedWithOtherSort = new EQBuilder<TestModel>()
       .sortAsc("nested.name")
       .sortAsc("name")
-      .sortAsc("options")
+      .sortDesc("options")
       .build();
 
     const combinedWithOtherSortAscendingNested: "asc" =
       combinedWithOtherSort.sort[0].nested.name;
     const combinedWithOtherSortAscendingName: "asc" =
       combinedWithOtherSort.sort[1].name;
-    const combinedWithOtherSortAscendingOptions: "asc" =
+    const combinedWithOtherSortAscendingOptions: "desc" =
       combinedWithOtherSort.sort[2].options;
 
     expect(combinedWithOtherSortAscendingNested).toBe("asc");
     expect(combinedWithOtherSortAscendingName).toBe("asc");
-    expect(combinedWithOtherSortAscendingOptions).toBe("asc");
+    expect(combinedWithOtherSortAscendingOptions).toBe("desc");
   });
 
   it("should sort wit list of key and single sort keys", () => {
@@ -52,12 +52,12 @@ describe("Sort types", () => {
 
   it("should create cross type", () => {
     const withFields = new EQBuilder<TestModel>()
-      .sortAsc("name")
+      .sortsDesc(["name"])
       .field("options")
       .build();
     const withFieldsOptions: "options" = withFields.fields[0];
-    const withFieldSort: "asc" = withFields.sort[0].name;
+    const withFieldSort: "desc" = withFields.sort[0].name;
     expect(withFieldsOptions).toBe("options");
-    expect(withFieldSort).toBe("asc");
+    expect(withFieldSort).toBe("desc");
   });
 });

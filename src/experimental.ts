@@ -107,6 +107,34 @@ export default class EQBuilder<
   }
 
   /**
+   * @description Add descending sort key
+   * @description Same keys will be merged
+   * @param {SortKey} sortKey Sort key
+   * @example new EQBuilder<Model>().sortAsc("key"); // { sort: [{"key": "desc"}] }
+   * @example new EQBuilder<Model>().sortAsc("parentKey.childKey"); // { sort: [{"parentKey": { "childKey": "desc" }}]}
+   */
+  public sortDesc<K extends SortKey<Model>>(sortKey: K) {
+    this._query.sort.set(sortKey, "desc");
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: [...Config["sort"], TransformNestedKey<K, "desc">];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
    * @description Add ascending sort keys
    * @description Same keys will be merged
    * @param {SortKey[]} sortKeys List of sort keys
@@ -124,6 +152,37 @@ export default class EQBuilder<
       {
         fields: Config["fields"];
         sort: [...Config["sort"], ...TransformNestedKeys<K, "asc">];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Add descending sort keys
+   * @description Same keys will be merged
+   * @param {SortKey[]} sortKeys List of sort keys
+   * @example new EQBuilder<Model>().sortsAsc(["key1", "key2"]); // { sort: [{"key1": "desc"}, {"key2": "desc"}] }
+   * @example new EQBuilder<Model>().sortsAsc(["parentKey.childKey", "anotherKey"]); // { sort: [{"parentKey": { "childKey": "desc" }}, {"anotherKey": "desc"}] }
+   */
+  public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
+    sortKeys: K
+  ) {
+    sortKeys.forEach((key) => this._query.sort.set(key, "desc"));
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: [...Config["sort"], ...TransformNestedKeys<K, "desc">];
         filters: Config["filters"];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
