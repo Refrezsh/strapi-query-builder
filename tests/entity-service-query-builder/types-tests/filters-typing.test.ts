@@ -235,4 +235,22 @@ describe("Filter types", () => {
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.$nei).toBe("1");
   });
+
+  it("should create single in", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .in("nested.id", [1, 2, 3])
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { id: { $in: number[] } } } =
+      eqFilter.filters.$and[0];
+
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.id.$in[0]).toBe(1);
+    expect(idFilter.nested.id.$in[1]).toBe(2);
+    expect(idFilter.nested.id.$in[2]).toBe(3);
+  });
 });

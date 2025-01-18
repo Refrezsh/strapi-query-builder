@@ -510,7 +510,7 @@ export default class EQBuilder<
    * @description Add "not" and "eqi" (Not Equal case-insensitive) filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
-   * @example new EQBuilder<Model>().eqi("key", "value"); // { filters: { $and: [{ key: { $not: { $eqi: "value" }}} ] }}
+   * @example new EQBuilder<Model>().notEqi("key", "value"); // { filters: { $and: [{ key: { $not: { $eqi: "value" }}} ] }}
    * @param {FilterOperatorKey} key Filter key
    * @param {SingleAttributeType} value Filter by value
    */
@@ -551,7 +551,7 @@ export default class EQBuilder<
    * @description Add "$ne" (Not Equal) filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
-   * @example new EQBuilder<Model>().eq("key", "value"); // { filters: { $and: [{ key: { $ne: "value" }} ] }}
+   * @example new EQBuilder<Model>().ne("key", "value"); // { filters: { $and: [{ key: { $ne: "value" }} ] }}
    * @param {FilterOperatorKey} key Filter key
    * @param {SingleAttributeType} value Filter by value
    */
@@ -589,7 +589,7 @@ export default class EQBuilder<
    * @description Add "$nei" (Not Equal case-insensitive) filter for attribute
    * @description Same keys will not be merged
    * @description Allowed "key.dot" notation
-   * @example new EQBuilder<Model>().eq("key", "value"); // { filters: { $and: [{ key: { $nei: "value" }} ] }}
+   * @example new EQBuilder<Model>().nei("key", "value"); // { filters: { $and: [{ key: { $nei: "value" }} ] }}
    * @param {FilterOperatorKey} key Filter key
    * @param {SingleAttributeType} value Filter by value
    */
@@ -611,6 +611,46 @@ export default class EQBuilder<
         fields: Config["fields"];
         sort: Config["sort"];
         filters: [...Config["filters"], TransformNestedKey<K, { $nei: V }>];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+      }
+    >;
+  }
+
+  /**
+   * @description Add "$in" Attribute is contained in the input list
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example
+   * new EQBuilder<Model>().in("key", ["value1", "value2"]);
+   * // { filters: { $and: [{ key: { $in: ["value1", "value2"] }} ] }}
+   * @param {FilterOperatorKey} key Filter key
+   * @param {MultipleAttributeType} value Filter in by values
+   */
+  public in<
+    K extends FilterOperatorKey<Model>,
+    V extends MultipleAttributeType
+  >(key: K, value: V) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$in",
+      value: value,
+      negate: false,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], TransformNestedKey<K, { $in: V }>];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
         populateAll: Config["populateAll"];
@@ -1431,6 +1471,7 @@ type StrapiSorts<Model extends object> = Map<SortKey<Model>, StrapiSortOptions>;
 
 // <editor-fold desc="Filter types">
 type SingleAttributeType = string | number | boolean;
+type MultipleAttributeType = string[] | number[];
 type FilterLogicalType = "$and" | "$or" | "$not";
 type EntityFilterAttributes =
   | "$eq"
