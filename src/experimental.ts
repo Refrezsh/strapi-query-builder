@@ -503,6 +503,74 @@ export default class EQBuilder<
   }
 
   /**
+   * @description Attribute contains the input value (case-sensitive)
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().contains("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $contains: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public contains<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$contains", value);
+  }
+
+  /**
+   * @description Attribute does not contain the input value (case-sensitive)
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notContains("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $notContains: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notContains<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$notContains", value);
+  }
+
+  /**
+   * @description Attribute contains the input value. $containsi is not case-sensitive
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().containsi("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $containsi: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public containsi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$containsi", value);
+  }
+
+  /**
+   * @description Attribute does not contain the input value. $notContainsi is not case-sensitive
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notContainsi("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $notContainsi: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notContainsi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$notContainsi", value);
+  }
+
+  /**
    * @description Attribute is contained in the input list
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation

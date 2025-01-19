@@ -410,4 +410,60 @@ describe("Filter types", () => {
     expect(idFilter.nested.id.$not.$between[0]).toBe(1);
     expect(idFilter.nested.id.$not.$between[1]).toBe(2);
   });
+
+  it("should create single contains", () => {
+    const eqFilter = new EQBuilder<TestModel>().contains("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $contains: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$contains).toBe("1");
+  });
+
+  it("should create single not contains", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .notContains("nested", "1")
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $notContains: "1" } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$notContains).toBe("1");
+  });
+
+  it("should create single containsi", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .containsi("nested", "1")
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $containsi: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$containsi).toBe("1");
+  });
+
+  it("should create single not containsi", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .notContainsi("nested", "1")
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $notContainsi: "1" } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$notContainsi).toBe("1");
+  });
 });
