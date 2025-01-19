@@ -605,6 +605,74 @@ export default class EQBuilder<
   }
 
   /**
+   * @description Attribute is greater than the input value
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().gt("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $gt: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public gt<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
+    attribute: K,
+    value: V
+  ) {
+    return this.filter(attribute, "$gt", value);
+  }
+
+  /**
+   * @description Attribute is not greater than the input value
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notGt("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $not: { $gt: "value" }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notGt<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$gt", value);
+  }
+
+  /**
+   * @description Attribute is greater than or equal to the input value.
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().gte("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $gte: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public gte<K extends FilterOperatorKey<Model>, V extends SingleAttributeType>(
+    attribute: K,
+    value: V
+  ) {
+    return this.filter(attribute, "$gte", value);
+  }
+
+  /**
+   * @description Attribute is not greater than or equal to the input value.
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notGte("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $not: { $gte: "value" }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notGte<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$gte", value);
+  }
+
+  /**
    * @description Generalized filter operator
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
