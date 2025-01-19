@@ -5,8 +5,6 @@ describe("Sort types", () => {
   it("should produce single nested asc sort", () => {
     const nestedType = new EQBuilder<TestModel>()
       .sortAsc("nested.name")
-      .sortAsc("nested.name")
-      .sortAsc("nested.name")
       .build();
 
     const nestedTypeAscending: "asc" = nestedType.sort[0].nested.name;
@@ -35,19 +33,19 @@ describe("Sort types", () => {
   it("should sort wit list of key and single sort keys", () => {
     const nestedSortWithKeys = new EQBuilder<TestModel>()
       .sortsAsc(["nested.name", "name"])
-      .sortAsc("options")
+      .sortDesc("options")
       .build();
 
     const combinedWithOtherSortAscendingNested: "asc" =
       nestedSortWithKeys.sort[0].nested.name;
     const combinedWithOtherSortAscendingName: "asc" =
       nestedSortWithKeys.sort[1].name;
-    const combinedWithOtherSortAscendingOptions: "asc" =
+    const combinedWithOtherSortAscendingOptions: "desc" =
       nestedSortWithKeys.sort[2].options;
 
     expect(combinedWithOtherSortAscendingNested).toBe("asc");
     expect(combinedWithOtherSortAscendingName).toBe("asc");
-    expect(combinedWithOtherSortAscendingOptions).toBe("asc");
+    expect(combinedWithOtherSortAscendingOptions).toBe("desc");
   });
 
   it("should create cross type", () => {

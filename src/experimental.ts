@@ -81,81 +81,88 @@ export default class EQBuilder<
 
   //<editor-fold desc="Sorts">
   /**
-   * @description Add ascending sort key
+   * @description Sort results by attribute in ascending order
    * @description Same keys will be merged
-   * @param {SortKey} sortKey Sort key
-   * @example new EQBuilder<Model>().sortAsc("key"); // { sort: [{"key": "asc"}] }
-   * @example new EQBuilder<Model>().sortAsc("parentKey.childKey"); // { sort: [{"parentKey": { "childKey": "asc" }}]}
+   * @description Allowed "attribute.dot" notation
+   * @param {SortKey} attribute Attribute
+   * @example
+   * new EQBuilder<Model>().sortAsc("attribute");
+   * // { sort: [{"attribute": "asc"}] }
+   * @example
+   * new EQBuilder<Model>().sortAsc("parentKey.childKey");
+   * // { sort: [{"parentKey": { "childKey": "asc" }}]}
    */
-  public sortAsc<K extends SortKey<Model>>(sortKey: K) {
-    this._query.sort.set(sortKey, "asc");
-    return this as unknown as EQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: [...Config["sort"], TransformNestedKey<K, "asc">];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
-      }
-    >;
+  public sortAsc<K extends SortKey<Model>>(attribute: K) {
+    return this.sort(attribute, "asc");
   }
 
   /**
-   * @description Add descending sort key
+   * @description Sort results by attribute in descending order
    * @description Same keys will be merged
-   * @param {SortKey} sortKey Sort key
-   * @example new EQBuilder<Model>().sortAsc("key"); // { sort: [{"key": "desc"}] }
-   * @example new EQBuilder<Model>().sortAsc("parentKey.childKey"); // { sort: [{"parentKey": { "childKey": "desc" }}]}
+   * @description Allowed "attribute.dot" notation
+   * @param {SortKey} attribute Attribute
+   * @example
+   * new EQBuilder<Model>().sortAsc("attribute");
+   * // { sort: [{"attribute": "desc"}] }
+   * @example
+   * new EQBuilder<Model>().sortAsc("parentKey.childKey");
+   * // { sort: [{"parentKey": { "childKey": "desc" }}]}
    */
-  public sortDesc<K extends SortKey<Model>>(sortKey: K) {
-    this._query.sort.set(sortKey, "desc");
-    return this as unknown as EQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: [...Config["sort"], TransformNestedKey<K, "desc">];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
-      }
-    >;
+  public sortDesc<K extends SortKey<Model>>(attribute: K) {
+    return this.sort(attribute, "desc");
   }
 
   /**
-   * @description Add ascending sort keys
+   * @description Sort results by attributes list in ascending order
    * @description Same keys will be merged
-   * @param {SortKey[]} sortKeys List of sort keys
-   * @example new EQBuilder<Model>().sortsAsc(["key1", "key2"]); // { sort: [{"key1": "asc"}, {"key2": "asc"}] }
-   * @example new EQBuilder<Model>().sortsAsc(["parentKey.childKey", "anotherKey"]); // { sort: [{"parentKey": { "childKey": "asc" }}, {"anotherKey": "asc"}] }
+   * @description Allowed "attribute.dot" notation
+   * @param {SortKey[]} attributes Attributes list
+   * @example
+   * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * // { sort: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
-    sortKeys: K
+    attributes: K
   ) {
-    sortKeys.forEach((key) => this._query.sort.set(key, "asc"));
+    return this.sorts(attributes, "asc");
+  }
 
+  /**
+   * @description Sort results by attributes list in descending order
+   * @description Same keys will be merged
+   * @description Allowed "attribute.dot" notation
+   * @param {SortKey[]} attributes Attributes list
+   * @example
+   * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
+   */
+  public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
+    attributes: K
+  ) {
+    return this.sorts(attributes, "desc");
+  }
+
+  /**
+   * @description Sort results by attribute and direction
+   * @description Same keys will be merged
+   * @description Allowed "attribute.dot" notation
+   * @param {SortKey} attribute Attribute
+   * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
+   * @example
+   * new EQBuilder<Model>().sort("attribute", "asc");
+   * // { sort: [{"attribute": "asc"}] }
+   */
+  public sort<K extends SortKey<Model>, D extends StrapiSortOptions>(
+    attribute: K,
+    direction: D
+  ) {
+    this._query.sort.set(attribute, direction);
     return this as unknown as EQBuilder<
       Model,
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...TransformNestedKeys<K, "asc">];
+        sort: [...Config["sort"], TransformNestedKey<K, D>];
         filters: Config["filters"];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
@@ -171,23 +178,26 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Add descending sort keys
+   * @description Sort results by attributes list and direction
    * @description Same keys will be merged
-   * @param {SortKey[]} sortKeys List of sort keys
-   * @example new EQBuilder<Model>().sortsAsc(["key1", "key2"]); // { sort: [{"key1": "desc"}, {"key2": "desc"}] }
-   * @example new EQBuilder<Model>().sortsAsc(["parentKey.childKey", "anotherKey"]); // { sort: [{"parentKey": { "childKey": "desc" }}, {"anotherKey": "desc"}] }
+   * @description Allowed "attribute.dot" notation
+   * @param {SortKey} attributes Attribute list
+   * @param {StrapiSortOptions} direction Direction "asc" or "desc"
+   * @example
+   * new EQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
+   * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
-  public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
-    sortKeys: K
-  ) {
-    sortKeys.forEach((key) => this._query.sort.set(key, "desc"));
-
+  public sorts<
+    K extends readonly [SortKey<Model>, ...SortKey<Model>[]],
+    D extends StrapiSortOptions
+  >(attributes: K, direction: D) {
+    attributes.forEach((key) => this._query.sort.set(key, direction));
     return this as unknown as EQBuilder<
       Model,
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...TransformNestedKeys<K, "desc">];
+        sort: [...Config["sort"], ...TransformNestedKeys<K, D>];
         filters: Config["filters"];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
