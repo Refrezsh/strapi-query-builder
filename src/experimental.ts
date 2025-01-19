@@ -680,6 +680,47 @@ export default class EQBuilder<
       }
     >;
   }
+
+  /**
+   * @description Add "$notIn" Attribute is not contained in the input list
+   * @description Same keys will not be merged
+   * @description Allowed "key.dot" notation
+   * @example
+   * new EQBuilder<Model>().notIn("key", ["value1", "value2"]);
+   * // { filters: { $and: [{ key: { $notIn: ["value1", "value2"] }} ] }}
+   * @param {FilterOperatorKey} key Filter key
+   * @param {MultipleAttributeType} value Filter not in by values
+   */
+  public notIn<
+    K extends FilterOperatorKey<Model>,
+    V extends MultipleAttributeType
+  >(key: K, value: V) {
+    this._query.filters.attributeFilters.push({
+      key: key,
+      type: "$notIn",
+      value: value,
+      negate: false,
+    });
+
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: [...Config["filters"], TransformNestedKey<K, { $notIn: V }>];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+        data: Config["data"];
+      }
+    >;
+  }
   //</editor-fold>
 
   //<editor-fold desc="Populate">

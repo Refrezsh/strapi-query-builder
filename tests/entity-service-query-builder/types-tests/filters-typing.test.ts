@@ -253,4 +253,19 @@ describe("Filter types", () => {
     expect(idFilter.nested.id.$in[1]).toBe(2);
     expect(idFilter.nested.id.$in[2]).toBe(3);
   });
+
+  it("should create single notIn", () => {
+    const eqFilter = new EQBuilder<TestModel>().notIn("id", [1, 2, 3]).build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { id: { $notIn: number[] } } = eqFilter.filters.$and[0];
+
+    expect(idFilter).toBeDefined();
+    expect(idFilter.id.$notIn[0]).toBe(1);
+    expect(idFilter.id.$notIn[1]).toBe(2);
+    expect(idFilter.id.$notIn[2]).toBe(3);
+  });
 });
