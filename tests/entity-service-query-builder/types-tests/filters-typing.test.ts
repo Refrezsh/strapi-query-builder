@@ -376,4 +376,38 @@ describe("Filter types", () => {
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.id.$not.$gte).toBe(1);
   });
+
+  it("should create single between", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .between("nested.id", [1, 2])
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { id: { $between: number[] } } } =
+      eqFilter.filters.$and[0];
+
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.id.$between[0]).toBe(1);
+    expect(idFilter.nested.id.$between[1]).toBe(2);
+  });
+
+  it("should create single not between", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .notBetween("nested.id", [1, 2])
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { id: { $not: { $between: number[] } } } } =
+      eqFilter.filters.$and[0];
+
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.id.$not.$between[0]).toBe(1);
+    expect(idFilter.nested.id.$not.$between[1]).toBe(2);
+  });
 });

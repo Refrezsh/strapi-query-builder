@@ -537,6 +537,40 @@ export default class EQBuilder<
   }
 
   /**
+   * @description Attribute is between the 2 input values
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().between("attribute", ["value1", "value2"]);
+   * // { filters: { $and: [{ attribute: { $between: ["value1", "value2"] }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {MultipleAttributeType} value Filter by tuple
+   */
+  public between<
+    K extends FilterOperatorKey<Model>,
+    V extends MultipleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$between", value);
+  }
+
+  /**
+   * @description Attribute is not between the 2 input values
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
+   * // { filters: { $and: [{ attribute: { $not: { $between: ["value1", "value2"] }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {MultipleAttributeType} value Filter by tuple
+   */
+  public notBetween<
+    K extends FilterOperatorKey<Model>,
+    V extends MultipleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$between", value);
+  }
+
+  /**
    * @description Attribute is less than the input value
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
