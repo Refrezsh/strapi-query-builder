@@ -522,4 +522,30 @@ describe("Filter types", () => {
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.$not.$endsWith).toBe("1");
   });
+
+  it("should create single null", () => {
+    const eqFilter = new EQBuilder<TestModel>().null("nested", true).build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $null: true } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$null).toBe(true);
+  });
+
+  it("should create single not null", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .notNull("nested", false)
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $notNull: false } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$notNull).toBe(false);
+  });
 });

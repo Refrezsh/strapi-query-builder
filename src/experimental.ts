@@ -843,6 +843,40 @@ export default class EQBuilder<
   }
 
   /**
+   * @description Attribute is null
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().null("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $null: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {boolean} value True/false
+   */
+  public null<K extends FilterOperatorKey<Model>, V extends boolean>(
+    attribute: K,
+    value: V
+  ) {
+    return this.filter(attribute, "$null", value);
+  }
+
+  /**
+   * @description Attribute is not null
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notNull("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $notNull: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {boolean} value True/false
+   */
+  public notNull<K extends FilterOperatorKey<Model>, V extends boolean>(
+    attribute: K,
+    value: V
+  ) {
+    return this.filter(attribute, "$notNull", value);
+  }
+
+  /**
    * @description Generalized filter operator
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
