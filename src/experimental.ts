@@ -45,6 +45,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -72,6 +73,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -102,6 +104,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -130,6 +133,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -161,6 +165,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -192,6 +197,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -220,6 +226,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -246,6 +253,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -272,6 +280,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -326,6 +335,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -385,6 +395,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -423,6 +434,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -464,6 +476,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -502,6 +515,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -543,6 +557,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -581,6 +596,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -619,6 +635,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -659,6 +676,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -687,6 +705,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -720,6 +739,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -753,6 +773,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -816,6 +837,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -906,6 +928,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -949,6 +972,7 @@ export default class EQBuilder<
         paginationType: "page";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -983,6 +1007,38 @@ export default class EQBuilder<
         paginationType: "limit";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
+      }
+    >;
+  }
+  //</editor-fold>
+
+  //<editor-fold desc="Data">
+  /**
+   * @description Set query data
+   * @param data Data object
+   * @example
+   * new EQBuilder<TestModel, TestModel>().data({ id: 1 })
+   * // { data: { id: 1 } }
+   */
+  public data(data: Data) {
+    this._query.data = data;
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: Config["pagination"];
+        paginationType: Config["paginationType"];
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+        data: Data;
       }
     >;
   }
@@ -1013,6 +1069,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1044,6 +1101,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1097,6 +1155,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1141,6 +1200,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1173,6 +1233,7 @@ export default class EQBuilder<
         paginationType: DeepConfig["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1212,6 +1273,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1241,6 +1303,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: Config["publicationState"];
         locale: L;
+        data: Config["data"];
       }
     >;
   }
@@ -1268,6 +1331,7 @@ export default class EQBuilder<
         paginationType: Config["paginationType"];
         publicationState: P;
         locale: Config["locale"];
+        data: Config["data"];
       }
     >;
   }
@@ -1317,6 +1381,11 @@ export default class EQBuilder<
         builtQuery.start = pagination.page;
         builtQuery.limit = pagination.pageSize;
       }
+    }
+
+    const data = rawQuery.data;
+    if (_isDefined(data)) {
+      builtQuery.data = data;
     }
 
     const publicationState = rawQuery.publicationState;
@@ -1586,6 +1655,7 @@ type InternalBuilderConfig = {
   paginationType: "page" | "limit";
   publicationState: PublicationStates;
   locale: string;
+  data: unknown;
 };
 
 type InitialBuildConfig = {
@@ -1600,6 +1670,7 @@ type InitialBuildConfig = {
   paginationType: never;
   publicationState: never;
   locale: never;
+  data: never;
 };
 
 interface QueryRawInfo<Model extends object, Data extends object> {
@@ -1610,6 +1681,7 @@ interface QueryRawInfo<Model extends object, Data extends object> {
   pagination?: StrapiPagination;
   locale?: string;
   publicationState?: PublicationStates;
+  data?: Data;
 }
 // </editor-fold>
 
@@ -1794,6 +1866,7 @@ type BuildOutput<Config extends InternalBuilderConfig> = {
     ? Config["publicationState"]
     : never;
   locale: Config["locale"] extends string ? Config["locale"] : never;
+  data: Config["data"];
 } extends infer Result
   ? {
       [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
