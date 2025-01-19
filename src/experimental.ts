@@ -741,7 +741,7 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Attribute is greater than or equal to the input value.
+   * @description Attribute is greater than or equal to the input value
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
@@ -758,7 +758,7 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Attribute is not greater than or equal to the input value.
+   * @description Attribute is not greater than or equal to the input value
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
@@ -772,6 +772,74 @@ export default class EQBuilder<
     V extends SingleAttributeType
   >(attribute: K, value: V) {
     return this.filterNot(attribute, "$gte", value);
+  }
+
+  /**
+   * @description Attribute starts with input value
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().startsWith("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $startsWith: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public startsWith<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$startsWith", value);
+  }
+
+  /**
+   * @description Attribute not starts with input value
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notStartsWith("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $not: { $startsWith: "value" }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notStartsWith<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$startsWith", value);
+  }
+
+  /**
+   * @description Attribute ends with input value
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().endsWith("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $endsWith: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public endsWith<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$endsWith", value);
+  }
+
+  /**
+   * @description Attribute not ends with input value
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new EQBuilder<Model>().notEndsWith("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $not: { $endsWith: "value" }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notEndsWith<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$endsWith", value);
   }
 
   /**

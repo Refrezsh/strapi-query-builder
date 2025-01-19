@@ -466,4 +466,60 @@ describe("Filter types", () => {
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.$notContainsi).toBe("1");
   });
+
+  it("should create single startsWith", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .startsWith("nested", "1")
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $startsWith: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$startsWith).toBe("1");
+  });
+
+  it("should create single not startsWith", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .notStartsWith("nested", "1")
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $not: { $startsWith: "1" } } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$not.$startsWith).toBe("1");
+  });
+
+  it("should create single endsWith", () => {
+    const eqFilter = new EQBuilder<TestModel>().endsWith("nested", "1").build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $endsWith: "1" } } = eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$endsWith).toBe("1");
+  });
+
+  it("should create single not endsWith", () => {
+    const eqFilter = new EQBuilder<TestModel>()
+      .notEndsWith("nested", "1")
+      .build();
+
+    const filters = eqFilter.filters.$and;
+    expect(filters).toBeDefined();
+    expect(filters.length).toBe(1);
+
+    const idFilter: { nested: { $not: { $endsWith: "1" } } } =
+      eqFilter.filters.$and[0];
+    expect(idFilter).toBeDefined();
+    expect(idFilter.nested.$not.$endsWith).toBe("1");
+  });
 });
