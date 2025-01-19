@@ -20,7 +20,9 @@ export default class EQBuilder<
   /**
    * @description Select specific fields
    * @description Same keys will be merged
-   * @example new EQBuilder<Model>().fields(["name", "type"]); // { fields: ["name", "type"] }
+   * @example
+   * new EQBuilder<Model>().fields(["name", "type"]);
+   * // { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
   public fields<
@@ -53,7 +55,9 @@ export default class EQBuilder<
   /**
    * @description Select specific field
    * @description Same keys will be merged
-   * @example new EQBuilder<Model>().field("key"); // { fields: ["key"] }
+   * @example
+   * new EQBuilder<Model>().field("key");
+   * // { fields: ["key"] }
    * @param {StrapiSingleFieldInput} field Single field
    */
   public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
@@ -217,7 +221,9 @@ export default class EQBuilder<
   /**
    * @description Change root logical to "$or"
    * @description Default - "$and"
-   * @example new EQBuilder<Model>().or(); // { filters: { $or: [...] }}
+   * @example
+   * new EQBuilder<Model>().or();
+   * // { filters: { $or: [...] }}
    */
   public or() {
     this._query.filters.rootLogical = "$or";
@@ -244,7 +250,9 @@ export default class EQBuilder<
   /**
    * @description Change root logical to "$and"
    * @description Default - "$and"
-   * @example new EQBuilder<Model>().and(); // { filters: { $and: [...] }}
+   * @example
+   * new EQBuilder<Model>().and();
+   * // { filters: { $and: [...] }}
    */
   public and() {
     this._query.filters.rootLogical = "$and";
@@ -271,7 +279,9 @@ export default class EQBuilder<
   /**
    * @description Add "$not" before root logical
    * @description Default - false
-   * @example new EQBuilder<Model>().not(); // { filters: { $not: { $and: [...] }}}
+   * @example
+   * new EQBuilder<Model>().not();
+   * // { filters: { $not: { $and: [...] }}}
    */
   public not() {
     this._query.filters.negate = true;
@@ -362,7 +372,7 @@ export default class EQBuilder<
    * //        $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
    * //      }
    * // }
-   * @param {FilterOperatorKey} relationKey Key of relation model
+   * @param {FilterOperatorKey} attribute Attribute
    * @param {BuilderCallback} builderFactory Fabric function that returns builder with filters for relation model
    */
   public filterRelation<
@@ -370,12 +380,12 @@ export default class EQBuilder<
     K extends FilterOperatorKey<Model>,
     RelationConfig extends InternalBuilderConfig
   >(
-    relationKey: K,
+    attribute: K,
     builderFactory: BuilderCallback<RelationModel, {}, RelationConfig>
   ) {
     const relationBuilder = builderFactory();
     this._query.filters.attributeFilters.push({
-      key: relationKey,
+      key: attribute,
       nested:
         relationBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
@@ -980,7 +990,9 @@ export default class EQBuilder<
   /**
    * @description Populate all relations of model
    * @description If any other populate presented, it will be ignored
-   * @example new EQBuilder<Model>().populateAll(); // { populate: "*" }
+   * @example
+   * new EQBuilder<Model>().populateAll();
+   * // { populate: "*" }
    */
   public populateAll() {
     this._addToPopulate({ key: "*" });
@@ -1005,13 +1017,15 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Populate all model by key
+   * @description Populate all model by attribute
    * @description Same keys will be overriding by last operator
-   * @param {StrapiInputPopulateKey} key Populate key
-   * @example new EQBuilder<Model>().populate("relation"); // { populate: { relation: true } }
+   * @param {StrapiInputPopulateKey} attribute Attribute
+   * @example
+   * new EQBuilder<Model>().populate("relation");
+   * // { populate: { relation: true } }
    */
-  public populate<K extends StrapiInputPopulateKey<Model>>(key: K) {
-    this._addToPopulate({ key: key });
+  public populate<K extends StrapiInputPopulateKey<Model>>(attribute: K) {
+    this._addToPopulate({ key: attribute });
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1039,13 +1053,15 @@ export default class EQBuilder<
   }
 
   /**
-   * @description Populate all models  by key list
+   * @description Populate all models by attributes list
    * @description Same keys will be overriding by last operator
-   * @param {StrapiInputPopulateKey[]} keys Populate key list
-   * @example new EQBuilder<Model>().populates(["relation1", "relation2"]); // { populate: { relation1: true, relation2: true } }
+   * @param {StrapiInputPopulateKey[]} attribute Attributes list
+   * @example
+   * new EQBuilder<Model>().populates(["relation1", "relation2"]);
+   * // { populate: { relation1: true, relation2: true } }
    */
-  public populates<K extends StrapiInputPopulateKey<Model>[]>(keys: K) {
-    keys.forEach((k) => this._addToPopulate({ key: k }));
+  public populates<K extends StrapiInputPopulateKey<Model>[]>(attribute: K) {
+    attribute.forEach((k) => this._addToPopulate({ key: k }));
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1075,7 +1091,7 @@ export default class EQBuilder<
   /**
    * @description Populate relation model, with specific deep config
    * @description Same keys will be overwritten by last operator
-   * @param {StrapiInputPopulateKey} key Populate key
+   * @param {StrapiInputPopulateKey} attribute Attribute
    * @param {BuilderCallback} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Relation Model
    * @example
    * new EQBuilder<TestModel>()
@@ -1094,13 +1110,13 @@ export default class EQBuilder<
     K extends StrapiInputPopulateKey<Model>,
     RelationConfig extends InternalBuilderConfig
   >(
-    key: K,
+    attribute: K,
     builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
 
     const populate: StrapiPopulate<Model, PopulateModel> = {
-      key: key,
+      key: attribute,
       nestedQuery: {
         fields: populateBuilder.getRawFields(),
         sort: populateBuilder.getRawSort(),
@@ -1140,7 +1156,7 @@ export default class EQBuilder<
    * @description Populate relation with dynamic zone.
    * @description Same relation model keys will be overwritten
    * @description Same dynamic zone component keys will be overwritten
-   * @param {StrapiInputPopulateKey} key Relation model key
+   * @param {StrapiInputPopulateKey} attribute Attribute
    * @param {string} componentKey Dynamic zone component key
    * @param {builderFactory} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Dynamic zone component
    * @example
@@ -1168,7 +1184,7 @@ export default class EQBuilder<
     C extends string,
     RelationConfig extends InternalBuilderConfig
   >(
-    key: K,
+    attribute: K,
     componentKey: C,
     builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
@@ -1182,13 +1198,13 @@ export default class EQBuilder<
       },
     };
 
-    const currentQuery = this._query.population.get(key);
+    const currentQuery = this._query.population.get(attribute);
     if (!_isDefined(currentQuery)) {
-      this._addToPopulate({ key: key, dynamicQuery: newQuery });
+      this._addToPopulate({ key: attribute, dynamicQuery: newQuery });
     } else {
       const currentDynamic = currentQuery.dynamicQuery || {};
       this._addToPopulate({
-        key: key,
+        key: attribute,
         dynamicQuery: { ...currentDynamic, ...newQuery },
       });
     }
@@ -1240,7 +1256,8 @@ export default class EQBuilder<
    * @param {number} page Current page
    * @param {number} pageSize Page size
    * @example
-   * new EQBuilder<TestModel>().page(1, 26) // { page: 1; pageSize: 26 }
+   * new EQBuilder<TestModel>().page(1, 26)
+   * // { page: 1; pageSize: 26 }
    */
   public page<Page extends number, PageSize extends number>(
     page: Page,
@@ -1275,7 +1292,9 @@ export default class EQBuilder<
    * @description Pagination by offset, when defining the start and limit parameters
    * @param {number} start
    * @param {number} limit
-   * @example new EQBuilder<TestModel>().pageLimit(0, 26) // { start: 0; limit: 26 }
+   * @example
+   * new EQBuilder<TestModel>().pageLimit(0, 26)
+   * // { start: 0; limit: 26 }
    */
   public pageLimit<Start extends number, limit extends number>(
     start: Start,
@@ -1575,10 +1594,12 @@ export default class EQBuilder<
 
   //<editor-fold desc="Service specific">
   /**
-   * @description Set locale filter
+   * @description Set locale code
    * @description Entity Service Specific
-   * @param {string} code - Locale code
-   * @example new EQBuilder<TestModel>().locale("ua") // { locale: "ua" }
+   * @param {string} code Locale code
+   * @example
+   * new EQBuilder<TestModel>().locale("ua")
+   * // { locale: "ua" }
    */
   public locale<L extends string>(code: L) {
     this._query.locale = code;
@@ -1606,7 +1627,9 @@ export default class EQBuilder<
    * @description Set publication state for draft & publish
    * @description Entity Service Specific
    * @param {PublicationStates} state Publication state
-   * @example new EQBuilder<TestModel>().publicationState("live") // { publicationState: "live" }
+   * @example
+   * new EQBuilder<TestModel>().publicationState("live")
+   * // { publicationState: "live" }
    */
   public publicationState<P extends PublicationStates>(state: P) {
     this._query.publicationState = state;
@@ -1634,7 +1657,7 @@ export default class EQBuilder<
   //<editor-fold desc="Build process">
   /**
    * @description Build the current query into the final Strapi Entity Service format
-   * @return Dynamically generated query type
+   * @return Query with dynamically generated query type
    */
   public build() {
     const builtQuery = EQBuilder._buildQuery(this._query);
