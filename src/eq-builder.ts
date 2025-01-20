@@ -9,27 +9,27 @@ import {
   ParseList,
   PopulateKey,
   PublicationStates,
+  QueryRawInfo,
   SingleAttributeType,
   SortKey,
   StrapiAttributesFilter,
   StrapiFields,
   StrapiInputPopulateKey,
-  StrapiUnionPagination,
   StrapiPopulate,
   StrapiPopulations,
   StrapiRawFilters,
   StrapiSingleFieldInput,
   StrapiSortOptions,
   StrapiSorts,
+  StrapiUnionPagination,
   TransformNestedKey,
   TransformNestedKeys,
-  QueryRawInfo,
 } from "./query-types-util";
 
 export class EQBuilder<
   Model extends object,
   Data extends object = {},
-  Config extends InternalBuilderConfig = InitialBuildConfig
+  Config extends EntityBuilderConfig = InitialBuildConfig
 > {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
@@ -351,7 +351,7 @@ export class EQBuilder<
    * // Reads like model.options === "value" && (model.name === "value1" || model.name === "value2")
    * @param {EQBuilderCallback} builderFactory Fabric function that returns builder with filters for current model
    */
-  public filterDeep<DeepConfig extends InternalBuilderConfig>(
+  public filterDeep<DeepConfig extends EntityBuilderConfig>(
     builderFactory: EQBuilderCallback<Model, {}, DeepConfig>
   ) {
     const deepBuilder = builderFactory();
@@ -404,7 +404,7 @@ export class EQBuilder<
   public filterRelation<
     RelationModel extends object,
     K extends FilterOperatorKey<Model>,
-    RelationConfig extends InternalBuilderConfig
+    RelationConfig extends EntityBuilderConfig
   >(
     attribute: K,
     builderFactory: EQBuilderCallback<RelationModel, {}, RelationConfig>
@@ -1139,7 +1139,7 @@ export class EQBuilder<
   public populateRelation<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
-    RelationConfig extends InternalBuilderConfig
+    RelationConfig extends EntityBuilderConfig
   >(
     attribute: K,
     builderFactory: EQBuilderCallback<PopulateModel, {}, RelationConfig>
@@ -1213,7 +1213,7 @@ export class EQBuilder<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
     C extends string,
-    RelationConfig extends InternalBuilderConfig
+    RelationConfig extends EntityBuilderConfig
   >(
     attribute: K,
     componentKey: C,
@@ -1396,7 +1396,7 @@ export class EQBuilder<
    * @description Same keys will be merged
    * @param {EQBuilder} builder Embedded builder
    */
-  public joinFields<DeepConfig extends InternalBuilderConfig>(
+  public joinFields<DeepConfig extends EntityBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
     builder.getRawFields().forEach((f) => this._query.fields.add(f));
@@ -1425,7 +1425,7 @@ export class EQBuilder<
    * @description Same keys will be merged
    * @param {EQBuilder} builder Embedded builder
    */
-  public joinSort<DeepConfig extends InternalBuilderConfig>(
+  public joinSort<DeepConfig extends EntityBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
     builder
@@ -1459,7 +1459,7 @@ export class EQBuilder<
    * @param {boolean} joinRootNegate Override root negate ?
    */
   public joinFilters<
-    DeepConfig extends InternalBuilderConfig,
+    DeepConfig extends EntityBuilderConfig,
     JoinRootLogical extends boolean = false,
     JoinRootNegate extends boolean = false
   >(
@@ -1511,7 +1511,7 @@ export class EQBuilder<
    * @description Same keys will be overwritten
    * @param {EQBuilder} builder Embedded builder
    */
-  public joinPopulate<DeepConfig extends InternalBuilderConfig>(
+  public joinPopulate<DeepConfig extends EntityBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
     builder
@@ -1555,7 +1555,7 @@ export class EQBuilder<
    * @description Attach pagination from other query builder
    * @param {EQBuilder} builder Embedded builder
    */
-  public joinPagination<DeepConfig extends InternalBuilderConfig>(
+  public joinPagination<DeepConfig extends EntityBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
     const externalPagination = builder.getRawPagination();
@@ -1588,7 +1588,7 @@ export class EQBuilder<
    * @description Join query from other query builder to current query builder
    * @param {EQBuilder} builder Embedded builder
    */
-  public joinQuery<DeepConfig extends InternalBuilderConfig>(
+  public joinQuery<DeepConfig extends EntityBuilderConfig>(
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
     this.joinPopulate(builder);
@@ -1870,7 +1870,7 @@ export class EQBuilder<
 }
 
 // <editor-fold desc="Specific query types utils">
-type InternalBuilderConfig = {
+type EntityBuilderConfig = {
   fields: unknown[];
   sort: unknown[];
   filters: unknown[];
@@ -1903,7 +1903,7 @@ type InitialBuildConfig = {
 type EQBuilderCallback<
   Model extends object,
   Data extends object,
-  Config extends InternalBuilderConfig
+  Config extends EntityBuilderConfig
 > = () => EQBuilder<Model, Data, Config>;
 
 type ParseEQBuilderPopulates<
@@ -1911,7 +1911,7 @@ type ParseEQBuilderPopulates<
   PopulateAll extends boolean
 > = keyof P extends never ? never : PopulateAll extends true ? "*" : P;
 
-type BuildEQCallback<Config extends InternalBuilderConfig> = {
+type BuildEQCallback<Config extends EntityBuilderConfig> = {
   fields: ParseList<Config["fields"]>;
   sort: ParseList<Config["sort"]>;
   filters: ParseFilters<
@@ -1926,7 +1926,7 @@ type BuildEQCallback<Config extends InternalBuilderConfig> = {
     }
   : never;
 
-type BuildEQOutput<Config extends InternalBuilderConfig> = {
+type BuildEQOutput<Config extends EntityBuilderConfig> = {
   fields: ParseList<Config["fields"]>;
   sort: ParseList<Config["sort"]>;
   filters: ParseFilters<

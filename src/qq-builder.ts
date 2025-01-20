@@ -8,28 +8,27 @@ import {
   ParseFilters,
   ParseList,
   PopulateKey,
-  PublicationStates,
+  QueryRawInfo,
   SingleAttributeType,
   SortKey,
   StrapiAttributesFilter,
   StrapiFields,
   StrapiInputPopulateKey,
-  StrapiUnionPagination,
   StrapiPopulate,
   StrapiPopulations,
   StrapiRawFilters,
   StrapiSingleFieldInput,
   StrapiSortOptions,
   StrapiSorts,
+  StrapiUnionPagination,
   TransformNestedKey,
   TransformNestedKeys,
-  QueryRawInfo,
 } from "./query-types-util";
 
 export class QQBuilder<
   Model extends object,
   Data extends object = {},
-  Config extends InternalBuilderConfig = InitialBuildConfig
+  Config extends QueryEngineBuilderConfig = InitialBuildConfig
 > {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
@@ -71,8 +70,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -101,8 +98,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -200,8 +195,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -235,8 +228,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -266,8 +257,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -295,8 +284,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -324,8 +311,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -351,7 +336,7 @@ export class QQBuilder<
    * // Reads like model.options === "value" && (model.name === "value1" || model.name === "value2")
    * @param {QQBuilderCallback} builderFactory Fabric function that returns builder with filters for current model
    */
-  public filterDeep<DeepConfig extends InternalBuilderConfig>(
+  public filterDeep<DeepConfig extends QueryEngineBuilderConfig>(
     builderFactory: QQBuilderCallback<Model, {}, DeepConfig>
   ) {
     const deepBuilder = builderFactory();
@@ -379,8 +364,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -404,7 +387,7 @@ export class QQBuilder<
   public filterRelation<
     RelationModel extends object,
     K extends FilterOperatorKey<Model>,
-    RelationConfig extends InternalBuilderConfig
+    RelationConfig extends QueryEngineBuilderConfig
   >(
     attribute: K,
     builderFactory: QQBuilderCallback<RelationModel, {}, RelationConfig>
@@ -439,8 +422,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -958,8 +939,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1004,8 +983,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1035,8 +1012,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1071,8 +1046,6 @@ export class QQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1112,8 +1085,6 @@ export class QQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1139,7 +1110,7 @@ export class QQBuilder<
   public populateRelation<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
-    RelationConfig extends InternalBuilderConfig
+    RelationConfig extends QueryEngineBuilderConfig
   >(
     attribute: K,
     builderFactory: QQBuilderCallback<PopulateModel, {}, RelationConfig>
@@ -1176,8 +1147,6 @@ export class QQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1213,7 +1182,7 @@ export class QQBuilder<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
     C extends string,
-    RelationConfig extends InternalBuilderConfig
+    RelationConfig extends QueryEngineBuilderConfig
   >(
     attribute: K,
     componentKey: C,
@@ -1269,8 +1238,6 @@ export class QQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1284,43 +1251,6 @@ export class QQBuilder<
   //</editor-fold>
 
   //<editor-fold desc="Pagination">
-  /**
-   * @description Pagination by page, when defining the page and pageSize parameters
-   * @param {number} page Current page
-   * @param {number} pageSize Page size
-   * @example
-   * new EQBuilder<TestModel>().page(1, 26)
-   * // { page: 1; pageSize: 26 }
-   */
-  public page<Page extends number, PageSize extends number>(
-    page: Page,
-    pageSize: PageSize
-  ) {
-    this._query.pagination = {
-      page: page,
-      pageSize: pageSize,
-      paginationType: "page",
-    };
-    return this as unknown as QQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: { page: Page; pageSize: PageSize };
-        paginationType: "page";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
-      }
-    >;
-  }
-
   /**
    * @description Pagination by offset, when defining the start and limit parameters
    * @param {number} start
@@ -1351,8 +1281,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: { page: Start; pageSize: limit };
         paginationType: "limit";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1382,8 +1310,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: D;
       }
     >;
@@ -1396,7 +1322,7 @@ export class QQBuilder<
    * @description Same keys will be merged
    * @param {QQBuilder} builder Embedded builder
    */
-  public joinFields<DeepConfig extends InternalBuilderConfig>(
+  public joinFields<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     builder.getRawFields().forEach((f) => this._query.fields.add(f));
@@ -1413,8 +1339,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1425,7 +1349,7 @@ export class QQBuilder<
    * @description Same keys will be merged
    * @param {QQBuilder} builder Embedded builder
    */
-  public joinSort<DeepConfig extends InternalBuilderConfig>(
+  public joinSort<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     builder
@@ -1445,8 +1369,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1459,7 +1381,7 @@ export class QQBuilder<
    * @param {boolean} joinRootNegate Override root negate ?
    */
   public joinFilters<
-    DeepConfig extends InternalBuilderConfig,
+    DeepConfig extends QueryEngineBuilderConfig,
     JoinRootLogical extends boolean = false,
     JoinRootNegate extends boolean = false
   >(
@@ -1499,8 +1421,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1511,7 +1431,7 @@ export class QQBuilder<
    * @description Same keys will be overwritten
    * @param {QQBuilder} builder Embedded builder
    */
-  public joinPopulate<DeepConfig extends InternalBuilderConfig>(
+  public joinPopulate<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     builder
@@ -1544,8 +1464,6 @@ export class QQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1555,7 +1473,7 @@ export class QQBuilder<
    * @description Attach pagination from other query builder
    * @param {QQBuilder} builder Embedded builder
    */
-  public joinPagination<DeepConfig extends InternalBuilderConfig>(
+  public joinPagination<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     const externalPagination = builder.getRawPagination();
@@ -1577,8 +1495,6 @@ export class QQBuilder<
         populates: Config["populates"];
         pagination: DeepConfig["pagination"];
         paginationType: DeepConfig["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1588,7 +1504,7 @@ export class QQBuilder<
    * @description Join query from other query builder to current query builder
    * @param {QQBuilder} builder Embedded builder
    */
-  public joinQuery<DeepConfig extends InternalBuilderConfig>(
+  public joinQuery<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     this.joinPopulate(builder);
@@ -1617,70 +1533,6 @@ export class QQBuilder<
         };
         pagination: Config["pagination"];
         paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
-      }
-    >;
-  }
-  //</editor-fold>
-
-  //<editor-fold desc="Service specific">
-  /**
-   * @description Set locale code
-   * @description Entity Service Specific
-   * @param {string} code Locale code
-   * @example
-   * new EQBuilder<TestModel>().locale("ua")
-   * // { locale: "ua" }
-   */
-  public locale<L extends string>(code: L) {
-    this._query.locale = code;
-    return this as unknown as QQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: L;
-        data: Config["data"];
-      }
-    >;
-  }
-
-  /**
-   * @description Set publication state for draft & publish
-   * @description Entity Service Specific
-   * @param {PublicationStates} state Publication state
-   * @example
-   * new EQBuilder<TestModel>().publicationState("live")
-   * // { publicationState: "live" }
-   */
-  public publicationState<P extends PublicationStates>(state: P) {
-    this._query.publicationState = state;
-    return this as unknown as QQBuilder<
-      Model,
-      Data,
-      {
-        fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
-        populateAll: Config["populateAll"];
-        populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: P;
-        locale: Config["locale"];
         data: Config["data"];
       }
     >;
@@ -1705,17 +1557,17 @@ export class QQBuilder<
     const parsedFields =
       rawQuery.fields.size > 0 ? [...rawQuery.fields] : undefined;
     if (_isDefined(parsedFields)) {
-      builtQuery.fields = parsedFields;
+      builtQuery.select = parsedFields;
     }
 
     const parsedSort = QQBuilder._parseSort(rawQuery.sort);
     if (parsedSort.length > 0) {
-      builtQuery.sort = parsedSort;
+      builtQuery.orderBy = parsedSort;
     }
 
     const parsedFilters = QQBuilder._parseFilters(rawQuery.filters);
     if (_isDefined(parsedFilters)) {
-      builtQuery.filters = parsedFilters;
+      builtQuery.where = parsedFilters;
     }
 
     const parsedPopulation = QQBuilder._parsePopulate(rawQuery.population);
@@ -1725,11 +1577,8 @@ export class QQBuilder<
 
     const pagination = rawQuery.pagination;
     if (_isDefined(pagination)) {
-      if (pagination.paginationType === "page") {
-        builtQuery.page = pagination.page;
-        builtQuery.pageSize = pagination.pageSize;
-      } else {
-        builtQuery.start = pagination.page;
+      if (pagination.paginationType === "limit") {
+        builtQuery.offset = pagination.page;
         builtQuery.limit = pagination.pageSize;
       }
     }
@@ -1737,16 +1586,6 @@ export class QQBuilder<
     const data = rawQuery.data;
     if (_isDefined(data)) {
       builtQuery.data = data;
-    }
-
-    const publicationState = rawQuery.publicationState;
-    if (_isDefined(publicationState)) {
-      builtQuery.publicationState = publicationState;
-    }
-
-    const locale = rawQuery.locale;
-    if (_isDefined(locale)) {
-      builtQuery.locale = locale;
     }
 
     return builtQuery;
@@ -1870,7 +1709,7 @@ export class QQBuilder<
 }
 
 // <editor-fold desc="Specific query type utils">
-type InternalBuilderConfig = {
+type QueryEngineBuilderConfig = {
   fields: unknown[];
   sort: unknown[];
   filters: unknown[];
@@ -1879,9 +1718,7 @@ type InternalBuilderConfig = {
   populateAll: boolean;
   populates: Record<string, any>;
   pagination: { page: number; pageSize: number };
-  paginationType: "page" | "limit";
-  publicationState: PublicationStates;
-  locale: string;
+  paginationType: "limit";
   data: unknown;
 };
 
@@ -1895,26 +1732,24 @@ type InitialBuildConfig = {
   populates: {};
   pagination: never;
   paginationType: never;
-  publicationState: never;
-  locale: never;
   data: never;
 };
 
 type QQBuilderCallback<
   Model extends object,
   Data extends object,
-  Config extends InternalBuilderConfig
+  Config extends QueryEngineBuilderConfig
 > = () => QQBuilder<Model, Data, Config>;
 
 type ParseQQBuilderPopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
-> = keyof P extends never ? never : PopulateAll extends true ? "*" : P;
+> = keyof P extends never ? never : PopulateAll extends true ? true : P;
 
-type BuildQQCallback<Config extends InternalBuilderConfig> = {
-  fields: ParseList<Config["fields"]>;
-  sort: ParseList<Config["sort"]>;
-  filters: ParseFilters<
+type BuildQQCallback<Config extends QueryEngineBuilderConfig> = {
+  select: ParseList<Config["fields"]>;
+  orderBy: ParseList<Config["sort"]>;
+  where: ParseFilters<
     Config["filters"],
     Config["rootLogical"],
     Config["negate"]
@@ -1926,31 +1761,21 @@ type BuildQQCallback<Config extends InternalBuilderConfig> = {
     }
   : never;
 
-type BuildQQOutput<Config extends InternalBuilderConfig> = {
-  fields: ParseList<Config["fields"]>;
-  sort: ParseList<Config["sort"]>;
-  filters: ParseFilters<
+type BuildQQOutput<Config extends QueryEngineBuilderConfig> = {
+  select: ParseList<Config["fields"]>;
+  orderBy: ParseList<Config["sort"]>;
+  where: ParseFilters<
     Config["filters"],
     Config["rootLogical"],
     Config["negate"]
   >;
   populate: ParseQQBuilderPopulates<Config["populates"], Config["populateAll"]>;
-  page: Config["paginationType"] extends "page"
-    ? Config["pagination"]["page"]
-    : never;
-  pageSize: Config["paginationType"] extends "page"
-    ? Config["pagination"]["pageSize"]
-    : never;
-  start: Config["paginationType"] extends "limit"
+  offset: Config["paginationType"] extends "limit"
     ? Config["pagination"]["page"]
     : never;
   limit: Config["paginationType"] extends "limit"
     ? Config["pagination"]["pageSize"]
     : never;
-  publicationState: Config["publicationState"] extends PublicationStates
-    ? Config["publicationState"]
-    : never;
-  locale: Config["locale"] extends string ? Config["locale"] : never;
   data: Config["data"];
 } extends infer Result
   ? {
