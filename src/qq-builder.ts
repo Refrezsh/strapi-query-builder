@@ -1663,16 +1663,17 @@ export class QQBuilder<
     const attributeFilters = rawFilters?.attributeFilters || [];
     const rootLogical = rawFilters?.rootLogical || "$and";
     const negateRoot = rawFilters?.negate || false;
+    const filtersLength = attributeFilters.length;
 
-    if (attributeFilters.length === 0) return undefined;
+    if (filtersLength === 0) return undefined;
 
     const parsedFilters: any[] = [];
-    attributeFilters.forEach((attributeQuery) => {
+    for (let i = 0; i < filtersLength; i++) {
+      const attributeQuery = attributeFilters[i];
       const parsedAttribute = QQBuilder._parseAttributeFilter(attributeQuery);
-      if (!_isDefined(parsedAttribute)) return;
+      if (!_isDefined(parsedAttribute)) continue;
       parsedFilters.push(parsedAttribute);
-    });
-
+    }
     if (parsedFilters.length === 0) return undefined;
 
     const filters = {
