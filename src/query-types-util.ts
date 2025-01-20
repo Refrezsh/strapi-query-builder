@@ -84,26 +84,26 @@ export interface StrapiRawFilters<Model extends object> {
 // </editor-fold>
 
 // <editor-fold desc="Population Types">
-type StrapiInputPopulateKey<Model extends object> = GetStrictOrWeak<
+export type StrapiInputPopulateKey<Model extends object> = GetStrictOrWeak<
   Model,
   GetRelations<Model>,
   GetRelations<Model> | string
 >;
 
-type PopulateKey<Model extends object> =
+export type PopulateKey<Model extends object> =
   | GetStrictOrWeak<Model, GetRelations<Model>, GetRelations<Model> | string>
   | "*";
 
-type MorphOnPopulate<PopulateModel extends object> = {
+export type MorphOnPopulate<PopulateModel extends object> = {
   [key: string]: DefaultPopulate<PopulateModel>;
 };
 
-type DefaultPopulate<PopulateModel extends object> = Omit<
+export type DefaultPopulate<PopulateModel extends object> = Omit<
   QueryRawInfo<PopulateModel, object>,
   "pagination"
 >;
 
-interface StrapiPopulate<
+export interface StrapiPopulate<
   ParentModel extends object,
   PopulateModel extends object
 > {
@@ -112,14 +112,14 @@ interface StrapiPopulate<
   dynamicQuery?: MorphOnPopulate<PopulateModel>;
 }
 
-type StrapiPopulations<
+export type StrapiPopulations<
   ParentModel extends object,
   PopulateModel extends object
 > = Map<PopulateKey<ParentModel>, StrapiPopulate<ParentModel, PopulateModel>>;
 // </editor-fold>
 
 // <editor-fold desc="Pagination Types">
-interface StrapiPagination {
+export interface StrapiUnionPagination {
   page: number;
   pageSize: number;
   paginationType: "page" | "limit";
@@ -127,47 +127,17 @@ interface StrapiPagination {
 // </editor-fold>
 
 // <editor-fold desc="Service specific types">
-type PublicationStates = "live" | "preview";
+export type PublicationStates = "live" | "preview";
 // </editor-fold>
 
 // <editor-fold desc="Query shapes">
-type InternalBuilderConfig = {
-  fields: unknown[];
-  sort: unknown[];
-  filters: unknown[];
-  rootLogical: "$and" | "$or";
-  negate: boolean;
-  populateAll: boolean;
-  populates: Record<string, any>;
-  pagination: { page: number; pageSize: number };
-  paginationType: "page" | "limit";
-  publicationState: PublicationStates;
-  locale: string;
-  data: unknown;
-};
-
-type InitialBuildConfig = {
-  fields: [];
-  sort: [];
-  filters: [];
-  rootLogical: "$and";
-  negate: false;
-  populateAll: false;
-  populates: {};
-  pagination: never;
-  paginationType: never;
-  publicationState: never;
-  locale: never;
-  data: never;
-};
-
-interface QueryRawInfo<Model extends object, Data extends object> {
+export interface QueryRawInfo<Model extends object, Data extends object> {
   sort: StrapiSorts<Model>;
   fields: StrapiFields<Model>;
   filters: StrapiRawFilters<Model>;
   population: StrapiPopulations<Model, any>;
   // Query specific
-  pagination?: StrapiPagination;
+  pagination?: StrapiUnionPagination;
   locale?: string;
   publicationState?: PublicationStates;
   data?: Data;

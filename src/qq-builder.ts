@@ -3,21 +3,18 @@ import {
   EntityFilterAttributes,
   FilterOperatorKey,
   GetAttributeType,
-  InitialBuildConfig,
-  InternalBuilderConfig,
   MultipleAttributeType,
   OnType,
   ParseFilters,
   ParseList,
   PopulateKey,
   PublicationStates,
-  QueryRawInfo,
   SingleAttributeType,
   SortKey,
   StrapiAttributesFilter,
   StrapiFields,
   StrapiInputPopulateKey,
-  StrapiPagination,
+  StrapiUnionPagination,
   StrapiPopulate,
   StrapiPopulations,
   StrapiRawFilters,
@@ -26,6 +23,7 @@ import {
   StrapiSorts,
   TransformNestedKey,
   TransformNestedKeys,
+  QueryRawInfo,
 } from "./query-types-util";
 
 export class QQBuilder<
@@ -1865,13 +1863,43 @@ export class QQBuilder<
   protected getRawPopulation(): StrapiPopulations<Model, any> {
     return this._query.population;
   }
-  protected getRawPagination(): StrapiPagination | undefined {
+  protected getRawPagination(): StrapiUnionPagination | undefined {
     return this._query.pagination;
   }
   //</editor-fold>
 }
 
-// <editor-fold desc="Output specific type utils">
+// <editor-fold desc="Specific query type utils">
+type InternalBuilderConfig = {
+  fields: unknown[];
+  sort: unknown[];
+  filters: unknown[];
+  rootLogical: "$and" | "$or";
+  negate: boolean;
+  populateAll: boolean;
+  populates: Record<string, any>;
+  pagination: { page: number; pageSize: number };
+  paginationType: "page" | "limit";
+  publicationState: PublicationStates;
+  locale: string;
+  data: unknown;
+};
+
+type InitialBuildConfig = {
+  fields: [];
+  sort: [];
+  filters: [];
+  rootLogical: "$and";
+  negate: false;
+  populateAll: false;
+  populates: {};
+  pagination: never;
+  paginationType: never;
+  publicationState: never;
+  locale: never;
+  data: never;
+};
+
 type QQBuilderCallback<
   Model extends object,
   Data extends object,
