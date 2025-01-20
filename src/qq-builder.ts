@@ -1590,14 +1590,8 @@ export class QQBuilder<
   }
 
   private static _parseSort<Md extends object>(sorts: StrapiSorts<Md>) {
-    const sortQuery: any[] = new Array(sorts.size);
-
-    let index = 0;
-    for (const { 0: key, 1: order } of sorts) {
-      sortQuery[index] = _set({}, key, order);
-      index++;
-    }
-
+    const sortQuery: any[] = [];
+    sorts.forEach((order, key) => sortQuery.push(_set({}, key, order)));
     return sortQuery;
   }
 
