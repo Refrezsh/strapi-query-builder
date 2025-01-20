@@ -57,7 +57,13 @@ export class QQBuilder<
     ]
   >(fields: F) {
     const currentFields = this._query.fields;
-    fields.forEach((f) => currentFields.add(f));
+    const fieldsLength = fields.length;
+
+    for (let i = 0; i < fieldsLength; i++) {
+      const field = fields[i];
+      currentFields.add(field);
+    }
+
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1330,7 +1336,12 @@ export class QQBuilder<
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     const currentFields = this._query.fields;
-    builder.getRawFields().forEach((f) => currentFields.add(f));
+    const newFields = builder.getRawFields().values();
+
+    for (const field of newFields) {
+      currentFields.add(field);
+    }
+
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1358,8 +1369,7 @@ export class QQBuilder<
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     const currentSorts = this._query.sort;
-    const joinSortsMap = builder.getRawSort();
-    const joinSortsValues = joinSortsMap.values();
+    const joinSortsValues = builder.getRawSort().values();
 
     for (let value of joinSortsValues) {
       currentSorts.set(value.key, value);
