@@ -1023,7 +1023,7 @@ export class EQBuilder<
    * // { populate: "*" }
    */
   public populateAll() {
-    this._addToPopulate({ key: "*" });
+    this._query.population.set("*", { key: "*" });
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1053,7 +1053,7 @@ export class EQBuilder<
    * // { populate: { relation: true } }
    */
   public populate<K extends StrapiInputPopulateKey<Model>>(attribute: K) {
-    this._addToPopulate({ key: attribute });
+    this._query.population.set(attribute, { key: attribute });
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1083,7 +1083,7 @@ export class EQBuilder<
   /**
    * @description Populate all models by attributes list
    * @description Same keys will be overriding by last operator
-   * @param {StrapiInputPopulateKey[]} attribute Attributes list
+   * @param {StrapiInputPopulateKey[]} attributes Attributes list
    * @example
    * new EQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
@@ -1093,8 +1093,9 @@ export class EQBuilder<
       StrapiInputPopulateKey<Model>,
       ...StrapiInputPopulateKey<Model>[]
     ]
-  >(attribute: K) {
-    attribute.forEach((k) => this._addToPopulate({ key: k }));
+  >(attributes: K) {
+    const populate = this._query.population;
+    attributes.forEach((k) => populate.set(k, { key: k }));
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1158,7 +1159,7 @@ export class EQBuilder<
       },
     };
 
-    this._addToPopulate(populate);
+    this._query.population.set(attribute, populate);
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1228,17 +1229,18 @@ export class EQBuilder<
       population: populateBuilder.getRawPopulation(),
       filters: populateBuilder.getRawFilters(),
     };
+    const populate = this._query.population;
 
-    const currentQuery = this._query.population.get(attribute);
+    const currentQuery = populate.get(attribute);
     if (!_isDefined(currentQuery)) {
-      this._addToPopulate({
+      populate.set(attribute, {
         key: attribute,
         dynamicQuery: { [componentKey]: newQuery },
       });
     } else {
       const currentDynamic = currentQuery.dynamicQuery || {};
       currentDynamic[componentKey] = newQuery;
-      this._addToPopulate({
+      populate.set(attribute, {
         key: attribute,
         dynamicQuery: currentDynamic,
       });
@@ -1276,12 +1278,6 @@ export class EQBuilder<
         data: Config["data"];
       }
     >;
-  }
-
-  private _addToPopulate<PopulateModel extends object>(
-    populate: StrapiPopulate<Model, PopulateModel>
-  ) {
-    this._query.population.set(populate.key, populate);
   }
   //</editor-fold>
 
