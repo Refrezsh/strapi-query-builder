@@ -1,1 +1,1 @@
-export { EQBuilder } from "./EQBuilder";
+export { EQBuilder } from "./eq-builder";
