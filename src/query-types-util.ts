@@ -21,7 +21,7 @@ export type SortKey<Model extends object> = GetStrictOrWeak<
 
 export type StrapiSorts<Model extends object> = Map<
   SortKey<Model>,
-  StrapiSortOptions
+  { key: SortKey<Model>; order: StrapiSortOptions }
 >;
 // </editor-fold>
 

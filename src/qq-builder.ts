@@ -182,7 +182,7 @@ export class QQBuilder<
     attribute: K,
     direction: D
   ) {
-    this._query.sort.set(attribute, direction);
+    this._query.sort.set(attribute, { key: attribute, order: direction });
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -216,7 +216,13 @@ export class QQBuilder<
     D extends StrapiSortOptions
   >(attributes: K, direction: D) {
     const currentSorts = this._query.sort;
-    attributes.forEach((key) => currentSorts.set(key, direction));
+
+    const attributesLength = attributes.length;
+    for (let i = 0; i < attributesLength; i++) {
+      const attribute = attributes[i];
+      currentSorts.set(attribute, { key: attribute, order: direction });
+    }
+
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1352,7 +1358,12 @@ export class QQBuilder<
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
     const currentSorts = this._query.sort;
-    builder.getRawSort().forEach((value, key) => currentSorts.set(key, value));
+    const joinSortsMap = builder.getRawSort();
+    const joinSortsValues = joinSortsMap.values();
+
+    for (let value of joinSortsValues) {
+      currentSorts.set(value.key, value);
+    }
 
     return this as unknown as QQBuilder<
       Model,
@@ -1591,7 +1602,10 @@ export class QQBuilder<
 
   private static _parseSort<Md extends object>(sorts: StrapiSorts<Md>) {
     const sortQuery: any[] = [];
-    sorts.forEach((order, key) => sortQuery.push(_set({}, key, order)));
+    const sortValues = sorts.values();
+    for (let sort of sortValues) {
+      sortQuery.push(_set({}, sort.key, sort.order));
+    }
     return sortQuery;
   }
 
