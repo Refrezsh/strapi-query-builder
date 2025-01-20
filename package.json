@@ -14,6 +14,9 @@
     "prepack": "npm run build",
     "test": "npm run build && jest",
     "perfomance": "node tests/performance-test.js",
+    "performance-trace-deopt": "node --prof --trace-deopt --logfile=performance-v8.log tests/performance-test.js",
+    "performance-trace-gc": "node --prof --trace-gc --logfile=performance-v8.log tests/performance-test.js",
+    "performance-trace-opt": "node --prof --trace-opt --logfile=performance-v8.log tests/performance-test.js",
     "coverage": "jest --coverage",
     "semantic-release": "semantic-release"
   },

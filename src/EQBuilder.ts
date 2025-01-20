@@ -1676,8 +1676,9 @@ export class EQBuilder<
   ) {
     const builtQuery: any = {};
 
-    const parsedFields = Array.from(rawQuery.fields);
-    if (parsedFields.length > 0) {
+    const parsedFields =
+      rawQuery.fields.size > 0 ? [...rawQuery.fields] : undefined;
+    if (_isDefined(parsedFields)) {
       builtQuery.fields = parsedFields;
     }
 
