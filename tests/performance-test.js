@@ -1,11 +1,11 @@
-const SQBuilder = require("../lib/cjs/index").default;
+const EQBuilder = require("../lib/cjs/index").EQBuilder;
 
 const times = 500;
 
 let query;
 const assigmentStarts = performance.now();
 for (let i = 0; i < times; i++) {
-  query = new SQBuilder();
+  query = new EQBuilder();
   query
     .fields([
       "GoodName",
@@ -21,64 +21,48 @@ for (let i = 0; i < times; i++) {
       "IsDeliverable",
     ])
     .or()
-    .filters("RetailPrice")
-    .between([3, 4])
-    .filters("RetailPriceWithDiscount")
-    .between([1, 2])
-    .filters("Slug", (b) => b.eq("slug"))
-    .filterDeep("Deep", (nestedBuilder) =>
-      nestedBuilder
+    .between("RetailPrice", [3, 4])
+    .between("RetailPriceWithDiscount", [1, 2])
+    .eq("Slug", "slug")
+    .filterRelation("Deep", () =>
+      new EQBuilder()
         .or()
-        .filters("RetailPrice")
-        .between([3, 4])
-        .filters("RetailPriceWithDiscount")
-        .between([1, 2])
-        .filters("Slug", (b) => b.eq("slug"))
+        .between("RetailPrice", [3, 4])
+        .between("RetailPriceWithDiscount", [1, 2])
+        .eq("Slug", "slug")
     )
-    .sortsRaw([
-      { key: "RetailPriceWithDiscount", type: "asc" },
-      { key: "RetailPrice", type: "asc" },
-    ])
+    .sortsAsc(["RetailPriceWithDiscount", "RetailPrice"])
     .populate("Covers")
     .populate("Alert")
-    .populate("Layout", (layoutBuilder) => {
-      layoutBuilder
-        .on("layout.alert", (alertBuilder) => {
-          alertBuilder.fields(["type", "message"]);
-        })
-        .on("layout.article", (articleBuilder) => {
-          articleBuilder.fields(["Article"]);
-        })
-        .on("layout.slider", (sliderBuilder) => {
-          sliderBuilder
-            .fields([
-              "SliderTimeoutSeconds",
-              "EnableDots",
-              "Arrows",
-              "AutoScroll",
-              "SideImages",
-            ])
-            .populate("Slides", (photoBuilder) =>
-              photoBuilder.fields(["Link"])
-            );
-        })
-        .on("layout.cardlist", (serverCardBuilder) => {
-          serverCardBuilder.populate("Cards", (cardBuilder) =>
-            cardBuilder.fields(["Title", "Description"])
-          );
-        })
-        .on("layout.faq", (faqBuilder) =>
-          faqBuilder.fields(["Question", "Answer"])
-        )
-        .on("ts.goods-tab", (productTabBuilder) => {
-          productTabBuilder.fields(["Label"]);
-        })
-        .on("layout.social-links", (socialLinksBuilder) => {
-          socialLinksBuilder.populate("Links", (b) => {
-            b.fields(["Link", "Alt"]);
-          });
-        });
-    });
+    .populateDynamic("Layout", "layout.alert", () =>
+      new EQBuilder().fields(["type", "message"])
+    )
+    .populateDynamic("Layout", "layout.article", () =>
+      new EQBuilder().fields(["Article"])
+    )
+    .populateDynamic("Layout", "layout.slider", () =>
+      new EQBuilder()
+        .fields([
+          "SliderTimeoutSeconds",
+          "EnableDots",
+          "Arrows",
+          "AutoScroll",
+          "SideImages",
+        ])
+        .populateRelation("Slides", () => new EQBuilder().fields(["Link"]))
+    )
+    .populateDynamic("Layout", "layout.cardlist", () =>
+      new EQBuilder().fields(["Title", "Description"])
+    )
+    .populateDynamic("Layout", "layout.faq", () =>
+      new EQBuilder().fields(["Question", "Answer"])
+    )
+    .populateDynamic("Layout", "ts.goods-tab", () =>
+      new EQBuilder().fields(["Label"])
+    )
+    .populateDynamic("Layout", "layout.social-links", () =>
+      new EQBuilder().fields(["Link", "Alt"])
+    );
 }
 const assigmentEnds = performance.now();
 

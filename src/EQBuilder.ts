@@ -1,6 +1,6 @@
 import { _isDefined, _set } from "./query-utils";
 
-export default class EQBuilder<
+export class EQBuilder<
   Model extends object,
   Data extends object = {},
   Config extends InternalBuilderConfig = InitialBuildConfig
@@ -1060,7 +1060,12 @@ export default class EQBuilder<
    * new EQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
    */
-  public populates<K extends StrapiInputPopulateKey<Model>[]>(attribute: K) {
+  public populates<
+    K extends readonly [
+      StrapiInputPopulateKey<Model>,
+      ...StrapiInputPopulateKey<Model>[]
+    ]
+  >(attribute: K) {
     attribute.forEach((k) => this._addToPopulate({ key: k }));
     return this as unknown as EQBuilder<
       Model,
@@ -1189,23 +1194,25 @@ export default class EQBuilder<
     builderFactory: BuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
-    const newQuery: MorphOnPopulate<PopulateModel> = {
-      [componentKey]: {
-        fields: populateBuilder.getRawFields(),
-        sort: populateBuilder.getRawSort(),
-        population: populateBuilder.getRawPopulation(),
-        filters: populateBuilder.getRawFilters(),
-      },
+    const newQuery = {
+      fields: populateBuilder.getRawFields(),
+      sort: populateBuilder.getRawSort(),
+      population: populateBuilder.getRawPopulation(),
+      filters: populateBuilder.getRawFilters(),
     };
 
     const currentQuery = this._query.population.get(attribute);
     if (!_isDefined(currentQuery)) {
-      this._addToPopulate({ key: attribute, dynamicQuery: newQuery });
-    } else {
-      const currentDynamic = currentQuery.dynamicQuery || {};
       this._addToPopulate({
         key: attribute,
-        dynamicQuery: { ...currentDynamic, ...newQuery },
+        dynamicQuery: { [componentKey]: newQuery },
+      });
+    } else {
+      const currentDynamic = currentQuery.dynamicQuery || {};
+      currentDynamic[componentKey] = newQuery;
+      this._addToPopulate({
+        key: attribute,
+        dynamicQuery: currentDynamic,
       });
     }
 
@@ -1795,12 +1802,14 @@ export default class EQBuilder<
 
     populates.forEach((populate) => {
       if (populate.dynamicQuery) {
-        const dynamicZoneQuery: any = {};
-        Object.entries(populate.dynamicQuery).forEach(([key, query]) => {
-          dynamicZoneQuery[key] = EQBuilder._buildQuery(query);
-        });
-
-        parsedPopulates[populate.key] = { on: dynamicZoneQuery };
+        const unparsedDynamicZone = populate.dynamicQuery;
+        const parsedDynamicZone: any = {};
+        for (const key of Object.keys(unparsedDynamicZone)) {
+          parsedDynamicZone[key] = EQBuilder._buildQuery(
+            unparsedDynamicZone[key]
+          );
+        }
+        parsedPopulates[populate.key] = { on: parsedDynamicZone };
       } else if (populate.nestedQuery) {
         parsedPopulates[populate.key] = EQBuilder._buildQuery(
           populate.nestedQuery

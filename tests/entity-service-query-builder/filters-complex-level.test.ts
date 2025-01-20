@@ -1,24 +1,14 @@
-import SQBuilder from "../lib/cjs";
+import { EQBuilder } from "../../lib/cjs";
 
 describe("Filters operator", () => {
   it("should create nested filters without attribute", () => {
-    const builtQuery = new SQBuilder()
+    const builtQuery = new EQBuilder()
       .and()
-      .filterThis((nestedBuilder) =>
-        nestedBuilder
-          .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2")
+      .filterDeep(() =>
+        new EQBuilder().or().lte("createdAt", "date1").gte("createdAt", "date2")
       )
-      .filterThis((nestedBuilder) =>
-        nestedBuilder
-          .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2")
+      .filterDeep(() =>
+        new EQBuilder().or().lte("createdAt", "date1").gte("createdAt", "date2")
       )
       .build();
 
@@ -26,23 +16,16 @@ describe("Filters operator", () => {
   });
 
   it("should create nested filters with attribute", () => {
-    const builtQuery = new SQBuilder()
+    const builtQuery = new EQBuilder()
       .and()
-      .filterDeep("attribute1", (nestedBuilder) =>
-        nestedBuilder
-          .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2")
+      .filterRelation("attribute1", () =>
+        new EQBuilder().or().lte("createdAt", "date1").gte("createdAt", "date2")
       )
-      .filterDeep("attribute2", (nestedBuilder) => {
-        nestedBuilder
+      .filterRelation("attribute2", () => {
+        return new EQBuilder()
           .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2");
+          .lte("createdAt", "date1")
+          .gte("createdAt", "date2");
       })
       .build();
 
@@ -50,60 +33,48 @@ describe("Filters operator", () => {
   });
 
   it("should create complex query", () => {
-    const builtQuery = new SQBuilder()
+    const builtQuery = new EQBuilder()
       .or()
-      .filterDeep("attribute1", (nestedBuilder) => {
-        nestedBuilder
+      .filterRelation("attribute1", () => {
+        return new EQBuilder()
           .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2");
+          .lte("createdAt", "date1")
+          .gte("createdAt", "date2");
       })
-      .filterDeep("attribute2", (nestedBuilder) => {
-        nestedBuilder
+      .filterRelation("attribute2", () => {
+        return new EQBuilder()
           .not()
           .and()
-          .filters("createdAt", (b) => b.lte("date1"))
-          .filters("createdAt", (b) => b.not().gte("date2"))
-          .filterThis((secondNestedBuilder) => {
-            secondNestedBuilder
+          .lte("createdAt", "date1")
+          .notGte("createdAt", "date2")
+          .filterDeep(() => {
+            return new EQBuilder()
               .or()
-              .filters("deep1", (d) => d.eq("some"))
-              .filters("deep1")
-              .not()
-              .contains("some-other");
+              .eq("deep1", "some")
+              .filterNot("deep1", "$contains", "some-other");
           });
       })
-      .filterThis((nestedBuilder) => {
-        nestedBuilder
+      .filterDeep(() => {
+        return new EQBuilder()
           .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .not()
-          .gte("date2")
-          .filterDeep("deep2", (thirdNestedBuilder) => {
-            thirdNestedBuilder
-              .filters("some2")
-              .eq("some")
-              .filters("some3")
-              .between(["a", "b"]);
-          })
-          .eq("FLOAT EQ");
+          .lte("createdAt", "date1")
+          .notGte("createdAt", "date2")
+          .filterRelation("deep2", () => {
+            return new EQBuilder()
+              .eq("some2", "some")
+              .between("some3", ["a", "b"]);
+          });
       })
-      .filterThis((nestedBuilder) =>
+      .filterDeep(() =>
         // Try to create illegal operators on nested filter operator
-        nestedBuilder
+        new EQBuilder()
           .or()
-          .filters("createdAt")
-          .lte("date1")
-          .filters("createdAt")
-          .gte("date2")
-          .pageSize(1)
+          .lte("createdAt", "date1")
+          .gte("createdAt", "date2")
+          .page(1, 26)
           .populateAll()
           .fields(["some"])
-          .sorts(["some"])
+          .sortsAsc(["some"])
       )
       .build();
 

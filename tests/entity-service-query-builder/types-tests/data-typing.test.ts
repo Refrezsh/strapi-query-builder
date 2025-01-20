@@ -1,5 +1,5 @@
-import EQBuilder from "../../../src/experimental";
 import { TestModel } from "./fields-typing.test";
+import { EQBuilder } from "../../../lib/cjs";
 
 describe("Data types", () => {
   it("should set data with right type", () => {

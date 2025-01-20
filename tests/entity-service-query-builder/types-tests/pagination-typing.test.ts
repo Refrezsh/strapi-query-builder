@@ -1,4 +1,4 @@
-import EQBuilder from "../../../src/experimental";
+import { EQBuilder } from "../../../lib/cjs";
 import { TestModel } from "./fields-typing.test";
 
 describe("Pagination types", () => {

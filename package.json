@@ -13,7 +13,7 @@
     "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run pretty",
     "prepack": "npm run build",
     "test": "npm run build && jest",
-    "speed": "node tests/performance-test.js",
+    "perfomance": "node tests/performance-test.js",
     "coverage": "jest --coverage",
     "semantic-release": "semantic-release"
   },
