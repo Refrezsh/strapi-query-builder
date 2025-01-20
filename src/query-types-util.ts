@@ -95,7 +95,7 @@ export type PopulateKey<Model extends object> =
   | "*";
 
 export type MorphOnPopulate<PopulateModel extends object> = {
-  [key: string]: DefaultPopulate<PopulateModel>;
+  [key: string]: DefaultPopulate<PopulateModel> & { componentKey: string };
 };
 
 export type DefaultPopulate<PopulateModel extends object> = Omit<

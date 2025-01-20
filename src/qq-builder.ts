@@ -1080,7 +1080,13 @@ export class QQBuilder<
     ]
   >(attributes: K) {
     const populate = this._query.population;
-    attributes.forEach((k) => populate.set(k, { key: k }));
+
+    const attributesLength = attributes.length;
+    for (let i = 0; i < attributesLength; i++) {
+      const attribute = attributes[i];
+      populate.set(attribute, { key: attribute });
+    }
+
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1204,15 +1210,17 @@ export class QQBuilder<
     builderFactory: QQBuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
+    const populate = this._query.population;
+
+    const currentQuery = populate.get(attribute);
     const newQuery = {
+      componentKey: componentKey,
       fields: populateBuilder.getRawFields(),
       sort: populateBuilder.getRawSort(),
       population: populateBuilder.getRawPopulation(),
       filters: populateBuilder.getRawFilters(),
     };
-    const populate = this._query.population;
 
-    const currentQuery = populate.get(attribute);
     if (!_isDefined(currentQuery)) {
       populate.set(attribute, {
         key: attribute,
@@ -1693,23 +1701,29 @@ export class QQBuilder<
 
     let parsedPopulates: any = {};
 
-    populates.forEach((populate) => {
+    const unparsedPopulates = populates.values();
+    for (const populate of unparsedPopulates) {
       const populateKey = populate.key;
       const dynamicQuery = populate.dynamicQuery;
       const nestedQuery = populate.nestedQuery;
 
       if (dynamicQuery) {
         const parsedDynamicZone: any = {};
-        for (const key of Object.keys(dynamicQuery)) {
-          parsedDynamicZone[key] = QQBuilder._buildQuery(dynamicQuery[key]);
+        const unparsedDynamicZone = Object.values(dynamicQuery);
+
+        for (const dynamicComponent of unparsedDynamicZone) {
+          const componentKey = dynamicComponent.componentKey;
+          parsedDynamicZone[componentKey] =
+            QQBuilder._buildQuery(dynamicComponent);
         }
+
         parsedPopulates[populateKey] = { on: parsedDynamicZone };
       } else if (nestedQuery) {
         parsedPopulates[populateKey] = QQBuilder._buildQuery(nestedQuery);
       } else {
         parsedPopulates[populateKey] = true;
       }
-    });
+    }
 
     return parsedPopulates;
   }
