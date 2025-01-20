@@ -31,28 +31,47 @@ for (let i = 0; i < times; i++) {
         .between("RetailPriceWithDiscount", [1, 2])
         .eq("Slug", "slug")
     )
-    .sortsAsc(["RetailPriceWithDiscount", "RetailPrice"])
+    .sortsAsc([
+      "RetailPriceWithDiscount",
+      "RetailPrice",
+      "WarehouseQuantity",
+      "MinQuantityForOrder",
+      "RetailPrice",
+      "RetailPriceWithDiscount",
+      "PriceDiscountPercent",
+    ])
     .populate("Covers")
     .populate("Alert")
+    .populates([
+      "RetailPriceWithDiscount",
+      "RetailPrice",
+      "WarehouseQuantity",
+      "MinQuantityForOrder",
+      "RetailPrice",
+      "RetailPriceWithDiscount",
+      "PriceDiscountPercent",
+    ])
+    .populateRelation("A1", () => new EQBuilder().fields(["Link"]))
+    .populateRelation("A2", () => new EQBuilder().fields(["Link"]))
+    .populateRelation("A3", () => new EQBuilder().fields(["Link"]))
+    .populateRelation("A4", () => new EQBuilder().fields(["Link"]))
     .populateDynamic("Layout", "layout.alert", () =>
-      new EQBuilder().fields(["type", "message"])
+      new EQBuilder().field("type").field("message")
     )
     .populateDynamic("Layout", "layout.article", () =>
-      new EQBuilder().fields(["Article"])
+      new EQBuilder().field("Article")
     )
     .populateDynamic("Layout", "layout.slider", () =>
       new EQBuilder()
-        .fields([
-          "SliderTimeoutSeconds",
-          "EnableDots",
-          "Arrows",
-          "AutoScroll",
-          "SideImages",
-        ])
+        .field("SliderTimeoutSeconds")
+        .field("EnableDots")
+        .field("Arrows")
+        .field("AutoScroll")
+        .field("SideImages")
         .populateRelation("Slides", () => new EQBuilder().fields(["Link"]))
     )
     .populateDynamic("Layout", "layout.cardlist", () =>
-      new EQBuilder().fields(["Title", "Description"])
+      new EQBuilder().field("Title").field("Description")
     )
     .populateDynamic("Layout", "layout.faq", () =>
       new EQBuilder().fields(["Question", "Answer"])
@@ -62,7 +81,8 @@ for (let i = 0; i < times; i++) {
     )
     .populateDynamic("Layout", "layout.social-links", () =>
       new EQBuilder().fields(["Link", "Alt"])
-    );
+    )
+    .page(1, 26);
 }
 const assigmentEnds = performance.now();
 

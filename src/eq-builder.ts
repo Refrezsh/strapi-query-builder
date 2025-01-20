@@ -1244,6 +1244,7 @@ export class EQBuilder<
     const populate = this._query.population;
 
     const currentQuery = populate.get(attribute);
+    const currentDynamic = currentQuery?.dynamicQuery || {};
     const newQuery = {
       componentKey: componentKey,
       fields: populateBuilder.getRawFields(),
@@ -1252,19 +1253,12 @@ export class EQBuilder<
       filters: populateBuilder.getRawFilters(),
     };
 
-    if (!_isDefined(currentQuery)) {
-      populate.set(attribute, {
-        key: attribute,
-        dynamicQuery: { [componentKey]: newQuery },
-      });
-    } else {
-      const currentDynamic = currentQuery.dynamicQuery || {};
-      currentDynamic[componentKey] = newQuery;
-      populate.set(attribute, {
-        key: attribute,
-        dynamicQuery: currentDynamic,
-      });
-    }
+    currentDynamic[componentKey] = newQuery;
+
+    populate.set(attribute, {
+      key: attribute,
+      dynamicQuery: currentDynamic,
+    });
 
     return this as unknown as EQBuilder<
       Model,
@@ -1542,14 +1536,14 @@ export class EQBuilder<
     builder: EQBuilder<Model, {}, DeepConfig>
   ) {
     const currentPopulate = this._query.population;
-    builder
-      .getRawPopulation()
-      .forEach((populate) =>
-        currentPopulate.set(
-          populate.key as PopulateKey<Model>,
-          populate as unknown as StrapiPopulate<Model, any>
-        )
+    const newPopulateValues = builder.getRawPopulation().values();
+
+    for (const populate of newPopulateValues) {
+      currentPopulate.set(
+        populate.key,
+        populate as unknown as StrapiPopulate<Model, any>
       );
+    }
 
     return this as unknown as EQBuilder<
       Model,
