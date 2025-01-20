@@ -56,7 +56,8 @@ export class QQBuilder<
       ...StrapiSingleFieldInput<Model>[]
     ]
   >(fields: F) {
-    fields.forEach((f) => this._query.fields.add(f));
+    const currentFields = this._query.fields;
+    fields.forEach((f) => currentFields.add(f));
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -214,7 +215,8 @@ export class QQBuilder<
     K extends readonly [SortKey<Model>, ...SortKey<Model>[]],
     D extends StrapiSortOptions
   >(attributes: K, direction: D) {
-    attributes.forEach((key) => this._query.sort.set(key, direction));
+    const currentSorts = this._query.sort;
+    attributes.forEach((key) => currentSorts.set(key, direction));
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1325,7 +1327,8 @@ export class QQBuilder<
   public joinFields<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
-    builder.getRawFields().forEach((f) => this._query.fields.add(f));
+    const currentFields = this._query.fields;
+    builder.getRawFields().forEach((f) => currentFields.add(f));
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1352,9 +1355,8 @@ export class QQBuilder<
   public joinSort<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
-    builder
-      .getRawSort()
-      .forEach((value, key) => this._query.sort.set(key, value));
+    const currentSorts = this._query.sort;
+    builder.getRawSort().forEach((value, key) => currentSorts.set(key, value));
 
     return this as unknown as QQBuilder<
       Model,
@@ -1434,10 +1436,11 @@ export class QQBuilder<
   public joinPopulate<DeepConfig extends QueryEngineBuilderConfig>(
     builder: QQBuilder<Model, {}, DeepConfig>
   ) {
+    const currentPopulate = this._query.population;
     builder
       .getRawPopulation()
       .forEach((populate) =>
-        this._query.population.set(
+        currentPopulate.set(
           populate.key as PopulateKey<Model>,
           populate as unknown as StrapiPopulate<Model, any>
         )
@@ -1545,8 +1548,7 @@ export class QQBuilder<
    * @return Query with dynamically generated query type
    */
   public build() {
-    const builtQuery = QQBuilder._buildQuery(this._query);
-    return builtQuery as BuildQQOutput<Config>;
+    return QQBuilder._buildQuery(this._query) as BuildQQOutput<Config>;
   }
 
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -1606,31 +1608,38 @@ export class QQBuilder<
   private static _parseAttributeFilter<Md extends object>(
     filter: StrapiAttributesFilter<Md>
   ): any | undefined {
-    if (filter.nested !== undefined) {
-      const nestedFilters = this._parseFilters(filter.nested);
-      if (!_isDefined(nestedFilters)) return undefined;
+    const nestedFilters = filter.nested;
+    const filterKey = filter.key;
 
-      return !_isDefined(filter.key)
-        ? nestedFilters
-        : _set({}, filter.key, nestedFilters);
+    if (nestedFilters !== undefined) {
+      const parsedNestedFilters = this._parseFilters(nestedFilters);
+      if (!_isDefined(parsedNestedFilters)) return undefined;
+
+      return !_isDefined(filterKey)
+        ? parsedNestedFilters
+        : _set({}, filterKey, parsedNestedFilters);
     }
 
+    const filterType = filter.type;
+    const filterValue = filter.value;
+    const filterNegate = filter.negate;
+
     if (
-      !_isDefined(filter.value) ||
-      !_isDefined(filter.type) ||
-      !_isDefined(filter.key)
+      !_isDefined(filterKey) ||
+      !_isDefined(filterType) ||
+      !_isDefined(filterValue)
     ) {
       return undefined;
     }
 
-    const filterValue = {
-      [filter.type]: filter.value,
+    const filterOperator = {
+      [filterType]: filterValue,
     };
 
     return _set(
       {},
-      filter.key,
-      filter.negate ? { ["$not"]: filterValue } : filterValue
+      filterKey,
+      filterNegate ? { ["$not"]: filterOperator } : filterOperator
     );
   }
 
@@ -1640,6 +1649,8 @@ export class QQBuilder<
     const attributeFilters = rawFilters?.attributeFilters || [];
     const rootLogical = rawFilters?.rootLogical || "$and";
     const negateRoot = rawFilters?.negate || false;
+
+    if (attributeFilters.length === 0) return undefined;
 
     const parsedFilters: any[] = [];
     attributeFilters.forEach((attributeQuery) => {
@@ -1653,6 +1664,7 @@ export class QQBuilder<
     const filters = {
       [rootLogical]: parsedFilters,
     };
+
     return negateRoot ? { ["$not"]: filters } : filters;
   }
 
@@ -1662,26 +1674,25 @@ export class QQBuilder<
     if (populates.size === 0) return undefined;
 
     const allPopulate = populates.get("*");
-    if (_isDefined(allPopulate)) return "*";
+    if (_isDefined(allPopulate)) return true;
 
     let parsedPopulates: any = {};
 
     populates.forEach((populate) => {
-      if (populate.dynamicQuery) {
-        const unparsedDynamicZone = populate.dynamicQuery;
+      const populateKey = populate.key;
+      const dynamicQuery = populate.dynamicQuery;
+      const nestedQuery = populate.nestedQuery;
+
+      if (dynamicQuery) {
         const parsedDynamicZone: any = {};
-        for (const key of Object.keys(unparsedDynamicZone)) {
-          parsedDynamicZone[key] = QQBuilder._buildQuery(
-            unparsedDynamicZone[key]
-          );
+        for (const key of Object.keys(dynamicQuery)) {
+          parsedDynamicZone[key] = QQBuilder._buildQuery(dynamicQuery[key]);
         }
-        parsedPopulates[populate.key] = { on: parsedDynamicZone };
-      } else if (populate.nestedQuery) {
-        parsedPopulates[populate.key] = QQBuilder._buildQuery(
-          populate.nestedQuery
-        );
+        parsedPopulates[populateKey] = { on: parsedDynamicZone };
+      } else if (nestedQuery) {
+        parsedPopulates[populateKey] = QQBuilder._buildQuery(nestedQuery);
       } else {
-        parsedPopulates[populate.key] = true;
+        parsedPopulates[populateKey] = true;
       }
     });
 
