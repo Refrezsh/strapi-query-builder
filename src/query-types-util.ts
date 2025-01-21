@@ -120,8 +120,8 @@ export type StrapiPopulations<
 
 // <editor-fold desc="Pagination Types">
 export interface StrapiUnionPagination {
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
   paginationType: "page" | "limit";
 }
 // </editor-fold>

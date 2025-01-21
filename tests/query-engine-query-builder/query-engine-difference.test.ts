@@ -57,10 +57,33 @@ describe("Query Engine Query Builder", () => {
     expect(typedQuery.where.$and[2].nestedList.$and[0].id.$eq).toBe("1");
   });
 
-  it("should create offset pagination", () => {
-    const query = new QQBuilder<TestModel>().pageLimit(10, 25).build();
-    const typedQuery: { offset: 10; limit: 25 } = query;
+  it("should create offset", () => {
+    const query = new QQBuilder<TestModel>().start(10).build();
+    const typedQuery: { offset: 10 } = query;
     expect(typedQuery.offset).toBe(10);
-    expect(typedQuery.limit).toBe(25);
+
+    // @ts-ignore
+    expect(typedQuery["limit"]).toBeUndefined();
+  });
+
+  it("should create limit", () => {
+    const query = new QQBuilder<TestModel>().limit(40).build();
+    const typedQuery: { limit: 40 } = query;
+    expect(typedQuery.limit).toBe(40);
+
+    // @ts-ignore
+    expect(typedQuery["offset"]).toBeUndefined();
+  });
+
+  it("should combine limit and offset in any direction", () => {
+    const limitOffset = new QQBuilder<TestModel>().limit(20).start(5).build();
+    const typedLimitOffset: { offset: 5; limit: 20 } = limitOffset;
+    expect(typedLimitOffset.offset).toBe(5);
+    expect(typedLimitOffset.limit).toBe(20);
+
+    const offsetLimit = new QQBuilder<TestModel>().start(5).limit(20).build();
+    const typedOffsetLimit: { offset: 5; limit: 20 } = offsetLimit;
+    expect(typedOffsetLimit.offset).toBe(5);
+    expect(typedOffsetLimit.limit).toBe(20);
   });
 });

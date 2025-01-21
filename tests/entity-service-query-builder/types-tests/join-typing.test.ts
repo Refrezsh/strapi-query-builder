@@ -123,7 +123,7 @@ describe("Join functions", () => {
   });
 
   it("should join pagination on query", () => {
-    const secondQuery = new EQBuilder<TestModel>().page(1, 26);
+    const secondQuery = new EQBuilder<TestModel>().page(1).pageSize(26);
     const query = new EQBuilder<TestModel>()
       .field("id")
       .joinPagination(secondQuery)
@@ -137,10 +137,11 @@ describe("Join functions", () => {
   });
 
   it("should join and override pagination on query", () => {
-    const secondQuery = new EQBuilder<TestModel>().pageLimit(1, 26);
+    const secondQuery = new EQBuilder<TestModel>().start(1).limit(26);
     const query = new EQBuilder<TestModel>()
       .field("id")
-      .page(1, 40)
+      .page(1)
+      .pageSize(40)
       .joinPagination(secondQuery)
       .build();
 

@@ -7,7 +7,6 @@ import {
   OnType,
   ParseFilters,
   ParseList,
-  PopulateKey,
   PublicationStates,
   QueryRawInfo,
   SingleAttributeType,
@@ -1297,22 +1296,23 @@ export class EQBuilder<
 
   //<editor-fold desc="Pagination">
   /**
-   * @description Pagination by page, when defining the page and pageSize parameters
-   * @param {number} page Current page
-   * @param {number} pageSize Page size
+   * @description Pagination by page, when defining the page parameter
+   * @param {number} page Select page
    * @example
-   * new EQBuilder<TestModel>().page(1, 26)
-   * // { page: 1; pageSize: 26 }
+   * new EQBuilder<TestModel>().page(1)
+   * // { page: 1; }
    */
-  public page<Page extends number, PageSize extends number>(
-    page: Page,
-    pageSize: PageSize
-  ) {
-    this._query.pagination = {
-      page: page,
-      pageSize: pageSize,
-      paginationType: "page",
-    };
+  public page<Page extends number>(page: Page) {
+    if (!this._query.pagination) {
+      this._query.pagination = {
+        page: page,
+        pageSize: undefined,
+        paginationType: "page",
+      };
+    } else {
+      this._query.pagination.page = page;
+      this._query.pagination.paginationType = "page";
+    }
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1324,7 +1324,7 @@ export class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Page; pageSize: PageSize };
+        pagination: { page: Page; pageSize: Config["pagination"]["pageSize"] };
         paginationType: "page";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
@@ -1334,22 +1334,24 @@ export class EQBuilder<
   }
 
   /**
-   * @description Pagination by offset, when defining the start and limit parameters
-   * @param {number} start
-   * @param {number} limit
+   * @description Pagination by page, when defining the pageSize parameter
+   * @param pageSize
    * @example
-   * new EQBuilder<TestModel>().pageLimit(0, 26)
-   * // { start: 0; limit: 26 }
+   * new EQBuilder<TestModel>().pageSize(26)
+   * // { pageSize: 26; }
    */
-  public pageLimit<Start extends number, limit extends number>(
-    start: Start,
-    limit: limit
-  ) {
-    this._query.pagination = {
-      page: start,
-      pageSize: limit,
-      paginationType: "limit",
-    };
+  public pageSize<PageSize extends number>(pageSize: PageSize) {
+    if (!this._query.pagination) {
+      this._query.pagination = {
+        page: undefined,
+        pageSize: pageSize,
+        paginationType: "page",
+      };
+    } else {
+      this._query.pagination.pageSize = pageSize;
+      this._query.pagination.paginationType = "page";
+    }
+
     return this as unknown as EQBuilder<
       Model,
       Data,
@@ -1361,7 +1363,83 @@ export class EQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Start; pageSize: limit };
+        pagination: { page: Config["pagination"]["page"]; pageSize: PageSize };
+        paginationType: "page";
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+        data: Config["data"];
+      }
+    >;
+  }
+
+  /**
+   * @description Pagination by offset, when defining the start parameter
+   * @param {number} start
+   * @example
+   * new EQBuilder<TestModel>().start(5)
+   * // { start: 5; }
+   */
+  public start<Start extends number>(start: Start) {
+    if (!this._query.pagination) {
+      this._query.pagination = {
+        page: start,
+        pageSize: undefined,
+        paginationType: "limit",
+      };
+    } else {
+      this._query.pagination.page = start;
+      this._query.pagination.paginationType = "limit";
+    }
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Start; pageSize: Config["pagination"]["pageSize"] };
+        paginationType: "limit";
+        publicationState: Config["publicationState"];
+        locale: Config["locale"];
+        data: Config["data"];
+      }
+    >;
+  }
+
+  /**
+   * @description Pagination by offset, when defining the limit parameter
+   * @param {number} limit
+   * @example
+   * new EQBuilder<TestModel>().limit(20)
+   * // { limit: 20; }
+   */
+  public limit<Limit extends number>(limit: Limit) {
+    if (!this._query.pagination) {
+      this._query.pagination = {
+        page: undefined,
+        pageSize: limit,
+        paginationType: "limit",
+      };
+    } else {
+      this._query.pagination.pageSize = limit;
+      this._query.pagination.paginationType = "limit";
+    }
+    return this as unknown as EQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Config["pagination"]["page"]; pageSize: Limit };
         paginationType: "limit";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
@@ -1746,12 +1824,16 @@ export class EQBuilder<
 
     const pagination = rawQuery.pagination;
     if (_isDefined(pagination)) {
-      if (pagination.paginationType === "page") {
-        builtQuery.page = pagination.page;
-        builtQuery.pageSize = pagination.pageSize;
-      } else {
-        builtQuery.start = pagination.page;
-        builtQuery.limit = pagination.pageSize;
+      const pageKey = pagination.paginationType === "page" ? "page" : "start";
+      const pageLimitKey =
+        pagination.paginationType === "page" ? "pageSize" : "limit";
+
+      if (_isDefined(pagination.page)) {
+        builtQuery[pageKey] = pagination.page;
+      }
+
+      if (_isDefined(pagination.pageSize)) {
+        builtQuery[pageLimitKey] = pagination.pageSize;
       }
     }
 
@@ -1914,7 +1996,7 @@ type EntityBuilderConfig = {
   negate: boolean;
   populateAll: boolean;
   populates: Record<string, any>;
-  pagination: { page: number; pageSize: number };
+  pagination: { page?: number; pageSize?: number };
   paginationType: "page" | "limit";
   publicationState: PublicationStates;
   locale: string;
@@ -1929,7 +2011,7 @@ type InitialBuildConfig = {
   negate: false;
   populateAll: false;
   populates: {};
-  pagination: never;
+  pagination: { page: never; pageSize: never };
   paginationType: never;
   publicationState: never;
   locale: never;

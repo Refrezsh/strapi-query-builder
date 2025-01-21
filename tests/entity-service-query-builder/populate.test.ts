@@ -1,7 +1,6 @@
 import { EQBuilder } from "../../lib/cjs";
 
 const getAllPopulate = { populate: "*" };
-const populateAllQueryEngine = { populate: true };
 
 const key1 = "key1" as const;
 const key2 = "key2" as const;
@@ -28,13 +27,6 @@ describe("Population operator", () => {
 
     expect(builtQuery).toEqual(getAllPopulate);
   });
-
-  // TODO: Uncomment when query engine realization will be complete
-  // it("should populate all with true for query engine", () => {
-  //   const builtQuery = new SQBuilder().populateAll().buildQueryEngine();
-  //
-  //   expect(builtQuery).toEqual(populateAllQueryEngine);
-  // });
 
   it("should merge same keys", () => {
     const builtQuery = new EQBuilder()
@@ -64,7 +56,8 @@ describe("Population operator", () => {
     const builtQuery = new EQBuilder()
       .populateRelation(key1, () => {
         return new EQBuilder()
-          .page(1, 26)
+          .page(1)
+          .pageSize(26)
           .locale("ua")
           .publicationState("preview")
           .sortAsc(key1)

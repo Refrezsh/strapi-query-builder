@@ -7,7 +7,6 @@ import {
   OnType,
   ParseFilters,
   ParseList,
-  PopulateKey,
   QueryRawInfo,
   SingleAttributeType,
   SortKey,
@@ -1264,22 +1263,23 @@ export class QQBuilder<
 
   //<editor-fold desc="Pagination">
   /**
-   * @description Pagination by offset, when defining the start and limit parameters
+   * @description Pagination by offset, when defining the start parameter
    * @param {number} start
-   * @param {number} limit
    * @example
-   * new EQBuilder<TestModel>().pageLimit(0, 26)
-   * // { start: 0; limit: 26 }
+   * new EQBuilder<TestModel>().start(5)
+   * // { start: 5; }
    */
-  public pageLimit<Start extends number, limit extends number>(
-    start: Start,
-    limit: limit
-  ) {
-    this._query.pagination = {
-      page: start,
-      pageSize: limit,
-      paginationType: "limit",
-    };
+  public start<Start extends number>(start: Start) {
+    if (!this._query.pagination) {
+      this._query.pagination = {
+        page: start,
+        pageSize: undefined,
+        paginationType: "limit",
+      };
+    } else {
+      this._query.pagination.page = start;
+      this._query.pagination.paginationType = "limit";
+    }
     return this as unknown as QQBuilder<
       Model,
       Data,
@@ -1291,7 +1291,43 @@ export class QQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Start; pageSize: limit };
+        pagination: { page: Start; pageSize: Config["pagination"]["pageSize"] };
+        paginationType: "limit";
+        data: Config["data"];
+      }
+    >;
+  }
+
+  /**
+   * @description Pagination by offset, when defining the limit parameter
+   * @param {number} limit
+   * @example
+   * new EQBuilder<TestModel>().limit(20)
+   * // { limit: 20; }
+   */
+  public limit<Limit extends number>(limit: Limit) {
+    if (!this._query.pagination) {
+      this._query.pagination = {
+        page: undefined,
+        pageSize: limit,
+        paginationType: "limit",
+      };
+    } else {
+      this._query.pagination.pageSize = limit;
+      this._query.pagination.paginationType = "limit";
+    }
+    return this as unknown as QQBuilder<
+      Model,
+      Data,
+      {
+        fields: Config["fields"];
+        sort: Config["sort"];
+        filters: Config["filters"];
+        rootLogical: Config["rootLogical"];
+        negate: Config["negate"];
+        populateAll: Config["populateAll"];
+        populates: Config["populates"];
+        pagination: { page: Config["pagination"]["page"]; pageSize: Limit };
         paginationType: "limit";
         data: Config["data"];
       }
@@ -1598,8 +1634,10 @@ export class QQBuilder<
 
     const pagination = rawQuery.pagination;
     if (_isDefined(pagination)) {
-      if (pagination.paginationType === "limit") {
+      if (_isDefined(pagination.page)) {
         builtQuery.offset = pagination.page;
+      }
+      if (_isDefined(pagination.pageSize)) {
         builtQuery.limit = pagination.pageSize;
       }
     }
@@ -1751,7 +1789,7 @@ type QueryEngineBuilderConfig = {
   negate: boolean;
   populateAll: boolean;
   populates: Record<string, any>;
-  pagination: { page: number; pageSize: number };
+  pagination: { page?: number; pageSize?: number };
   paginationType: "limit";
   data: unknown;
 };
@@ -1764,7 +1802,7 @@ type InitialBuildConfig = {
   negate: false;
   populateAll: false;
   populates: {};
-  pagination: never;
+  pagination: { page: never; pageSize: never };
   paginationType: never;
   data: never;
 };

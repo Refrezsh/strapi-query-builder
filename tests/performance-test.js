@@ -82,7 +82,8 @@ for (let i = 0; i < times; i++) {
     .populateDynamic("Layout", "layout.social-links", () =>
       new EQBuilder().fields(["Link", "Alt"])
     )
-    .page(1, 26);
+    .page(1)
+    .pageSize(26);
 }
 const assigmentEnds = performance.now();
 
