@@ -25,7 +25,7 @@ import {
   TransformNestedKeys,
 } from "./query-types-util";
 
-export class SQBuilder<
+export class RQBuilder<
   Model extends object,
   Data extends object = {},
   Config extends EntityBuilderConfig = InitialBuildConfig
@@ -46,7 +46,7 @@ export class SQBuilder<
    * @description Select specific fields
    * @description Same keys will be merged
    * @example
-   * new SQBuilder<Model>().fields(["name", "type"]);
+   * new RQBuilder<Model>().fields(["name", "type"]);
    * // { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
@@ -64,7 +64,7 @@ export class SQBuilder<
       currentFields.add(field);
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -88,13 +88,13 @@ export class SQBuilder<
    * @description Select specific field
    * @description Same keys will be merged
    * @example
-   * new SQBuilder<Model>().field("key");
+   * new RQBuilder<Model>().field("key");
    * // { fields: ["key"] }
    * @param {StrapiSingleFieldInput} field Single field
    */
   public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
     this._query.fields.add(field);
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -122,10 +122,10 @@ export class SQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new SQBuilder<Model>().sortAsc("attribute");
+   * new RQBuilder<Model>().sortAsc("attribute");
    * // { sort: [{"attribute": "asc"}] }
    * @example
-   * new SQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new RQBuilder<Model>().sortAsc("parentKey.childKey");
    * // { sort: [{"parentKey": { "childKey": "asc" }}]}
    */
   public sortAsc<K extends SortKey<Model>>(attribute: K) {
@@ -138,10 +138,10 @@ export class SQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new SQBuilder<Model>().sortAsc("attribute");
+   * new RQBuilder<Model>().sortAsc("attribute");
    * // { sort: [{"attribute": "desc"}] }
    * @example
-   * new SQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new RQBuilder<Model>().sortAsc("parentKey.childKey");
    * // { sort: [{"parentKey": { "childKey": "desc" }}]}
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
@@ -154,7 +154,7 @@ export class SQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new SQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new RQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
@@ -169,7 +169,7 @@ export class SQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new SQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new RQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
@@ -185,7 +185,7 @@ export class SQBuilder<
    * @param {SortKey} attribute Attribute
    * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
    * @example
-   * new SQBuilder<Model>().sort("attribute", "asc");
+   * new RQBuilder<Model>().sort("attribute", "asc");
    * // { sort: [{"attribute": "asc"}] }
    */
   public sort<K extends SortKey<Model>, D extends StrapiSortOptions>(
@@ -193,7 +193,7 @@ export class SQBuilder<
     direction: D
   ) {
     this._query.sort.set(attribute, { key: attribute, order: direction });
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -220,7 +220,7 @@ export class SQBuilder<
    * @param {SortKey} attributes Attribute list
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
-   * new SQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
+   * new RQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sorts<
@@ -235,7 +235,7 @@ export class SQBuilder<
       currentSorts.set(attribute, { key: attribute, order: direction });
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -261,12 +261,12 @@ export class SQBuilder<
    * @description Change root logical to "$or"
    * @description Default - "$and"
    * @example
-   * new SQBuilder<Model>().or();
+   * new RQBuilder<Model>().or();
    * // { filters: { $or: [...] }}
    */
   public or() {
     this._query.filters.rootLogical = "$or";
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -290,12 +290,12 @@ export class SQBuilder<
    * @description Change root logical to "$and"
    * @description Default - "$and"
    * @example
-   * new SQBuilder<Model>().and();
+   * new RQBuilder<Model>().and();
    * // { filters: { $and: [...] }}
    */
   public and() {
     this._query.filters.rootLogical = "$and";
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -319,12 +319,12 @@ export class SQBuilder<
    * @description Add "$not" before root logical
    * @description Default - false
    * @example
-   * new SQBuilder<Model>().not();
+   * new RQBuilder<Model>().not();
    * // { filters: { $not: { $and: [...] }}}
    */
   public not() {
     this._query.filters.negate = true;
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -347,10 +347,10 @@ export class SQBuilder<
   /**
    * @description Add deep filters for current model
    * @example
-   * new SQBuilder<TestModel>()
+   * new RQBuilder<TestModel>()
    *     .eq("options", "value")
    *     .filterDeep(() =>
-   *       new SQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
+   *       new RQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
    *     )
    * // {
    * //    filters: {
@@ -362,17 +362,17 @@ export class SQBuilder<
    * // }
    *
    * // Reads like model.options === "value" && (model.name === "value1" || model.name === "value2")
-   * @param {SQBuilderCallback} builderFactory Fabric function that returns builder with filters for current model
+   * @param {RQBuilderCallback} builderFactory Fabric function that returns builder with filters for current model
    */
   public filterDeep<DeepConfig extends EntityBuilderConfig>(
-    builderFactory: SQBuilderCallback<Model, {}, DeepConfig>
+    builderFactory: RQBuilderCallback<Model, {}, DeepConfig>
   ) {
     const deepBuilder = builderFactory();
     this._query.filters.attributeFilters.push({
       nested: deepBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -402,9 +402,9 @@ export class SQBuilder<
   /**
    * @description Add related model filters
    * @example
-   * new SQBuilder<TestModel>()
+   * new RQBuilder<TestModel>()
    *       .filterRelation("nested", () =>
-   *         new SQBuilder<NestedModel>().eq("id", "value")
+   *         new RQBuilder<NestedModel>().eq("id", "value")
    *       )
    * // {
    * //      filters: {
@@ -412,7 +412,7 @@ export class SQBuilder<
    * //      }
    * // }
    * @param {FilterOperatorKey} attribute Attribute
-   * @param {SQBuilderCallback} builderFactory Fabric function that returns builder with filters for relation model
+   * @param {RQBuilderCallback} builderFactory Fabric function that returns builder with filters for relation model
    */
   public filterRelation<
     RelationModel extends object,
@@ -420,7 +420,7 @@ export class SQBuilder<
     RelationConfig extends EntityBuilderConfig
   >(
     attribute: K,
-    builderFactory: SQBuilderCallback<RelationModel, {}, RelationConfig>
+    builderFactory: RQBuilderCallback<RelationModel, {}, RelationConfig>
   ) {
     const relationBuilder = builderFactory();
     this._query.filters.attributeFilters.push({
@@ -429,7 +429,7 @@ export class SQBuilder<
         relationBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -464,7 +464,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().eq("attribute", "value");
+   * new RQBuilder<Model>().eq("attribute", "value");
    * // { filters: { $and: [{ attribute: { $eq: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -481,7 +481,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notEq("key", "value");
+   * new RQBuilder<Model>().notEq("key", "value");
    * // { filters: { $and: [{ attribute: { $not: { $eq: "value" } }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -498,7 +498,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().eqi("attribute", "value");
+   * new RQBuilder<Model>().eqi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $eqi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -515,7 +515,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notEqi("attribute", "value");
+   * new RQBuilder<Model>().notEqi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $eqi: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -532,7 +532,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().ne("attribute", "value");
+   * new RQBuilder<Model>().ne("attribute", "value");
    * // { filters: { $and: [{ attribute: { $ne: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -549,7 +549,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().nei("attribute", "value");
+   * new RQBuilder<Model>().nei("attribute", "value");
    * // { filters: { $and: [{ attribute: { $nei: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Filter key
    * @param {SingleAttributeType} value Filter by value
@@ -566,7 +566,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().contains("attribute", "value");
+   * new RQBuilder<Model>().contains("attribute", "value");
    * // { filters: { $and: [{ attribute: { $contains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -583,7 +583,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notContains("attribute", "value");
+   * new RQBuilder<Model>().notContains("attribute", "value");
    * // { filters: { $and: [{ attribute: { $notContains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -600,7 +600,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().containsi("attribute", "value");
+   * new RQBuilder<Model>().containsi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $containsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -617,7 +617,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notContainsi("attribute", "value");
+   * new RQBuilder<Model>().notContainsi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $notContainsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -634,7 +634,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().in("attribute", ["value1", "value2"]);
+   * new RQBuilder<Model>().in("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $in: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter in by values
@@ -651,7 +651,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
+   * new RQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $notIn: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter not in by values
@@ -668,7 +668,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().between("attribute", ["value1", "value2"]);
+   * new RQBuilder<Model>().between("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $between: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
@@ -685,7 +685,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
+   * new RQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $not: { $between: ["value1", "value2"] }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
@@ -702,7 +702,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().lt("attribute", "value");
+   * new RQBuilder<Model>().lt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $lt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -719,7 +719,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notLt("attribute", "value");
+   * new RQBuilder<Model>().notLt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $lt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -736,7 +736,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().lte("attribute", "value");
+   * new RQBuilder<Model>().lte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $lte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -753,7 +753,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notLte("attribute", "value");
+   * new RQBuilder<Model>().notLte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $lte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -770,7 +770,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().gt("attribute", "value");
+   * new RQBuilder<Model>().gt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $gt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -787,7 +787,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notGt("attribute", "value");
+   * new RQBuilder<Model>().notGt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $gt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -804,7 +804,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().gte("attribute", "value");
+   * new RQBuilder<Model>().gte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $gte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -821,7 +821,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notGte("attribute", "value");
+   * new RQBuilder<Model>().notGte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $gte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -838,7 +838,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().startsWith("attribute", "value");
+   * new RQBuilder<Model>().startsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $startsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -855,7 +855,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notStartsWith("attribute", "value");
+   * new RQBuilder<Model>().notStartsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $startsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -872,7 +872,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().endsWith("attribute", "value");
+   * new RQBuilder<Model>().endsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $endsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -889,7 +889,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notEndsWith("attribute", "value");
+   * new RQBuilder<Model>().notEndsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $endsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -906,7 +906,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().null("attribute", "value");
+   * new RQBuilder<Model>().null("attribute", "value");
    * // { filters: { $and: [{ attribute: { $null: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
@@ -923,7 +923,7 @@ export class SQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new SQBuilder<Model>().notNull("attribute", "value");
+   * new RQBuilder<Model>().notNull("attribute", "value");
    * // { filters: { $and: [{ attribute: { $notNull: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
@@ -943,7 +943,7 @@ export class SQBuilder<
    * @param {EntityFilterAttributes} filter Filter operator, "$eq", "$contains", etc.
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
-   * new SQBuilder<Model>().filter("attribute", "$eq", "value");
+   * new RQBuilder<Model>().filter("attribute", "$eq", "value");
    * // { filters: { $and: [{ attribute: { $eq: "value" }} ] }}
    */
   public filter<
@@ -958,7 +958,7 @@ export class SQBuilder<
       negate: false,
     });
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -986,7 +986,7 @@ export class SQBuilder<
    * @param {EntityFilterAttributes} filter Filter operator, "$eq", "$contains", etc.
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
-   * new SQBuilder<Model>().filterNot("attribute", "$eq", "value");
+   * new RQBuilder<Model>().filterNot("attribute", "$eq", "value");
    * // { filters: { $and: [{ attribute: { $not: { $eq: "value" }}} ] }}
    */
   public filterNot<
@@ -1001,7 +1001,7 @@ export class SQBuilder<
       negate: true,
     });
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1030,12 +1030,12 @@ export class SQBuilder<
    * @description Populate all relations of model
    * @description If any other populate presented, it will be ignored
    * @example
-   * new SQBuilder<Model>().populateAll();
+   * new RQBuilder<Model>().populateAll();
    * // { populate: "*" }
    */
   public populateAll() {
     this._query.population.set("*", { key: "*" });
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1060,12 +1060,12 @@ export class SQBuilder<
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey} attribute Attribute
    * @example
-   * new SQBuilder<Model>().populate("relation");
+   * new RQBuilder<Model>().populate("relation");
    * // { populate: { relation: true } }
    */
   public populate<K extends StrapiInputPopulateKey<Model>>(attribute: K) {
     this._query.population.set(attribute, { key: attribute });
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1096,7 +1096,7 @@ export class SQBuilder<
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey[]} attributes Attributes list
    * @example
-   * new SQBuilder<Model>().populates(["relation1", "relation2"]);
+   * new RQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
    */
   public populates<
@@ -1113,7 +1113,7 @@ export class SQBuilder<
       populate.set(attribute, { key: attribute });
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1143,11 +1143,11 @@ export class SQBuilder<
    * @description Populate relation model, with specific deep config
    * @description Same keys will be overwritten by last operator
    * @param {StrapiInputPopulateKey} attribute Attribute
-   * @param {SQBuilderCallback} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Relation Model
+   * @param {RQBuilderCallback} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Relation Model
    * @example
-   * new SQBuilder<TestModel>()
+   * new RQBuilder<TestModel>()
    *       .populateRelation("nested", () =>
-   *         new SQBuilder<NestedModel>().eq("id", "value").field("id")
+   *         new RQBuilder<NestedModel>().eq("id", "value").field("id")
    *       )
    * //     populate: {
    * //       nested: {
@@ -1162,7 +1162,7 @@ export class SQBuilder<
     RelationConfig extends EntityBuilderConfig
   >(
     attribute: K,
-    builderFactory: SQBuilderCallback<PopulateModel, {}, RelationConfig>
+    builderFactory: RQBuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
 
@@ -1177,7 +1177,7 @@ export class SQBuilder<
     };
 
     this._query.population.set(attribute, populate);
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1189,7 +1189,7 @@ export class SQBuilder<
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
-            ? BuildSQCallback<RelationConfig>
+            ? BuildRQCallback<RelationConfig>
             : P extends keyof Config["populates"]
             ? Config["populates"][P]
             : never;
@@ -1211,12 +1211,12 @@ export class SQBuilder<
    * @param {string} componentKey Dynamic zone component key
    * @param {builderFactory} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Dynamic zone component
    * @example
-   * new SQBuilder<TestModel>()
+   * new RQBuilder<TestModel>()
    *       .populateDynamic("nested", "component.1", () =>
-   *         new SQBuilder<NestedModel>().eq("id", "value")
+   *         new RQBuilder<NestedModel>().eq("id", "value")
    *       )
    *       .populateDynamic("nested", "component.2", () =>
-   *         new SQBuilder<NestedModel>().notEq("id", "value3")
+   *         new RQBuilder<NestedModel>().notEq("id", "value3")
    *       )
    * //      populate: {
    * //       nested: {
@@ -1237,7 +1237,7 @@ export class SQBuilder<
   >(
     attribute: K,
     componentKey: C,
-    builderFactory: SQBuilderCallback<PopulateModel, {}, RelationConfig>
+    builderFactory: RQBuilderCallback<PopulateModel, {}, RelationConfig>
   ) {
     const populateBuilder = builderFactory();
     const populate = this._query.population;
@@ -1259,7 +1259,7 @@ export class SQBuilder<
       dynamicQuery: currentDynamic,
     });
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1274,7 +1274,7 @@ export class SQBuilder<
             ? {
                 on: {
                   [D in keyof OnType<Config["populates"][P]> | C]: D extends C
-                    ? BuildSQCallback<RelationConfig>
+                    ? BuildRQCallback<RelationConfig>
                     : D extends keyof OnType<Config["populates"][P]>
                     ? OnType<Config["populates"][P]>[D]
                     : never;
@@ -1299,7 +1299,7 @@ export class SQBuilder<
    * @description Pagination by page, when defining the page parameter
    * @param {number} page Select page
    * @example
-   * new SQBuilder<TestModel>().page(1)
+   * new RQBuilder<TestModel>().page(1)
    * // { page: 1; }
    */
   public page<Page extends number>(page: Page) {
@@ -1313,7 +1313,7 @@ export class SQBuilder<
       this._query.pagination.page = page;
       this._query.pagination.paginationType = "page";
     }
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1337,7 +1337,7 @@ export class SQBuilder<
    * @description Pagination by page, when defining the pageSize parameter
    * @param pageSize
    * @example
-   * new SQBuilder<TestModel>().pageSize(26)
+   * new RQBuilder<TestModel>().pageSize(26)
    * // { pageSize: 26; }
    */
   public pageSize<PageSize extends number>(pageSize: PageSize) {
@@ -1352,7 +1352,7 @@ export class SQBuilder<
       this._query.pagination.paginationType = "page";
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1376,7 +1376,7 @@ export class SQBuilder<
    * @description Pagination by offset, when defining the start parameter
    * @param {number} start
    * @example
-   * new SQBuilder<TestModel>().start(5)
+   * new RQBuilder<TestModel>().start(5)
    * // { start: 5; }
    */
   public start<Start extends number>(start: Start) {
@@ -1390,7 +1390,7 @@ export class SQBuilder<
       this._query.pagination.page = start;
       this._query.pagination.paginationType = "limit";
     }
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1414,7 +1414,7 @@ export class SQBuilder<
    * @description Pagination by offset, when defining the limit parameter
    * @param {number} limit
    * @example
-   * new SQBuilder<TestModel>().limit(20)
+   * new RQBuilder<TestModel>().limit(20)
    * // { limit: 20; }
    */
   public limit<Limit extends number>(limit: Limit) {
@@ -1428,7 +1428,7 @@ export class SQBuilder<
       this._query.pagination.pageSize = limit;
       this._query.pagination.paginationType = "limit";
     }
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1454,12 +1454,12 @@ export class SQBuilder<
    * @description Set query data
    * @param data Data object
    * @example
-   * new SQBuilder<TestModel, TestModel>().data({ id: 1 })
+   * new RQBuilder<TestModel, TestModel>().data({ id: 1 })
    * // { data: { id: 1 } }
    */
   public data<D extends Data>(data: D) {
     this._query.data = data;
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1484,10 +1484,10 @@ export class SQBuilder<
   /**
    * @description Attach fields from other query builder
    * @description Same keys will be merged
-   * @param {SQBuilder} builder Embedded builder
+   * @param {RQBuilder} builder Embedded builder
    */
   public joinFields<DeepConfig extends EntityBuilderConfig>(
-    builder: SQBuilder<Model, {}, DeepConfig>
+    builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const currentFields = this._query.fields;
     const newFields = builder.getRawFields().values();
@@ -1496,7 +1496,7 @@ export class SQBuilder<
       currentFields.add(field);
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1519,10 +1519,10 @@ export class SQBuilder<
   /**
    * @description Attach sorts from other query builder
    * @description Same keys will be merged
-   * @param {SQBuilder} builder Embedded builder
+   * @param {RQBuilder} builder Embedded builder
    */
   public joinSort<DeepConfig extends EntityBuilderConfig>(
-    builder: SQBuilder<Model, {}, DeepConfig>
+    builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const currentSorts = this._query.sort;
     const joinSortsValues = builder.getRawSort().values();
@@ -1531,7 +1531,7 @@ export class SQBuilder<
       currentSorts.set(value.key, value);
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1553,7 +1553,7 @@ export class SQBuilder<
 
   /**
    * @description Attach filters from other query builder
-   * @param {SQBuilder} builder Embedded builder
+   * @param {RQBuilder} builder Embedded builder
    * @param {boolean} joinRootLogical Override root logical ?
    * @param {boolean} joinRootNegate Override root negate ?
    */
@@ -1562,7 +1562,7 @@ export class SQBuilder<
     JoinRootLogical extends boolean = false,
     JoinRootNegate extends boolean = false
   >(
-    builder: SQBuilder<Model, {}, DeepConfig>,
+    builder: RQBuilder<Model, {}, DeepConfig>,
     joinRootLogical?: JoinRootLogical,
     joinRootNegate?: JoinRootNegate
   ) {
@@ -1581,7 +1581,7 @@ export class SQBuilder<
       this._query.filters.negate = externalFilters.negate;
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1608,10 +1608,10 @@ export class SQBuilder<
   /**
    * @description Attach populates from other query builder
    * @description Same keys will be overwritten
-   * @param {SQBuilder} builder Embedded builder
+   * @param {RQBuilder} builder Embedded builder
    */
   public joinPopulate<DeepConfig extends EntityBuilderConfig>(
-    builder: SQBuilder<Model, {}, DeepConfig>
+    builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const currentPopulate = this._query.population;
     const newPopulateValues = builder.getRawPopulation().values();
@@ -1623,7 +1623,7 @@ export class SQBuilder<
       );
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1653,10 +1653,10 @@ export class SQBuilder<
 
   /**
    * @description Attach pagination from other query builder
-   * @param {SQBuilder} builder Embedded builder
+   * @param {RQBuilder} builder Embedded builder
    */
   public joinPagination<DeepConfig extends EntityBuilderConfig>(
-    builder: SQBuilder<Model, {}, DeepConfig>
+    builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const externalPagination = builder.getRawPagination();
 
@@ -1664,7 +1664,7 @@ export class SQBuilder<
       this._query.pagination = externalPagination;
     }
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1686,17 +1686,17 @@ export class SQBuilder<
 
   /**
    * @description Join query from other query builder to current query builder
-   * @param {SQBuilder} builder Embedded builder
+   * @param {RQBuilder} builder Embedded builder
    */
   public joinQuery<DeepConfig extends EntityBuilderConfig>(
-    builder: SQBuilder<Model, {}, DeepConfig>
+    builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     this.joinPopulate(builder);
     this.joinFilters(builder);
     this.joinSort(builder);
     this.joinFields(builder);
 
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1731,12 +1731,12 @@ export class SQBuilder<
    * @description Entity Service Specific
    * @param {string} code Locale code
    * @example
-   * new SQBuilder<TestModel>().locale("ua")
+   * new RQBuilder<TestModel>().locale("ua")
    * // { locale: "ua" }
    */
   public locale<L extends string>(code: L) {
     this._query.locale = code;
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1761,12 +1761,12 @@ export class SQBuilder<
    * @description Entity Service Specific
    * @param {PublicationStates} state Publication state
    * @example
-   * new SQBuilder<TestModel>().publicationState("live")
+   * new RQBuilder<TestModel>().publicationState("live")
    * // { publicationState: "live" }
    */
   public publicationState<P extends PublicationStates>(state: P) {
     this._query.publicationState = state;
-    return this as unknown as SQBuilder<
+    return this as unknown as RQBuilder<
       Model,
       Data,
       {
@@ -1793,7 +1793,7 @@ export class SQBuilder<
    * @return Query with dynamically generated query type
    */
   public build() {
-    return SQBuilder._buildQuery(this._query) as BuildSQOutput<Config>;
+    return RQBuilder._buildQuery(this._query) as BuildRQOutput<Config>;
   }
 
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -1807,17 +1807,17 @@ export class SQBuilder<
       builtQuery.fields = parsedFields;
     }
 
-    const parsedSort = SQBuilder._parseSort(rawQuery.sort);
+    const parsedSort = RQBuilder._parseSort(rawQuery.sort);
     if (parsedSort.length > 0) {
       builtQuery.sort = parsedSort;
     }
 
-    const parsedFilters = SQBuilder._parseFilters(rawQuery.filters);
+    const parsedFilters = RQBuilder._parseFilters(rawQuery.filters);
     if (_isDefined(parsedFilters)) {
       builtQuery.filters = parsedFilters;
     }
 
-    const parsedPopulation = SQBuilder._parsePopulate(rawQuery.population);
+    const parsedPopulation = RQBuilder._parsePopulate(rawQuery.population);
     if (_isDefined(parsedPopulation)) {
       builtQuery.populate = parsedPopulation;
     }
@@ -1917,7 +1917,7 @@ export class SQBuilder<
     const parsedFilters: any[] = [];
     for (let i = 0; i < filtersLength; i++) {
       const attributeQuery = attributeFilters[i];
-      const parsedAttribute = SQBuilder._parseAttributeFilter(attributeQuery);
+      const parsedAttribute = RQBuilder._parseAttributeFilter(attributeQuery);
       if (!_isDefined(parsedAttribute)) continue;
       parsedFilters.push(parsedAttribute);
     }
@@ -1953,12 +1953,12 @@ export class SQBuilder<
         for (const dynamicComponent of unparsedDynamicZone) {
           const componentKey = dynamicComponent.componentKey;
           parsedDynamicZone[componentKey] =
-            SQBuilder._buildQuery(dynamicComponent);
+            RQBuilder._buildQuery(dynamicComponent);
         }
 
         parsedPopulates[populateKey] = { on: parsedDynamicZone };
       } else if (nestedQuery) {
-        parsedPopulates[populateKey] = SQBuilder._buildQuery(nestedQuery);
+        parsedPopulates[populateKey] = RQBuilder._buildQuery(nestedQuery);
       } else {
         parsedPopulates[populateKey] = true;
       }
@@ -2018,18 +2018,18 @@ type InitialBuildConfig = {
   data: never;
 };
 
-type SQBuilderCallback<
+type RQBuilderCallback<
   Model extends object,
   Data extends object,
   Config extends EntityBuilderConfig
-> = () => SQBuilder<Model, Data, Config>;
+> = () => RQBuilder<Model, Data, Config>;
 
-type ParseSQBuilderPopulates<
+type ParseRQBuilderPopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
 > = keyof P extends never ? never : PopulateAll extends true ? "*" : P;
 
-type BuildSQCallback<Config extends EntityBuilderConfig> = {
+type BuildRQCallback<Config extends EntityBuilderConfig> = {
   fields: ParseList<Config["fields"]>;
   sort: ParseList<Config["sort"]>;
   filters: ParseFilters<
@@ -2037,14 +2037,14 @@ type BuildSQCallback<Config extends EntityBuilderConfig> = {
     Config["rootLogical"],
     Config["negate"]
   >;
-  populate: ParseSQBuilderPopulates<Config["populates"], Config["populateAll"]>;
+  populate: ParseRQBuilderPopulates<Config["populates"], Config["populateAll"]>;
 } extends infer Result
   ? {
       [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
     }
   : never;
 
-type BuildSQOutput<Config extends EntityBuilderConfig> = {
+type BuildRQOutput<Config extends EntityBuilderConfig> = {
   fields: ParseList<Config["fields"]>;
   sort: ParseList<Config["sort"]>;
   filters: ParseFilters<
@@ -2052,7 +2052,7 @@ type BuildSQOutput<Config extends EntityBuilderConfig> = {
     Config["rootLogical"],
     Config["negate"]
   >;
-  populate: ParseSQBuilderPopulates<Config["populates"], Config["populateAll"]>;
+  populate: ParseRQBuilderPopulates<Config["populates"], Config["populateAll"]>;
   page: Config["paginationType"] extends "page"
     ? Config["pagination"]["page"]
     : never;
