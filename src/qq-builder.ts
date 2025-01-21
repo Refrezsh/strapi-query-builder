@@ -46,7 +46,7 @@ export class QQBuilder<
    * @description Same keys will be merged
    * @example
    * new EQBuilder<Model>().fields(["name", "type"]);
-   * // { fields: ["name", "type"] }
+   * // { select: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
   public fields<
@@ -86,7 +86,7 @@ export class QQBuilder<
    * @description Same keys will be merged
    * @example
    * new EQBuilder<Model>().field("key");
-   * // { fields: ["key"] }
+   * // { select: ["key"] }
    * @param {StrapiSingleFieldInput} field Single field
    */
   public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
@@ -118,10 +118,10 @@ export class QQBuilder<
    * @param {SortKey} attribute Attribute
    * @example
    * new EQBuilder<Model>().sortAsc("attribute");
-   * // { sort: [{"attribute": "asc"}] }
+   * // { orderBy: [{"attribute": "asc"}] }
    * @example
    * new EQBuilder<Model>().sortAsc("parentKey.childKey");
-   * // { sort: [{"parentKey": { "childKey": "asc" }}]}
+   * // { orderBy: [{"parentKey": { "childKey": "asc" }}]}
    */
   public sortAsc<K extends SortKey<Model>>(attribute: K) {
     return this.sort(attribute, "asc");
@@ -134,10 +134,10 @@ export class QQBuilder<
    * @param {SortKey} attribute Attribute
    * @example
    * new EQBuilder<Model>().sortAsc("attribute");
-   * // { sort: [{"attribute": "desc"}] }
+   * // { orderBy: [{"attribute": "desc"}] }
    * @example
    * new EQBuilder<Model>().sortAsc("parentKey.childKey");
-   * // { sort: [{"parentKey": { "childKey": "desc" }}]}
+   * // { orderBy: [{"parentKey": { "childKey": "desc" }}]}
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
     return this.sort(attribute, "desc");
@@ -150,7 +150,7 @@ export class QQBuilder<
    * @param {SortKey[]} attributes Attributes list
    * @example
    * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
-   * // { sort: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
+   * // { orderBy: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
     attributes: K
@@ -165,7 +165,7 @@ export class QQBuilder<
    * @param {SortKey[]} attributes Attributes list
    * @example
    * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
-   * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
+   * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
     attributes: K
@@ -181,7 +181,7 @@ export class QQBuilder<
    * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
    * @example
    * new EQBuilder<Model>().sort("attribute", "asc");
-   * // { sort: [{"attribute": "asc"}] }
+   * // { orderBy: [{"attribute": "asc"}] }
    */
   public sort<K extends SortKey<Model>, D extends StrapiSortOptions>(
     attribute: K,
@@ -214,7 +214,7 @@ export class QQBuilder<
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
    * new EQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
-   * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
+   * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sorts<
     K extends readonly [SortKey<Model>, ...SortKey<Model>[]],
@@ -253,7 +253,7 @@ export class QQBuilder<
    * @description Default - "$and"
    * @example
    * new EQBuilder<Model>().or();
-   * // { filters: { $or: [...] }}
+   * // { where: { $or: [...] }}
    */
   public or() {
     this._query.filters.rootLogical = "$or";
@@ -280,7 +280,7 @@ export class QQBuilder<
    * @description Default - "$and"
    * @example
    * new EQBuilder<Model>().and();
-   * // { filters: { $and: [...] }}
+   * // { where: { $and: [...] }}
    */
   public and() {
     this._query.filters.rootLogical = "$and";
@@ -307,7 +307,7 @@ export class QQBuilder<
    * @description Default - false
    * @example
    * new EQBuilder<Model>().not();
-   * // { filters: { $not: { $and: [...] }}}
+   * // { where: { $not: { $and: [...] }}}
    */
   public not() {
     this._query.filters.negate = true;
@@ -338,7 +338,7 @@ export class QQBuilder<
    *       new EQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
    *     )
    * // {
-   * //    filters: {
+   * //    where: {
    * //      $and: [
    * //        { options: { $eq: "value" } },
    * //        { $or: [{ name: { $eq: "value1" } }, { name: { $eq: "value2" } }] }
@@ -390,7 +390,7 @@ export class QQBuilder<
    *         new EQBuilder<NestedModel>().eq("id", "value")
    *       )
    * // {
-   * //      filters: {
+   * //      where: {
    * //        $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
    * //      }
    * // }
@@ -446,7 +446,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().eq("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $eq: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $eq: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -463,7 +463,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notEq("key", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $eq: "value" } }} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $eq: "value" } }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -480,7 +480,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().eqi("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $eqi: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $eqi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -497,7 +497,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notEqi("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $eqi: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $eqi: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -514,7 +514,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().ne("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $ne: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $ne: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -531,7 +531,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().nei("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $nei: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $nei: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Filter key
    * @param {SingleAttributeType} value Filter by value
    */
@@ -548,7 +548,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().contains("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $contains: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $contains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -565,7 +565,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notContains("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $notContains: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $notContains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -582,7 +582,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().containsi("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $containsi: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $containsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -599,7 +599,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notContainsi("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $notContainsi: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $notContainsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -616,7 +616,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().in("attribute", ["value1", "value2"]);
-   * // { filters: { $and: [{ attribute: { $in: ["value1", "value2"] }} ] }}
+   * // { where: { $and: [{ attribute: { $in: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter in by values
    */
@@ -633,7 +633,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
-   * // { filters: { $and: [{ attribute: { $notIn: ["value1", "value2"] }} ] }}
+   * // { where: { $and: [{ attribute: { $notIn: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter not in by values
    */
@@ -650,7 +650,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().between("attribute", ["value1", "value2"]);
-   * // { filters: { $and: [{ attribute: { $between: ["value1", "value2"] }} ] }}
+   * // { where: { $and: [{ attribute: { $between: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
    */
@@ -667,7 +667,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
-   * // { filters: { $and: [{ attribute: { $not: { $between: ["value1", "value2"] }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $between: ["value1", "value2"] }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
    */
@@ -684,7 +684,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().lt("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $lt: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $lt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -701,7 +701,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notLt("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $lt: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $lt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -718,7 +718,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().lte("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $lte: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $lte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -735,7 +735,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notLte("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $lte: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $lte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -752,7 +752,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().gt("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $gt: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $gt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -769,7 +769,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notGt("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $gt: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $gt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -786,7 +786,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().gte("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $gte: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $gte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -803,7 +803,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notGte("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $gte: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $gte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -820,7 +820,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().startsWith("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $startsWith: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $startsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -837,7 +837,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notStartsWith("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $startsWith: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $startsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -854,7 +854,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().endsWith("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $endsWith: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $endsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -871,7 +871,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notEndsWith("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $endsWith: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $endsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
    */
@@ -888,7 +888,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().null("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $null: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $null: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
    */
@@ -905,7 +905,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @example
    * new EQBuilder<Model>().notNull("attribute", "value");
-   * // { filters: { $and: [{ attribute: { $notNull: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $notNull: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
    */
@@ -925,7 +925,7 @@ export class QQBuilder<
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
    * new EQBuilder<Model>().filter("attribute", "$eq", "value");
-   * // { filters: { $and: [{ attribute: { $eq: "value" }} ] }}
+   * // { where: { $and: [{ attribute: { $eq: "value" }} ] }}
    */
   public filter<
     K extends FilterOperatorKey<Model>,
@@ -966,7 +966,7 @@ export class QQBuilder<
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
    * new EQBuilder<Model>().filterNot("attribute", "$eq", "value");
-   * // { filters: { $and: [{ attribute: { $not: { $eq: "value" }}} ] }}
+   * // { where: { $and: [{ attribute: { $not: { $eq: "value" }}} ] }}
    */
   public filterNot<
     K extends FilterOperatorKey<Model>,
@@ -1008,7 +1008,7 @@ export class QQBuilder<
    * @description If any other populate presented, it will be ignored
    * @example
    * new EQBuilder<Model>().populateAll();
-   * // { populate: "*" }
+   * // { populate: true }
    */
   public populateAll() {
     this._query.population.set("*", { key: "*" });
@@ -1122,8 +1122,8 @@ export class QQBuilder<
    *       )
    * //     populate: {
    * //       nested: {
-   * //         fields: ["id"];
-   * //         filters: { $and: [{ id: { $eq: "value" } }] };
+   * //         select: ["id"];
+   * //         where: { $and: [{ id: { $eq: "value" } }] };
    * //       }
    * //     }
    */
@@ -1190,9 +1190,9 @@ export class QQBuilder<
    * //      populate: {
    * //       nested: {
    * //         on: {
-   * //           "component.1": { filters: { $and: [{ id: { $eq: "value" } }] } };
+   * //           "component.1": { where: { $and: [{ id: { $eq: "value" } }] } };
    * //           "component.2": {
-   * //             filters: { $and: [{ id: { $not: { $eq: "value3" } } }] };
+   * //             where: { $and: [{ id: { $not: { $eq: "value3" } } }] };
    * //           };
    * //         };
    * //       };
@@ -1267,7 +1267,7 @@ export class QQBuilder<
    * @param {number} start
    * @example
    * new EQBuilder<TestModel>().start(5)
-   * // { start: 5; }
+   * // { offset: 5; }
    */
   public start<Start extends number>(start: Start) {
     if (!this._query.pagination) {
@@ -1599,7 +1599,7 @@ export class QQBuilder<
 
   //<editor-fold desc="Build process">
   /**
-   * @description Build the current query into the final Strapi Entity Service format
+   * @description Build the current query into the final Query Engine format
    * @return Query with dynamically generated query type
    */
   public build() {
