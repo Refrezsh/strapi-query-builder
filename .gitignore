@@ -4,3 +4,4 @@ coverage
 lib
 .env
 *performance-v8.log
+*.tgz
