@@ -1,11 +1,10 @@
-const EQBuilder = require("../lib/cjs/index").EQBuilder;
-
+const SQBuilder = require("../lib/cjs/index").SQBuilder;
 const times = 500;
 
 let query;
 const assigmentStarts = performance.now();
 for (let i = 0; i < times; i++) {
-  query = new EQBuilder();
+  query = new SQBuilder();
   query
     .fields([
       "GoodName",
@@ -25,7 +24,7 @@ for (let i = 0; i < times; i++) {
     .between("RetailPriceWithDiscount", [1, 2])
     .eq("Slug", "slug")
     .filterRelation("Deep", () =>
-      new EQBuilder()
+      new SQBuilder()
         .or()
         .between("RetailPrice", [3, 4])
         .between("RetailPriceWithDiscount", [1, 2])
@@ -51,36 +50,36 @@ for (let i = 0; i < times; i++) {
       "RetailPriceWithDiscount",
       "PriceDiscountPercent",
     ])
-    .populateRelation("A1", () => new EQBuilder().fields(["Link"]))
-    .populateRelation("A2", () => new EQBuilder().fields(["Link"]))
-    .populateRelation("A3", () => new EQBuilder().fields(["Link"]))
-    .populateRelation("A4", () => new EQBuilder().fields(["Link"]))
+    .populateRelation("A1", () => new SQBuilder().fields(["Link"]))
+    .populateRelation("A2", () => new SQBuilder().fields(["Link"]))
+    .populateRelation("A3", () => new SQBuilder().fields(["Link"]))
+    .populateRelation("A4", () => new SQBuilder().fields(["Link"]))
     .populateDynamic("Layout", "layout.alert", () =>
-      new EQBuilder().field("type").field("message")
+      new SQBuilder().field("type").field("message")
     )
     .populateDynamic("Layout", "layout.article", () =>
-      new EQBuilder().field("Article")
+      new SQBuilder().field("Article")
     )
     .populateDynamic("Layout", "layout.slider", () =>
-      new EQBuilder()
+      new SQBuilder()
         .field("SliderTimeoutSeconds")
         .field("EnableDots")
         .field("Arrows")
         .field("AutoScroll")
         .field("SideImages")
-        .populateRelation("Slides", () => new EQBuilder().fields(["Link"]))
+        .populateRelation("Slides", () => new SQBuilder().fields(["Link"]))
     )
     .populateDynamic("Layout", "layout.cardlist", () =>
-      new EQBuilder().field("Title").field("Description")
+      new SQBuilder().field("Title").field("Description")
     )
     .populateDynamic("Layout", "layout.faq", () =>
-      new EQBuilder().fields(["Question", "Answer"])
+      new SQBuilder().fields(["Question", "Answer"])
     )
     .populateDynamic("Layout", "ts.goods-tab", () =>
-      new EQBuilder().fields(["Label"])
+      new SQBuilder().fields(["Label"])
     )
     .populateDynamic("Layout", "layout.social-links", () =>
-      new EQBuilder().fields(["Link", "Alt"])
+      new SQBuilder().fields(["Link", "Alt"])
     )
     .page(1)
     .pageSize(26);

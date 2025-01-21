@@ -1,9 +1,9 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("type snapshot", () => {
   it("should create right type", () => {
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .field("name")
       .field("id")
       .fields(["options", "description"])
@@ -11,23 +11,23 @@ describe("type snapshot", () => {
       .sortsAsc(["options"])
       .eq("name", "test")
       .filterDeep(() =>
-        new EQBuilder<TestModel>()
+        new SQBuilder<TestModel>()
           .eq("name", "value")
           .notEq("options", "test32332")
           .filterDeep(() =>
-            new EQBuilder<TestModel>()
+            new SQBuilder<TestModel>()
               .notEq("description", "test32332")
               .eq("nested.name", "value")
           )
       )
       .populateDynamic("nested", "component.1", () =>
-        new EQBuilder<NestedModel>().eq("id", "value")
+        new SQBuilder<NestedModel>().eq("id", "value")
       )
       .populateDynamic("nested", "component.2", () =>
-        new EQBuilder<NestedModel>().notEq("id", "value3")
+        new SQBuilder<NestedModel>().notEq("id", "value3")
       )
       .populateRelation("nestedList", () =>
-        new EQBuilder<NestedModel>().eq("name", "value2").field("name")
+        new SQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .build();
 

@@ -1,4 +1,4 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 
 export interface NestedModel {
   id: string;
@@ -17,13 +17,13 @@ export interface TestModel {
 
 describe("Fields types", () => {
   it("should produce single type with constant types and right value", () => {
-    const singleType = new EQBuilder<TestModel>().field("id").build();
+    const singleType = new SQBuilder<TestModel>().field("id").build();
     const singleTypeId: "id" = singleType.fields[0];
     expect(singleTypeId).toEqual("id");
   });
 
   it("should product multiple type with chain", () => {
-    const multipleTypes = new EQBuilder<TestModel>()
+    const multipleTypes = new SQBuilder<TestModel>()
       .field("id")
       .field("name")
       .field("description")
@@ -38,7 +38,7 @@ describe("Fields types", () => {
   });
 
   it("should merge same keys and work with fields", () => {
-    const withUnionTypes = new EQBuilder<TestModel>()
+    const withUnionTypes = new SQBuilder<TestModel>()
       .field("id")
       .fields(["name", "description"])
       .field("options")
@@ -58,7 +58,7 @@ describe("Fields types", () => {
     const primitiveFilters: {
       fields: ["notNestedEnumeration"];
       filters: { $and: [{ notNestedEnumeration: { $eq: "value" } }] };
-    } = new EQBuilder<TestModel>()
+    } = new SQBuilder<TestModel>()
       .field("notNestedEnumeration")
       .eq("notNestedEnumeration", "value")
       .build();

@@ -45,7 +45,7 @@ export class QQBuilder<
    * @description Select specific fields
    * @description Same keys will be merged
    * @example
-   * new EQBuilder<Model>().fields(["name", "type"]);
+   * new QQBuilder<Model>().fields(["name", "type"]);
    * // { select: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
@@ -85,7 +85,7 @@ export class QQBuilder<
    * @description Select specific field
    * @description Same keys will be merged
    * @example
-   * new EQBuilder<Model>().field("key");
+   * new QQBuilder<Model>().field("key");
    * // { select: ["key"] }
    * @param {StrapiSingleFieldInput} field Single field
    */
@@ -117,10 +117,10 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new EQBuilder<Model>().sortAsc("attribute");
+   * new QQBuilder<Model>().sortAsc("attribute");
    * // { orderBy: [{"attribute": "asc"}] }
    * @example
-   * new EQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new QQBuilder<Model>().sortAsc("parentKey.childKey");
    * // { orderBy: [{"parentKey": { "childKey": "asc" }}]}
    */
   public sortAsc<K extends SortKey<Model>>(attribute: K) {
@@ -133,10 +133,10 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new EQBuilder<Model>().sortAsc("attribute");
+   * new QQBuilder<Model>().sortAsc("attribute");
    * // { orderBy: [{"attribute": "desc"}] }
    * @example
-   * new EQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new QQBuilder<Model>().sortAsc("parentKey.childKey");
    * // { orderBy: [{"parentKey": { "childKey": "desc" }}]}
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
@@ -149,7 +149,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new QQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { orderBy: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
@@ -164,7 +164,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new QQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
@@ -180,7 +180,7 @@ export class QQBuilder<
    * @param {SortKey} attribute Attribute
    * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
    * @example
-   * new EQBuilder<Model>().sort("attribute", "asc");
+   * new QQBuilder<Model>().sort("attribute", "asc");
    * // { orderBy: [{"attribute": "asc"}] }
    */
   public sort<K extends SortKey<Model>, D extends StrapiSortOptions>(
@@ -213,7 +213,7 @@ export class QQBuilder<
    * @param {SortKey} attributes Attribute list
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
-   * new EQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
+   * new QQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
    * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sorts<
@@ -252,7 +252,7 @@ export class QQBuilder<
    * @description Change root logical to "$or"
    * @description Default - "$and"
    * @example
-   * new EQBuilder<Model>().or();
+   * new QQBuilder<Model>().or();
    * // { where: { $or: [...] }}
    */
   public or() {
@@ -279,7 +279,7 @@ export class QQBuilder<
    * @description Change root logical to "$and"
    * @description Default - "$and"
    * @example
-   * new EQBuilder<Model>().and();
+   * new QQBuilder<Model>().and();
    * // { where: { $and: [...] }}
    */
   public and() {
@@ -306,7 +306,7 @@ export class QQBuilder<
    * @description Add "$not" before root logical
    * @description Default - false
    * @example
-   * new EQBuilder<Model>().not();
+   * new QQBuilder<Model>().not();
    * // { where: { $not: { $and: [...] }}}
    */
   public not() {
@@ -332,10 +332,10 @@ export class QQBuilder<
   /**
    * @description Add deep filters for current model
    * @example
-   * new EQBuilder<TestModel>()
+   * new QQBuilder<TestModel>()
    *     .eq("options", "value")
    *     .filterDeep(() =>
-   *       new EQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
+   *       new QQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
    *     )
    * // {
    * //    where: {
@@ -385,9 +385,9 @@ export class QQBuilder<
   /**
    * @description Add related model filters
    * @example
-   * new EQBuilder<TestModel>()
+   * new QQBuilder<TestModel>()
    *       .filterRelation("nested", () =>
-   *         new EQBuilder<NestedModel>().eq("id", "value")
+   *         new QQBuilder<NestedModel>().eq("id", "value")
    *       )
    * // {
    * //      where: {
@@ -445,7 +445,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().eq("attribute", "value");
+   * new QQBuilder<Model>().eq("attribute", "value");
    * // { where: { $and: [{ attribute: { $eq: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -462,7 +462,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notEq("key", "value");
+   * new QQBuilder<Model>().notEq("key", "value");
    * // { where: { $and: [{ attribute: { $not: { $eq: "value" } }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -479,7 +479,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().eqi("attribute", "value");
+   * new QQBuilder<Model>().eqi("attribute", "value");
    * // { where: { $and: [{ attribute: { $eqi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -496,7 +496,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notEqi("attribute", "value");
+   * new QQBuilder<Model>().notEqi("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $eqi: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -513,7 +513,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().ne("attribute", "value");
+   * new QQBuilder<Model>().ne("attribute", "value");
    * // { where: { $and: [{ attribute: { $ne: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -530,7 +530,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().nei("attribute", "value");
+   * new QQBuilder<Model>().nei("attribute", "value");
    * // { where: { $and: [{ attribute: { $nei: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Filter key
    * @param {SingleAttributeType} value Filter by value
@@ -547,7 +547,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().contains("attribute", "value");
+   * new QQBuilder<Model>().contains("attribute", "value");
    * // { where: { $and: [{ attribute: { $contains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -564,7 +564,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notContains("attribute", "value");
+   * new QQBuilder<Model>().notContains("attribute", "value");
    * // { where: { $and: [{ attribute: { $notContains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -581,7 +581,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().containsi("attribute", "value");
+   * new QQBuilder<Model>().containsi("attribute", "value");
    * // { where: { $and: [{ attribute: { $containsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -598,7 +598,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notContainsi("attribute", "value");
+   * new QQBuilder<Model>().notContainsi("attribute", "value");
    * // { where: { $and: [{ attribute: { $notContainsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -615,7 +615,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().in("attribute", ["value1", "value2"]);
+   * new QQBuilder<Model>().in("attribute", ["value1", "value2"]);
    * // { where: { $and: [{ attribute: { $in: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter in by values
@@ -632,7 +632,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
+   * new QQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
    * // { where: { $and: [{ attribute: { $notIn: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter not in by values
@@ -649,7 +649,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().between("attribute", ["value1", "value2"]);
+   * new QQBuilder<Model>().between("attribute", ["value1", "value2"]);
    * // { where: { $and: [{ attribute: { $between: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
@@ -666,7 +666,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
+   * new QQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
    * // { where: { $and: [{ attribute: { $not: { $between: ["value1", "value2"] }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
@@ -683,7 +683,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().lt("attribute", "value");
+   * new QQBuilder<Model>().lt("attribute", "value");
    * // { where: { $and: [{ attribute: { $lt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -700,7 +700,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notLt("attribute", "value");
+   * new QQBuilder<Model>().notLt("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $lt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -717,7 +717,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().lte("attribute", "value");
+   * new QQBuilder<Model>().lte("attribute", "value");
    * // { where: { $and: [{ attribute: { $lte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -734,7 +734,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notLte("attribute", "value");
+   * new QQBuilder<Model>().notLte("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $lte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -751,7 +751,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().gt("attribute", "value");
+   * new QQBuilder<Model>().gt("attribute", "value");
    * // { where: { $and: [{ attribute: { $gt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -768,7 +768,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notGt("attribute", "value");
+   * new QQBuilder<Model>().notGt("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $gt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -785,7 +785,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().gte("attribute", "value");
+   * new QQBuilder<Model>().gte("attribute", "value");
    * // { where: { $and: [{ attribute: { $gte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -802,7 +802,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notGte("attribute", "value");
+   * new QQBuilder<Model>().notGte("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $gte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -819,7 +819,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().startsWith("attribute", "value");
+   * new QQBuilder<Model>().startsWith("attribute", "value");
    * // { where: { $and: [{ attribute: { $startsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -836,7 +836,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notStartsWith("attribute", "value");
+   * new QQBuilder<Model>().notStartsWith("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $startsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -853,7 +853,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().endsWith("attribute", "value");
+   * new QQBuilder<Model>().endsWith("attribute", "value");
    * // { where: { $and: [{ attribute: { $endsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -870,7 +870,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notEndsWith("attribute", "value");
+   * new QQBuilder<Model>().notEndsWith("attribute", "value");
    * // { where: { $and: [{ attribute: { $not: { $endsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -887,7 +887,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().null("attribute", "value");
+   * new QQBuilder<Model>().null("attribute", "value");
    * // { where: { $and: [{ attribute: { $null: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
@@ -904,7 +904,7 @@ export class QQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notNull("attribute", "value");
+   * new QQBuilder<Model>().notNull("attribute", "value");
    * // { where: { $and: [{ attribute: { $notNull: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
@@ -924,7 +924,7 @@ export class QQBuilder<
    * @param {EntityFilterAttributes} filter Filter operator, "$eq", "$contains", etc.
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
-   * new EQBuilder<Model>().filter("attribute", "$eq", "value");
+   * new QQBuilder<Model>().filter("attribute", "$eq", "value");
    * // { where: { $and: [{ attribute: { $eq: "value" }} ] }}
    */
   public filter<
@@ -965,7 +965,7 @@ export class QQBuilder<
    * @param {EntityFilterAttributes} filter Filter operator, "$eq", "$contains", etc.
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
-   * new EQBuilder<Model>().filterNot("attribute", "$eq", "value");
+   * new QQBuilder<Model>().filterNot("attribute", "$eq", "value");
    * // { where: { $and: [{ attribute: { $not: { $eq: "value" }}} ] }}
    */
   public filterNot<
@@ -1007,7 +1007,7 @@ export class QQBuilder<
    * @description Populate all relations of model
    * @description If any other populate presented, it will be ignored
    * @example
-   * new EQBuilder<Model>().populateAll();
+   * new QQBuilder<Model>().populateAll();
    * // { populate: true }
    */
   public populateAll() {
@@ -1035,7 +1035,7 @@ export class QQBuilder<
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey} attribute Attribute
    * @example
-   * new EQBuilder<Model>().populate("relation");
+   * new QQBuilder<Model>().populate("relation");
    * // { populate: { relation: true } }
    */
   public populate<K extends StrapiInputPopulateKey<Model>>(attribute: K) {
@@ -1069,7 +1069,7 @@ export class QQBuilder<
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey[]} attributes Attributes list
    * @example
-   * new EQBuilder<Model>().populates(["relation1", "relation2"]);
+   * new QQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
    */
   public populates<
@@ -1116,9 +1116,9 @@ export class QQBuilder<
    * @param {StrapiInputPopulateKey} attribute Attribute
    * @param {QQBuilderCallback} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Relation Model
    * @example
-   * new EQBuilder<TestModel>()
+   * new QQBuilder<TestModel>()
    *       .populateRelation("nested", () =>
-   *         new EQBuilder<NestedModel>().eq("id", "value").field("id")
+   *         new QQBuilder<NestedModel>().eq("id", "value").field("id")
    *       )
    * //     populate: {
    * //       nested: {
@@ -1180,12 +1180,12 @@ export class QQBuilder<
    * @param {string} componentKey Dynamic zone component key
    * @param {builderFactory} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Dynamic zone component
    * @example
-   * new EQBuilder<TestModel>()
+   * new QQBuilder<TestModel>()
    *       .populateDynamic("nested", "component.1", () =>
-   *         new EQBuilder<NestedModel>().eq("id", "value")
+   *         new QQBuilder<NestedModel>().eq("id", "value")
    *       )
    *       .populateDynamic("nested", "component.2", () =>
-   *         new EQBuilder<NestedModel>().notEq("id", "value3")
+   *         new QQBuilder<NestedModel>().notEq("id", "value3")
    *       )
    * //      populate: {
    * //       nested: {
@@ -1266,7 +1266,7 @@ export class QQBuilder<
    * @description Pagination by offset, when defining the start parameter
    * @param {number} start
    * @example
-   * new EQBuilder<TestModel>().start(5)
+   * new QQBuilder<TestModel>().start(5)
    * // { offset: 5; }
    */
   public start<Start extends number>(start: Start) {
@@ -1302,7 +1302,7 @@ export class QQBuilder<
    * @description Pagination by offset, when defining the limit parameter
    * @param {number} limit
    * @example
-   * new EQBuilder<TestModel>().limit(20)
+   * new QQBuilder<TestModel>().limit(20)
    * // { limit: 20; }
    */
   public limit<Limit extends number>(limit: Limit) {
@@ -1340,7 +1340,7 @@ export class QQBuilder<
    * @description Set query data
    * @param data Data object
    * @example
-   * new EQBuilder<TestModel, TestModel>().data({ id: 1 })
+   * new QQBuilder<TestModel, TestModel>().data({ id: 1 })
    * // { data: { id: 1 } }
    */
   public data<D extends Data>(data: D) {

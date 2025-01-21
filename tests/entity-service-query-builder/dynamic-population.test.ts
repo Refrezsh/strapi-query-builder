@@ -1,4 +1,4 @@
-import { EQBuilder } from "../../lib/cjs";
+import { SQBuilder } from "../../lib/cjs";
 
 const mainKey = "key1";
 const mainKey2 = "key2";
@@ -8,12 +8,12 @@ const keyType2 = "ketType2";
 
 describe("Dynamic zone operator", () => {
   it("should create proper query", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populateDynamic(mainKey, keyType1, () =>
-        new EQBuilder().sortAsc(keyType1)
+        new SQBuilder().sortAsc(keyType1)
       )
       .populateDynamic(mainKey, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
@@ -24,21 +24,21 @@ describe("Dynamic zone operator", () => {
   });
 
   it("should create multiple dynamic zones query", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populateDynamic(mainKey, keyType1, () =>
-        new EQBuilder().sortAsc(keyType1)
+        new SQBuilder().sortAsc(keyType1)
       )
       .populateDynamic(mainKey, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
       )
       .populateDynamic(mainKey2, keyType1, () =>
-        new EQBuilder().sortAsc(keyType1)
+        new SQBuilder().sortAsc(keyType1)
       )
       .populateDynamic(mainKey2, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
@@ -49,21 +49,21 @@ describe("Dynamic zone operator", () => {
   });
 
   it("should select last population for same dynamic zones", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populateDynamic(mainKey, keyType1, () =>
-        new EQBuilder().sortAsc(keyType2)
+        new SQBuilder().sortAsc(keyType2)
       )
       .populateDynamic(mainKey, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
       )
       .populateDynamic(mainKey, keyType1, () =>
-        new EQBuilder().sortAsc(keyType1)
+        new SQBuilder().sortAsc(keyType1)
       )
       .populateDynamic(mainKey, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
@@ -74,29 +74,29 @@ describe("Dynamic zone operator", () => {
   });
 
   it("should join", () => {
-    const query1 = new EQBuilder()
+    const query1 = new SQBuilder()
       .populateDynamic(mainKey, keyType1, () =>
-        new EQBuilder().sortAsc(keyType1)
+        new SQBuilder().sortAsc(keyType1)
       )
       .populateDynamic(mainKey, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
       );
 
-    const query2 = new EQBuilder()
+    const query2 = new SQBuilder()
       .populateDynamic(mainKey2, keyType1, () =>
-        new EQBuilder().sortAsc(keyType1)
+        new SQBuilder().sortAsc(keyType1)
       )
       .populateDynamic(mainKey2, keyType2, () =>
-        new EQBuilder()
+        new SQBuilder()
           .field(keyType2)
           .in(keyType2, [keyType2])
           .eq(keyType2, keyType2)
       );
 
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .joinPopulate(query1)
       .joinPopulate(query2)
       .build();

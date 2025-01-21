@@ -1,4 +1,4 @@
-import { EQBuilder } from "../../lib/cjs";
+import { SQBuilder } from "../../lib/cjs";
 
 const attribute = "attribute";
 const value = "value";
@@ -54,14 +54,14 @@ const getTwoResults = (type: string, negateRoot = false) =>
 describe("Filters operator", () => {
   it("should create filter query for all operators", () => {
     for (const atr of attributeFilters) {
-      const builtQuery = new EQBuilder().filter(attribute, atr, value).build();
+      const builtQuery = new SQBuilder().filter(attribute, atr, value).build();
       expect(builtQuery).toEqual(getResult(atr));
     }
   });
 
   it("should create query for single attribute and all operators", () => {
     for (const atr of attributeFilters) {
-      const builtQuery = new EQBuilder()
+      const builtQuery = new SQBuilder()
         .and()
         .filter(attribute, atr, value)
         .filter(attribute, atr, value)
@@ -73,7 +73,7 @@ describe("Filters operator", () => {
 
   it("should create query with not for single attribute and all operators", () => {
     for (const atr of attributeFilters) {
-      const builtQuery = new EQBuilder()
+      const builtQuery = new SQBuilder()
         .filterNot(attribute, atr, value)
         .build();
 
@@ -83,7 +83,7 @@ describe("Filters operator", () => {
 
   it("should add not operator to root query", () => {
     for (const atr of attributeFilters) {
-      const builtQuery = new EQBuilder()
+      const builtQuery = new SQBuilder()
         .not()
         .and()
         .filter(attribute, atr, value)
@@ -95,8 +95,8 @@ describe("Filters operator", () => {
   });
 
   it("should join filters", () => {
-    const query = new EQBuilder().eq(attribute, value);
-    const builtQuery = new EQBuilder().joinFilters(query).build();
+    const query = new SQBuilder().eq(attribute, value);
+    const builtQuery = new SQBuilder().joinFilters(query).build();
 
     expect(builtQuery).toEqual(getResult("$eq"));
   });

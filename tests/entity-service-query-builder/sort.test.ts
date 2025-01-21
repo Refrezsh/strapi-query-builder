@@ -1,4 +1,4 @@
-import { EQBuilder } from "../../lib/cjs";
+import { SQBuilder } from "../../lib/cjs";
 
 const oneKey = "key";
 const secondKey = "key2";
@@ -16,19 +16,19 @@ const getFewDiffSorts = (key1: string, key2: string) => ({
 
 describe("Sort operator", () => {
   it("should sort by string", () => {
-    const builtQuery = new EQBuilder().sortAsc(oneKey).build();
+    const builtQuery = new SQBuilder().sortAsc(oneKey).build();
 
     expect(builtQuery).toEqual(getOneSort(oneKey));
   });
 
   it("should sort desc order", () => {
-    const builtQuery = new EQBuilder().sortDesc(oneKey).build();
+    const builtQuery = new SQBuilder().sortDesc(oneKey).build();
 
     expect(builtQuery).not.toEqual(getOneSort(oneKey));
   });
 
   it("should sort by chain", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .sortAsc(oneKey)
       .sortDesc(secondKey)
       .build();
@@ -37,7 +37,7 @@ describe("Sort operator", () => {
   });
 
   it("should change root direction", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .sortAsc(oneKey)
       .sortAsc(secondKey)
       .build();
@@ -46,7 +46,7 @@ describe("Sort operator", () => {
   });
 
   it("should merge same keys", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .sortsAsc([oneKey, oneKey, oneKey])
       .build();
 
@@ -54,13 +54,13 @@ describe("Sort operator", () => {
   });
 
   it("should sort by string array", () => {
-    const builtQuery = new EQBuilder().sortsAsc([oneKey, secondKey]).build();
+    const builtQuery = new SQBuilder().sortsAsc([oneKey, secondKey]).build();
 
     expect(builtQuery).toEqual(getFewSorts(oneKey, secondKey));
   });
 
   it("should create deep sort", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .sortAsc(`${oneKey}.${secondKey}`)
       .build();
 
@@ -68,8 +68,8 @@ describe("Sort operator", () => {
   });
 
   it("should join sort", () => {
-    const query1 = new EQBuilder().sortsAsc([oneKey]);
-    const query2 = new EQBuilder().sortAsc(secondKey);
+    const query1 = new SQBuilder().sortsAsc([oneKey]);
+    const query2 = new SQBuilder().sortAsc(secondKey);
 
     const builtQuery = query1.joinSort(query2).build();
 

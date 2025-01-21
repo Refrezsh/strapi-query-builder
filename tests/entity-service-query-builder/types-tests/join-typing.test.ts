@@ -1,14 +1,14 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("Join functions", () => {
   it("should join fields", () => {
-    const secondBuilder = new EQBuilder<TestModel>().fields([
+    const secondBuilder = new SQBuilder<TestModel>().fields([
       "options",
       "name",
     ]);
 
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .field("id")
       .joinFields(secondBuilder)
       .build();
@@ -21,9 +21,9 @@ describe("Join functions", () => {
   });
 
   it("should join sorts", () => {
-    const secondBuilder = new EQBuilder<TestModel>().sortAsc("nested.id");
+    const secondBuilder = new SQBuilder<TestModel>().sortAsc("nested.id");
 
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .sortAsc("name")
       .joinSort(secondBuilder)
       .build();
@@ -37,14 +37,14 @@ describe("Join functions", () => {
   });
 
   it("should join filters without merging root logical", () => {
-    const secondBuilder = new EQBuilder<TestModel>()
+    const secondBuilder = new SQBuilder<TestModel>()
       .not()
       .or()
       .filterRelation("nested", () =>
-        new EQBuilder<NestedModel>().not().or().eq("id", "1")
+        new SQBuilder<NestedModel>().not().or().eq("id", "1")
       );
 
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .eq("description", "value")
       .joinFilters(secondBuilder)
       .build();
@@ -64,14 +64,14 @@ describe("Join functions", () => {
   });
 
   it("should join filters with merging root logical", () => {
-    const secondBuilder = new EQBuilder<TestModel>()
+    const secondBuilder = new SQBuilder<TestModel>()
       .not()
       .or()
       .filterRelation("nested", () =>
-        new EQBuilder<NestedModel>().not().or().eq("id", "1")
+        new SQBuilder<NestedModel>().not().or().eq("id", "1")
       );
 
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .eq("description", "value")
       .joinFilters(secondBuilder, true, true)
       .build();
@@ -95,15 +95,15 @@ describe("Join functions", () => {
   });
 
   it("should join populate", () => {
-    const secondBuilder = new EQBuilder<TestModel>().populateDynamic(
+    const secondBuilder = new SQBuilder<TestModel>().populateDynamic(
       "nestedList",
       "component.1",
-      () => new EQBuilder<NestedModel>().field("name")
+      () => new SQBuilder<NestedModel>().field("name")
     );
 
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new EQBuilder<NestedModel>().field("id")
+        new SQBuilder<NestedModel>().field("id")
       )
       .joinPopulate(secondBuilder)
       .build();
@@ -123,8 +123,8 @@ describe("Join functions", () => {
   });
 
   it("should join pagination on query", () => {
-    const secondQuery = new EQBuilder<TestModel>().page(1).pageSize(26);
-    const query = new EQBuilder<TestModel>()
+    const secondQuery = new SQBuilder<TestModel>().page(1).pageSize(26);
+    const query = new SQBuilder<TestModel>()
       .field("id")
       .joinPagination(secondQuery)
       .build();
@@ -137,8 +137,8 @@ describe("Join functions", () => {
   });
 
   it("should join and override pagination on query", () => {
-    const secondQuery = new EQBuilder<TestModel>().start(1).limit(26);
-    const query = new EQBuilder<TestModel>()
+    const secondQuery = new SQBuilder<TestModel>().start(1).limit(26);
+    const query = new SQBuilder<TestModel>()
       .field("id")
       .page(1)
       .pageSize(40)
@@ -153,24 +153,24 @@ describe("Join functions", () => {
   });
 
   it("should join all", () => {
-    const joinQuery = new EQBuilder<TestModel>()
+    const joinQuery = new SQBuilder<TestModel>()
       .field("id")
       .sortAsc("id")
       .eq("id", "1")
       .filterRelation("nested", () =>
-        new EQBuilder<NestedModel>().eq("name", "value")
+        new SQBuilder<NestedModel>().eq("name", "value")
       )
       .populate("nested");
 
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .field("description")
       .sortAsc("options")
       .eq("notNestedEnumeration", "test")
       .filterDeep(() =>
-        new EQBuilder<TestModel>().or().eq("name", "test").eq("name", "test2")
+        new SQBuilder<TestModel>().or().eq("name", "test").eq("name", "test2")
       )
       .populateRelation("nestedList", () =>
-        new EQBuilder<NestedModel>().field("name")
+        new SQBuilder<NestedModel>().field("name")
       )
       .joinQuery(joinQuery)
       .build();

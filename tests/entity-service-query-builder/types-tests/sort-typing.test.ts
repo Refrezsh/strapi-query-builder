@@ -1,9 +1,9 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 import { TestModel } from "./fields-typing.test";
 
 describe("Sort types", () => {
   it("should produce single nested asc sort", () => {
-    const nestedType = new EQBuilder<TestModel>()
+    const nestedType = new SQBuilder<TestModel>()
       .sortAsc("nested.name")
       .build();
 
@@ -12,7 +12,7 @@ describe("Sort types", () => {
   });
 
   it("should produce asc sort with nested and default keys", () => {
-    const combinedWithOtherSort = new EQBuilder<TestModel>()
+    const combinedWithOtherSort = new SQBuilder<TestModel>()
       .sortAsc("nested.name")
       .sortAsc("name")
       .sortDesc("options")
@@ -31,7 +31,7 @@ describe("Sort types", () => {
   });
 
   it("should sort wit list of key and single sort keys", () => {
-    const nestedSortWithKeys = new EQBuilder<TestModel>()
+    const nestedSortWithKeys = new SQBuilder<TestModel>()
       .sortsAsc(["nested.name", "name"])
       .sortDesc("options")
       .build();
@@ -49,7 +49,7 @@ describe("Sort types", () => {
   });
 
   it("should create cross type", () => {
-    const withFields = new EQBuilder<TestModel>()
+    const withFields = new SQBuilder<TestModel>()
       .sortsDesc(["name"])
       .field("options")
       .build();

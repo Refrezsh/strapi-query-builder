@@ -1,4 +1,4 @@
-import { EQBuilder } from "../../lib/cjs";
+import { SQBuilder } from "../../lib/cjs";
 
 const getAllPopulate = { populate: "*" };
 
@@ -23,13 +23,13 @@ const fullQuery = {
 
 describe("Population operator", () => {
   it("should populate all", () => {
-    const builtQuery = new EQBuilder().populateAll().build();
+    const builtQuery = new SQBuilder().populateAll().build();
 
     expect(builtQuery).toEqual(getAllPopulate);
   });
 
   it("should merge same keys", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populates([key1, key2])
       .populate(key1)
       .build();
@@ -38,9 +38,9 @@ describe("Population operator", () => {
   });
 
   it("should create nested population", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populateRelation(key1, () => {
-        return new EQBuilder()
+        return new SQBuilder()
           .sortAsc(key1)
           .sort(key2, "desc")
           .fields([key1, key2])
@@ -53,9 +53,9 @@ describe("Population operator", () => {
   });
 
   it("should skip illegal operators of population", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populateRelation(key1, () => {
-        return new EQBuilder()
+        return new SQBuilder()
           .page(1)
           .pageSize(26)
           .locale("ua")
@@ -72,10 +72,10 @@ describe("Population operator", () => {
   });
 
   it("should select last population of same keys", () => {
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populate(key1)
       .populateRelation(key1, () => {
-        return new EQBuilder()
+        return new SQBuilder()
           .sortAsc(key1)
           .sort(key2, "desc")
           .fields([key1, key2])
@@ -88,16 +88,16 @@ describe("Population operator", () => {
   });
 
   it("should merge population", () => {
-    const sortQuery = new EQBuilder().sortsAsc([key1]).sortDesc(key2);
+    const sortQuery = new SQBuilder().sortsAsc([key1]).sortDesc(key2);
 
-    const fieldsQuery = new EQBuilder().fields([key1, key2]);
+    const fieldsQuery = new SQBuilder().fields([key1, key2]);
 
-    const filtersQuery = new EQBuilder().eq(key1, key1).contains(key2, key2);
+    const filtersQuery = new SQBuilder().eq(key1, key1).contains(key2, key2);
 
-    const builtQuery = new EQBuilder()
+    const builtQuery = new SQBuilder()
       .populate(key1)
       .populateRelation(key1, () => {
-        return new EQBuilder()
+        return new SQBuilder()
           .joinSort(sortQuery)
           .joinFields(fieldsQuery)
           .joinFilters(filtersQuery);

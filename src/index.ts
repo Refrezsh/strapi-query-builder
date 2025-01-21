@@ -1,2 +1,2 @@
-export { EQBuilder } from "./eq-builder";
+export { SQBuilder } from "./sq-builder";
 export { QQBuilder } from "./qq-builder";

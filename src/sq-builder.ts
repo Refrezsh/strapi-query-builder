@@ -25,7 +25,7 @@ import {
   TransformNestedKeys,
 } from "./query-types-util";
 
-export class EQBuilder<
+export class SQBuilder<
   Model extends object,
   Data extends object = {},
   Config extends EntityBuilderConfig = InitialBuildConfig
@@ -46,7 +46,7 @@ export class EQBuilder<
    * @description Select specific fields
    * @description Same keys will be merged
    * @example
-   * new EQBuilder<Model>().fields(["name", "type"]);
+   * new SQBuilder<Model>().fields(["name", "type"]);
    * // { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
@@ -64,7 +64,7 @@ export class EQBuilder<
       currentFields.add(field);
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -88,13 +88,13 @@ export class EQBuilder<
    * @description Select specific field
    * @description Same keys will be merged
    * @example
-   * new EQBuilder<Model>().field("key");
+   * new SQBuilder<Model>().field("key");
    * // { fields: ["key"] }
    * @param {StrapiSingleFieldInput} field Single field
    */
   public field<F extends StrapiSingleFieldInput<Model>>(field: F) {
     this._query.fields.add(field);
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -122,10 +122,10 @@ export class EQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new EQBuilder<Model>().sortAsc("attribute");
+   * new SQBuilder<Model>().sortAsc("attribute");
    * // { sort: [{"attribute": "asc"}] }
    * @example
-   * new EQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new SQBuilder<Model>().sortAsc("parentKey.childKey");
    * // { sort: [{"parentKey": { "childKey": "asc" }}]}
    */
   public sortAsc<K extends SortKey<Model>>(attribute: K) {
@@ -138,10 +138,10 @@ export class EQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new EQBuilder<Model>().sortAsc("attribute");
+   * new SQBuilder<Model>().sortAsc("attribute");
    * // { sort: [{"attribute": "desc"}] }
    * @example
-   * new EQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new SQBuilder<Model>().sortAsc("parentKey.childKey");
    * // { sort: [{"parentKey": { "childKey": "desc" }}]}
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
@@ -154,7 +154,7 @@ export class EQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new SQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
   public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
@@ -169,7 +169,7 @@ export class EQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new EQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new SQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
@@ -185,7 +185,7 @@ export class EQBuilder<
    * @param {SortKey} attribute Attribute
    * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
    * @example
-   * new EQBuilder<Model>().sort("attribute", "asc");
+   * new SQBuilder<Model>().sort("attribute", "asc");
    * // { sort: [{"attribute": "asc"}] }
    */
   public sort<K extends SortKey<Model>, D extends StrapiSortOptions>(
@@ -193,7 +193,7 @@ export class EQBuilder<
     direction: D
   ) {
     this._query.sort.set(attribute, { key: attribute, order: direction });
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -220,7 +220,7 @@ export class EQBuilder<
    * @param {SortKey} attributes Attribute list
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
-   * new EQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
+   * new SQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sorts<
@@ -235,7 +235,7 @@ export class EQBuilder<
       currentSorts.set(attribute, { key: attribute, order: direction });
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -261,12 +261,12 @@ export class EQBuilder<
    * @description Change root logical to "$or"
    * @description Default - "$and"
    * @example
-   * new EQBuilder<Model>().or();
+   * new SQBuilder<Model>().or();
    * // { filters: { $or: [...] }}
    */
   public or() {
     this._query.filters.rootLogical = "$or";
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -290,12 +290,12 @@ export class EQBuilder<
    * @description Change root logical to "$and"
    * @description Default - "$and"
    * @example
-   * new EQBuilder<Model>().and();
+   * new SQBuilder<Model>().and();
    * // { filters: { $and: [...] }}
    */
   public and() {
     this._query.filters.rootLogical = "$and";
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -319,12 +319,12 @@ export class EQBuilder<
    * @description Add "$not" before root logical
    * @description Default - false
    * @example
-   * new EQBuilder<Model>().not();
+   * new SQBuilder<Model>().not();
    * // { filters: { $not: { $and: [...] }}}
    */
   public not() {
     this._query.filters.negate = true;
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -347,10 +347,10 @@ export class EQBuilder<
   /**
    * @description Add deep filters for current model
    * @example
-   * new EQBuilder<TestModel>()
+   * new SQBuilder<TestModel>()
    *     .eq("options", "value")
    *     .filterDeep(() =>
-   *       new EQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
+   *       new SQBuilder<TestModel>().or().eq("name", "value1").eq("name", "value2")
    *     )
    * // {
    * //    filters: {
@@ -372,7 +372,7 @@ export class EQBuilder<
       nested: deepBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -402,9 +402,9 @@ export class EQBuilder<
   /**
    * @description Add related model filters
    * @example
-   * new EQBuilder<TestModel>()
+   * new SQBuilder<TestModel>()
    *       .filterRelation("nested", () =>
-   *         new EQBuilder<NestedModel>().eq("id", "value")
+   *         new SQBuilder<NestedModel>().eq("id", "value")
    *       )
    * // {
    * //      filters: {
@@ -429,7 +429,7 @@ export class EQBuilder<
         relationBuilder.getRawFilters() as unknown as StrapiRawFilters<{}>,
     });
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -464,7 +464,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().eq("attribute", "value");
+   * new SQBuilder<Model>().eq("attribute", "value");
    * // { filters: { $and: [{ attribute: { $eq: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -481,7 +481,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notEq("key", "value");
+   * new SQBuilder<Model>().notEq("key", "value");
    * // { filters: { $and: [{ attribute: { $not: { $eq: "value" } }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -498,7 +498,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().eqi("attribute", "value");
+   * new SQBuilder<Model>().eqi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $eqi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -515,7 +515,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notEqi("attribute", "value");
+   * new SQBuilder<Model>().notEqi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $eqi: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -532,7 +532,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().ne("attribute", "value");
+   * new SQBuilder<Model>().ne("attribute", "value");
    * // { filters: { $and: [{ attribute: { $ne: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -549,7 +549,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().nei("attribute", "value");
+   * new SQBuilder<Model>().nei("attribute", "value");
    * // { filters: { $and: [{ attribute: { $nei: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Filter key
    * @param {SingleAttributeType} value Filter by value
@@ -566,7 +566,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().contains("attribute", "value");
+   * new SQBuilder<Model>().contains("attribute", "value");
    * // { filters: { $and: [{ attribute: { $contains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -583,7 +583,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notContains("attribute", "value");
+   * new SQBuilder<Model>().notContains("attribute", "value");
    * // { filters: { $and: [{ attribute: { $notContains: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -600,7 +600,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().containsi("attribute", "value");
+   * new SQBuilder<Model>().containsi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $containsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -617,7 +617,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notContainsi("attribute", "value");
+   * new SQBuilder<Model>().notContainsi("attribute", "value");
    * // { filters: { $and: [{ attribute: { $notContainsi: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -634,7 +634,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().in("attribute", ["value1", "value2"]);
+   * new SQBuilder<Model>().in("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $in: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter in by values
@@ -651,7 +651,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
+   * new SQBuilder<Model>().notIn("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $notIn: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter not in by values
@@ -668,7 +668,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().between("attribute", ["value1", "value2"]);
+   * new SQBuilder<Model>().between("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $between: ["value1", "value2"] }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
@@ -685,7 +685,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
+   * new SQBuilder<Model>().notBetween("attribute", ["value1", "value2"]);
    * // { filters: { $and: [{ attribute: { $not: { $between: ["value1", "value2"] }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {MultipleAttributeType} value Filter by tuple
@@ -702,7 +702,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().lt("attribute", "value");
+   * new SQBuilder<Model>().lt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $lt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -719,7 +719,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notLt("attribute", "value");
+   * new SQBuilder<Model>().notLt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $lt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -736,7 +736,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().lte("attribute", "value");
+   * new SQBuilder<Model>().lte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $lte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -753,7 +753,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notLte("attribute", "value");
+   * new SQBuilder<Model>().notLte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $lte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -770,7 +770,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().gt("attribute", "value");
+   * new SQBuilder<Model>().gt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $gt: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -787,7 +787,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notGt("attribute", "value");
+   * new SQBuilder<Model>().notGt("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $gt: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -804,7 +804,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().gte("attribute", "value");
+   * new SQBuilder<Model>().gte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $gte: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -821,7 +821,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notGte("attribute", "value");
+   * new SQBuilder<Model>().notGte("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $gte: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -838,7 +838,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().startsWith("attribute", "value");
+   * new SQBuilder<Model>().startsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $startsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -855,7 +855,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notStartsWith("attribute", "value");
+   * new SQBuilder<Model>().notStartsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $startsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -872,7 +872,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().endsWith("attribute", "value");
+   * new SQBuilder<Model>().endsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $endsWith: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -889,7 +889,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notEndsWith("attribute", "value");
+   * new SQBuilder<Model>().notEndsWith("attribute", "value");
    * // { filters: { $and: [{ attribute: { $not: { $endsWith: "value" }}} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {SingleAttributeType} value Filter by value
@@ -906,7 +906,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().null("attribute", "value");
+   * new SQBuilder<Model>().null("attribute", "value");
    * // { filters: { $and: [{ attribute: { $null: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
@@ -923,7 +923,7 @@ export class EQBuilder<
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
    * @example
-   * new EQBuilder<Model>().notNull("attribute", "value");
+   * new SQBuilder<Model>().notNull("attribute", "value");
    * // { filters: { $and: [{ attribute: { $notNull: "value" }} ] }}
    * @param {FilterOperatorKey} attribute Attribute
    * @param {boolean} value True/false
@@ -943,7 +943,7 @@ export class EQBuilder<
    * @param {EntityFilterAttributes} filter Filter operator, "$eq", "$contains", etc.
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
-   * new EQBuilder<Model>().filter("attribute", "$eq", "value");
+   * new SQBuilder<Model>().filter("attribute", "$eq", "value");
    * // { filters: { $and: [{ attribute: { $eq: "value" }} ] }}
    */
   public filter<
@@ -958,7 +958,7 @@ export class EQBuilder<
       negate: false,
     });
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -986,7 +986,7 @@ export class EQBuilder<
    * @param {EntityFilterAttributes} filter Filter operator, "$eq", "$contains", etc.
    * @param {MultipleAttributeType | SingleAttributeType} value Attribute value, depends on filter operator
    * @example
-   * new EQBuilder<Model>().filterNot("attribute", "$eq", "value");
+   * new SQBuilder<Model>().filterNot("attribute", "$eq", "value");
    * // { filters: { $and: [{ attribute: { $not: { $eq: "value" }}} ] }}
    */
   public filterNot<
@@ -1001,7 +1001,7 @@ export class EQBuilder<
       negate: true,
     });
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1030,12 +1030,12 @@ export class EQBuilder<
    * @description Populate all relations of model
    * @description If any other populate presented, it will be ignored
    * @example
-   * new EQBuilder<Model>().populateAll();
+   * new SQBuilder<Model>().populateAll();
    * // { populate: "*" }
    */
   public populateAll() {
     this._query.population.set("*", { key: "*" });
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1060,12 +1060,12 @@ export class EQBuilder<
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey} attribute Attribute
    * @example
-   * new EQBuilder<Model>().populate("relation");
+   * new SQBuilder<Model>().populate("relation");
    * // { populate: { relation: true } }
    */
   public populate<K extends StrapiInputPopulateKey<Model>>(attribute: K) {
     this._query.population.set(attribute, { key: attribute });
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1096,7 +1096,7 @@ export class EQBuilder<
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey[]} attributes Attributes list
    * @example
-   * new EQBuilder<Model>().populates(["relation1", "relation2"]);
+   * new SQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
    */
   public populates<
@@ -1113,7 +1113,7 @@ export class EQBuilder<
       populate.set(attribute, { key: attribute });
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1145,9 +1145,9 @@ export class EQBuilder<
    * @param {StrapiInputPopulateKey} attribute Attribute
    * @param {EQBuilderCallback} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Relation Model
    * @example
-   * new EQBuilder<TestModel>()
+   * new SQBuilder<TestModel>()
    *       .populateRelation("nested", () =>
-   *         new EQBuilder<NestedModel>().eq("id", "value").field("id")
+   *         new SQBuilder<NestedModel>().eq("id", "value").field("id")
    *       )
    * //     populate: {
    * //       nested: {
@@ -1177,7 +1177,7 @@ export class EQBuilder<
     };
 
     this._query.population.set(attribute, populate);
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1211,12 +1211,12 @@ export class EQBuilder<
    * @param {string} componentKey Dynamic zone component key
    * @param {builderFactory} builderFactory Fabric function that returns builder with filters, sort, fields and other deep populate builders for Dynamic zone component
    * @example
-   * new EQBuilder<TestModel>()
+   * new SQBuilder<TestModel>()
    *       .populateDynamic("nested", "component.1", () =>
-   *         new EQBuilder<NestedModel>().eq("id", "value")
+   *         new SQBuilder<NestedModel>().eq("id", "value")
    *       )
    *       .populateDynamic("nested", "component.2", () =>
-   *         new EQBuilder<NestedModel>().notEq("id", "value3")
+   *         new SQBuilder<NestedModel>().notEq("id", "value3")
    *       )
    * //      populate: {
    * //       nested: {
@@ -1259,7 +1259,7 @@ export class EQBuilder<
       dynamicQuery: currentDynamic,
     });
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1299,7 +1299,7 @@ export class EQBuilder<
    * @description Pagination by page, when defining the page parameter
    * @param {number} page Select page
    * @example
-   * new EQBuilder<TestModel>().page(1)
+   * new SQBuilder<TestModel>().page(1)
    * // { page: 1; }
    */
   public page<Page extends number>(page: Page) {
@@ -1313,7 +1313,7 @@ export class EQBuilder<
       this._query.pagination.page = page;
       this._query.pagination.paginationType = "page";
     }
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1337,7 +1337,7 @@ export class EQBuilder<
    * @description Pagination by page, when defining the pageSize parameter
    * @param pageSize
    * @example
-   * new EQBuilder<TestModel>().pageSize(26)
+   * new SQBuilder<TestModel>().pageSize(26)
    * // { pageSize: 26; }
    */
   public pageSize<PageSize extends number>(pageSize: PageSize) {
@@ -1352,7 +1352,7 @@ export class EQBuilder<
       this._query.pagination.paginationType = "page";
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1376,7 +1376,7 @@ export class EQBuilder<
    * @description Pagination by offset, when defining the start parameter
    * @param {number} start
    * @example
-   * new EQBuilder<TestModel>().start(5)
+   * new SQBuilder<TestModel>().start(5)
    * // { start: 5; }
    */
   public start<Start extends number>(start: Start) {
@@ -1390,7 +1390,7 @@ export class EQBuilder<
       this._query.pagination.page = start;
       this._query.pagination.paginationType = "limit";
     }
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1414,7 +1414,7 @@ export class EQBuilder<
    * @description Pagination by offset, when defining the limit parameter
    * @param {number} limit
    * @example
-   * new EQBuilder<TestModel>().limit(20)
+   * new SQBuilder<TestModel>().limit(20)
    * // { limit: 20; }
    */
   public limit<Limit extends number>(limit: Limit) {
@@ -1428,7 +1428,7 @@ export class EQBuilder<
       this._query.pagination.pageSize = limit;
       this._query.pagination.paginationType = "limit";
     }
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1454,12 +1454,12 @@ export class EQBuilder<
    * @description Set query data
    * @param data Data object
    * @example
-   * new EQBuilder<TestModel, TestModel>().data({ id: 1 })
+   * new SQBuilder<TestModel, TestModel>().data({ id: 1 })
    * // { data: { id: 1 } }
    */
   public data<D extends Data>(data: D) {
     this._query.data = data;
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1484,10 +1484,10 @@ export class EQBuilder<
   /**
    * @description Attach fields from other query builder
    * @description Same keys will be merged
-   * @param {EQBuilder} builder Embedded builder
+   * @param {SQBuilder} builder Embedded builder
    */
   public joinFields<DeepConfig extends EntityBuilderConfig>(
-    builder: EQBuilder<Model, {}, DeepConfig>
+    builder: SQBuilder<Model, {}, DeepConfig>
   ) {
     const currentFields = this._query.fields;
     const newFields = builder.getRawFields().values();
@@ -1496,7 +1496,7 @@ export class EQBuilder<
       currentFields.add(field);
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1519,10 +1519,10 @@ export class EQBuilder<
   /**
    * @description Attach sorts from other query builder
    * @description Same keys will be merged
-   * @param {EQBuilder} builder Embedded builder
+   * @param {SQBuilder} builder Embedded builder
    */
   public joinSort<DeepConfig extends EntityBuilderConfig>(
-    builder: EQBuilder<Model, {}, DeepConfig>
+    builder: SQBuilder<Model, {}, DeepConfig>
   ) {
     const currentSorts = this._query.sort;
     const joinSortsValues = builder.getRawSort().values();
@@ -1531,7 +1531,7 @@ export class EQBuilder<
       currentSorts.set(value.key, value);
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1553,7 +1553,7 @@ export class EQBuilder<
 
   /**
    * @description Attach filters from other query builder
-   * @param {EQBuilder} builder Embedded builder
+   * @param {SQBuilder} builder Embedded builder
    * @param {boolean} joinRootLogical Override root logical ?
    * @param {boolean} joinRootNegate Override root negate ?
    */
@@ -1562,7 +1562,7 @@ export class EQBuilder<
     JoinRootLogical extends boolean = false,
     JoinRootNegate extends boolean = false
   >(
-    builder: EQBuilder<Model, {}, DeepConfig>,
+    builder: SQBuilder<Model, {}, DeepConfig>,
     joinRootLogical?: JoinRootLogical,
     joinRootNegate?: JoinRootNegate
   ) {
@@ -1581,7 +1581,7 @@ export class EQBuilder<
       this._query.filters.negate = externalFilters.negate;
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1608,10 +1608,10 @@ export class EQBuilder<
   /**
    * @description Attach populates from other query builder
    * @description Same keys will be overwritten
-   * @param {EQBuilder} builder Embedded builder
+   * @param {SQBuilder} builder Embedded builder
    */
   public joinPopulate<DeepConfig extends EntityBuilderConfig>(
-    builder: EQBuilder<Model, {}, DeepConfig>
+    builder: SQBuilder<Model, {}, DeepConfig>
   ) {
     const currentPopulate = this._query.population;
     const newPopulateValues = builder.getRawPopulation().values();
@@ -1623,7 +1623,7 @@ export class EQBuilder<
       );
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1653,10 +1653,10 @@ export class EQBuilder<
 
   /**
    * @description Attach pagination from other query builder
-   * @param {EQBuilder} builder Embedded builder
+   * @param {SQBuilder} builder Embedded builder
    */
   public joinPagination<DeepConfig extends EntityBuilderConfig>(
-    builder: EQBuilder<Model, {}, DeepConfig>
+    builder: SQBuilder<Model, {}, DeepConfig>
   ) {
     const externalPagination = builder.getRawPagination();
 
@@ -1664,7 +1664,7 @@ export class EQBuilder<
       this._query.pagination = externalPagination;
     }
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1686,17 +1686,17 @@ export class EQBuilder<
 
   /**
    * @description Join query from other query builder to current query builder
-   * @param {EQBuilder} builder Embedded builder
+   * @param {SQBuilder} builder Embedded builder
    */
   public joinQuery<DeepConfig extends EntityBuilderConfig>(
-    builder: EQBuilder<Model, {}, DeepConfig>
+    builder: SQBuilder<Model, {}, DeepConfig>
   ) {
     this.joinPopulate(builder);
     this.joinFilters(builder);
     this.joinSort(builder);
     this.joinFields(builder);
 
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1731,12 +1731,12 @@ export class EQBuilder<
    * @description Entity Service Specific
    * @param {string} code Locale code
    * @example
-   * new EQBuilder<TestModel>().locale("ua")
+   * new SQBuilder<TestModel>().locale("ua")
    * // { locale: "ua" }
    */
   public locale<L extends string>(code: L) {
     this._query.locale = code;
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1761,12 +1761,12 @@ export class EQBuilder<
    * @description Entity Service Specific
    * @param {PublicationStates} state Publication state
    * @example
-   * new EQBuilder<TestModel>().publicationState("live")
+   * new SQBuilder<TestModel>().publicationState("live")
    * // { publicationState: "live" }
    */
   public publicationState<P extends PublicationStates>(state: P) {
     this._query.publicationState = state;
-    return this as unknown as EQBuilder<
+    return this as unknown as SQBuilder<
       Model,
       Data,
       {
@@ -1793,7 +1793,7 @@ export class EQBuilder<
    * @return Query with dynamically generated query type
    */
   public build() {
-    return EQBuilder._buildQuery(this._query) as BuildEQOutput<Config>;
+    return SQBuilder._buildQuery(this._query) as BuildEQOutput<Config>;
   }
 
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -1807,17 +1807,17 @@ export class EQBuilder<
       builtQuery.fields = parsedFields;
     }
 
-    const parsedSort = EQBuilder._parseSort(rawQuery.sort);
+    const parsedSort = SQBuilder._parseSort(rawQuery.sort);
     if (parsedSort.length > 0) {
       builtQuery.sort = parsedSort;
     }
 
-    const parsedFilters = EQBuilder._parseFilters(rawQuery.filters);
+    const parsedFilters = SQBuilder._parseFilters(rawQuery.filters);
     if (_isDefined(parsedFilters)) {
       builtQuery.filters = parsedFilters;
     }
 
-    const parsedPopulation = EQBuilder._parsePopulate(rawQuery.population);
+    const parsedPopulation = SQBuilder._parsePopulate(rawQuery.population);
     if (_isDefined(parsedPopulation)) {
       builtQuery.populate = parsedPopulation;
     }
@@ -1917,7 +1917,7 @@ export class EQBuilder<
     const parsedFilters: any[] = [];
     for (let i = 0; i < filtersLength; i++) {
       const attributeQuery = attributeFilters[i];
-      const parsedAttribute = EQBuilder._parseAttributeFilter(attributeQuery);
+      const parsedAttribute = SQBuilder._parseAttributeFilter(attributeQuery);
       if (!_isDefined(parsedAttribute)) continue;
       parsedFilters.push(parsedAttribute);
     }
@@ -1953,12 +1953,12 @@ export class EQBuilder<
         for (const dynamicComponent of unparsedDynamicZone) {
           const componentKey = dynamicComponent.componentKey;
           parsedDynamicZone[componentKey] =
-            EQBuilder._buildQuery(dynamicComponent);
+            SQBuilder._buildQuery(dynamicComponent);
         }
 
         parsedPopulates[populateKey] = { on: parsedDynamicZone };
       } else if (nestedQuery) {
-        parsedPopulates[populateKey] = EQBuilder._buildQuery(nestedQuery);
+        parsedPopulates[populateKey] = SQBuilder._buildQuery(nestedQuery);
       } else {
         parsedPopulates[populateKey] = true;
       }
@@ -2022,7 +2022,7 @@ type EQBuilderCallback<
   Model extends object,
   Data extends object,
   Config extends EntityBuilderConfig
-> = () => EQBuilder<Model, Data, Config>;
+> = () => SQBuilder<Model, Data, Config>;
 
 type ParseEQBuilderPopulates<
   P extends Record<string, any>,

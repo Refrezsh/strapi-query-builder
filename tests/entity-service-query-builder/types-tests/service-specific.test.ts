@@ -1,16 +1,16 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 import { TestModel } from "./fields-typing.test";
 
 describe("Service specific types", () => {
   it("should set live publication state", () => {
-    const query = new EQBuilder<TestModel>().publicationState("live").build();
+    const query = new SQBuilder<TestModel>().publicationState("live").build();
     const typedQuery: { publicationState: "live" } = query;
 
     expect(typedQuery.publicationState).toEqual("live");
   });
 
   it("should set preivew publication state", () => {
-    const query = new EQBuilder<TestModel>()
+    const query = new SQBuilder<TestModel>()
       .publicationState("preview")
       .build();
     const typedQuery: { publicationState: "preview" } = query;
@@ -19,7 +19,7 @@ describe("Service specific types", () => {
   });
 
   it("should set any locale", () => {
-    const query = new EQBuilder<TestModel>().locale("ua").build();
+    const query = new SQBuilder<TestModel>().locale("ua").build();
     const typedQuery: { locale: "ua" } = query;
 
     expect(typedQuery.locale).toEqual("ua");

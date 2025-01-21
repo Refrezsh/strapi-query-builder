@@ -1,14 +1,14 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("population types", () => {
   it("should create right populateRelation type", () => {
-    const population = new EQBuilder<TestModel>()
+    const population = new SQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new EQBuilder<NestedModel>().eq("id", "value").field("id")
+        new SQBuilder<NestedModel>().eq("id", "value").field("id")
       )
       .populateRelation("nestedList", () =>
-        new EQBuilder<NestedModel>().eq("name", "value2").field("name")
+        new SQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .build();
 
@@ -41,12 +41,12 @@ describe("population types", () => {
   });
 
   it("should override prev populates wen populate all", () => {
-    const population = new EQBuilder<TestModel>()
+    const population = new SQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new EQBuilder<NestedModel>().eq("id", "value").field("id")
+        new SQBuilder<NestedModel>().eq("id", "value").field("id")
       )
       .populateRelation("nestedList", () =>
-        new EQBuilder<NestedModel>().eq("name", "value2").field("name")
+        new SQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .populateAll()
       .build();
@@ -57,7 +57,7 @@ describe("population types", () => {
   });
 
   it("should add populate all for key", () => {
-    const populate = new EQBuilder<TestModel>()
+    const populate = new SQBuilder<TestModel>()
       .populate("nested")
       .populate("nestedList")
       .build();
@@ -70,7 +70,7 @@ describe("population types", () => {
   });
 
   it("should add populate all for key list", () => {
-    const populate = new EQBuilder<TestModel>()
+    const populate = new SQBuilder<TestModel>()
       .populates(["nested", "nestedList"])
       .build();
 
@@ -83,12 +83,12 @@ describe("population types", () => {
   });
 
   it("should merge same keys", () => {
-    const populate = new EQBuilder<TestModel>()
+    const populate = new SQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new EQBuilder<NestedModel>().eq("id", "value").field("id")
+        new SQBuilder<NestedModel>().eq("id", "value").field("id")
       )
       .populateRelation("nested", () =>
-        new EQBuilder<NestedModel>().notEq("name", "value2")
+        new SQBuilder<NestedModel>().notEq("name", "value2")
       )
       .build();
 
@@ -105,15 +105,15 @@ describe("population types", () => {
   });
 
   it("should create right populateDynamic type", () => {
-    const dynamicZone = new EQBuilder<TestModel>()
+    const dynamicZone = new SQBuilder<TestModel>()
       .populateDynamic("nested", "component.1", () =>
-        new EQBuilder<NestedModel>().eq("id", "value")
+        new SQBuilder<NestedModel>().eq("id", "value")
       )
       .populateDynamic("nested", "component.2", () =>
-        new EQBuilder<NestedModel>().notEq("id", "value1")
+        new SQBuilder<NestedModel>().notEq("id", "value1")
       )
       .populateDynamic("nested", "component.2", () =>
-        new EQBuilder<NestedModel>().notEq("id", "value3")
+        new SQBuilder<NestedModel>().notEq("id", "value3")
       )
       .build();
 

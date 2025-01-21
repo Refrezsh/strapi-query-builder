@@ -1,9 +1,9 @@
 import { TestModel } from "./fields-typing.test";
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 
 describe("Data types", () => {
   it("should set data with right type", () => {
-    const query = new EQBuilder<TestModel, Partial<TestModel>>()
+    const query = new SQBuilder<TestModel, Partial<TestModel>>()
       .data({ id: "2" })
       .build();
 

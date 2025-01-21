@@ -1,9 +1,9 @@
-import { EQBuilder } from "../../../lib/cjs";
+import { SQBuilder } from "../../../lib/cjs";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
 describe("Filter types", () => {
   it("should create empty filters", () => {
-    const eqFilter: {} = new EQBuilder<TestModel>()
+    const eqFilter: {} = new SQBuilder<TestModel>()
       .or()
       .not()
       .and()
@@ -15,7 +15,7 @@ describe("Filter types", () => {
   });
 
   it("should update root logical to $or", () => {
-    const eqFilter = new EQBuilder<TestModel>().or().eq("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().or().eq("nested", "1").build();
 
     const filters = eqFilter.filters.$or;
     expect(filters).toBeDefined();
@@ -27,7 +27,7 @@ describe("Filter types", () => {
   });
 
   it("should update root logical to $not $or", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .not()
       .or()
       .eq("nested", "1")
@@ -43,7 +43,7 @@ describe("Filter types", () => {
   });
 
   it("should leave $and after filters chain", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .not()
       .or()
       .or()
@@ -74,7 +74,7 @@ describe("Filter types", () => {
           ];
         };
       };
-    } = new EQBuilder<TestModel>()
+    } = new SQBuilder<TestModel>()
       .not()
       .or()
       .eq("name", "1")
@@ -105,11 +105,11 @@ describe("Filter types", () => {
   });
 
   it("should produce type for deep filters", () => {
-    const nestedBuilder = new EQBuilder<TestModel>()
+    const nestedBuilder = new SQBuilder<TestModel>()
       .or()
       .eq("options", "1")
       .filterDeep(() =>
-        new EQBuilder<TestModel>()
+        new SQBuilder<TestModel>()
           .or()
           .notEq("name", "1")
           .eq("nested.name", "2")
@@ -143,9 +143,9 @@ describe("Filter types", () => {
   });
 
   it("should produce type for relation filter", () => {
-    const nestedFilter = new EQBuilder<TestModel>()
+    const nestedFilter = new SQBuilder<TestModel>()
       .filterRelation("nested", () =>
-        new EQBuilder<NestedModel>().eq("id", "value")
+        new SQBuilder<NestedModel>().eq("id", "value")
       )
       .build();
 
@@ -163,7 +163,7 @@ describe("Filter types", () => {
   });
 
   it("should create single eq", () => {
-    const eqFilter = new EQBuilder<TestModel>().eq("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().eq("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -175,7 +175,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not eq", () => {
-    const eqFilter = new EQBuilder<TestModel>().notEq("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().notEq("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -188,7 +188,7 @@ describe("Filter types", () => {
   });
 
   it("should create single eqi", () => {
-    const eqFilter = new EQBuilder<TestModel>().eqi("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().eqi("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -200,7 +200,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not eqi", () => {
-    const eqFilter = new EQBuilder<TestModel>().notEqi("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().notEqi("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -213,7 +213,7 @@ describe("Filter types", () => {
   });
 
   it("should create single ne", () => {
-    const eqFilter = new EQBuilder<TestModel>().ne("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().ne("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -225,7 +225,7 @@ describe("Filter types", () => {
   });
 
   it("should create single nei", () => {
-    const eqFilter = new EQBuilder<TestModel>().nei("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().nei("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -237,7 +237,7 @@ describe("Filter types", () => {
   });
 
   it("should create single in", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .in("nested.id", [1, 2, 3])
       .build();
 
@@ -255,7 +255,7 @@ describe("Filter types", () => {
   });
 
   it("should create single notIn", () => {
-    const eqFilter = new EQBuilder<TestModel>().notIn("id", [1, 2, 3]).build();
+    const eqFilter = new SQBuilder<TestModel>().notIn("id", [1, 2, 3]).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -270,7 +270,7 @@ describe("Filter types", () => {
   });
 
   it("should create single lt", () => {
-    const eqFilter = new EQBuilder<TestModel>().lt("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().lt("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -283,7 +283,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not lt", () => {
-    const eqFilter = new EQBuilder<TestModel>().notLt("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().notLt("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -297,7 +297,7 @@ describe("Filter types", () => {
   });
 
   it("should create single lt", () => {
-    const eqFilter = new EQBuilder<TestModel>().lte("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().lte("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -310,7 +310,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not lte", () => {
-    const eqFilter = new EQBuilder<TestModel>().notLte("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().notLte("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -324,7 +324,7 @@ describe("Filter types", () => {
   });
 
   it("should create single gt", () => {
-    const eqFilter = new EQBuilder<TestModel>().gt("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().gt("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -337,7 +337,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not gt", () => {
-    const eqFilter = new EQBuilder<TestModel>().notGt("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().notGt("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -351,7 +351,7 @@ describe("Filter types", () => {
   });
 
   it("should create single gte", () => {
-    const eqFilter = new EQBuilder<TestModel>().gte("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().gte("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -364,7 +364,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not gte", () => {
-    const eqFilter = new EQBuilder<TestModel>().notGte("nested.id", 1).build();
+    const eqFilter = new SQBuilder<TestModel>().notGte("nested.id", 1).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -378,7 +378,7 @@ describe("Filter types", () => {
   });
 
   it("should create single between", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .between("nested.id", [1, 2])
       .build();
 
@@ -395,7 +395,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not between", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .notBetween("nested.id", [1, 2])
       .build();
 
@@ -412,7 +412,7 @@ describe("Filter types", () => {
   });
 
   it("should create single contains", () => {
-    const eqFilter = new EQBuilder<TestModel>().contains("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().contains("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -424,7 +424,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not contains", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .notContains("nested", "1")
       .build();
 
@@ -439,7 +439,7 @@ describe("Filter types", () => {
   });
 
   it("should create single containsi", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .containsi("nested", "1")
       .build();
 
@@ -453,7 +453,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not containsi", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .notContainsi("nested", "1")
       .build();
 
@@ -468,7 +468,7 @@ describe("Filter types", () => {
   });
 
   it("should create single startsWith", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .startsWith("nested", "1")
       .build();
 
@@ -482,7 +482,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not startsWith", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .notStartsWith("nested", "1")
       .build();
 
@@ -497,7 +497,7 @@ describe("Filter types", () => {
   });
 
   it("should create single endsWith", () => {
-    const eqFilter = new EQBuilder<TestModel>().endsWith("nested", "1").build();
+    const eqFilter = new SQBuilder<TestModel>().endsWith("nested", "1").build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -509,7 +509,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not endsWith", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .notEndsWith("nested", "1")
       .build();
 
@@ -524,7 +524,7 @@ describe("Filter types", () => {
   });
 
   it("should create single null", () => {
-    const eqFilter = new EQBuilder<TestModel>().null("nested", true).build();
+    const eqFilter = new SQBuilder<TestModel>().null("nested", true).build();
 
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
@@ -536,7 +536,7 @@ describe("Filter types", () => {
   });
 
   it("should create single not null", () => {
-    const eqFilter = new EQBuilder<TestModel>()
+    const eqFilter = new SQBuilder<TestModel>()
       .notNull("nested", false)
       .build();
 
