@@ -1,6 +1,6 @@
 {
   "name": "strapi-query-builder",
-  "version": "2.0.1",
+  "version": "4.0.0",
   "description": "Utility for creating Strapi queries in declarative and typesafe way",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
