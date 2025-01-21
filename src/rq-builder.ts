@@ -25,6 +25,16 @@ import {
   TransformNestedKeys,
 } from "./query-types-util";
 
+// TODO: Add $startsWithi $endsWithi. REST API have it Entity, Query, Document service not. OK
+// TODO: Pagination parses under pagination property. Also there is withCount prop. OK
+// TODO: Sorts parsed as strings in format of key:direction. OK
+// TODO: Populate will be limited. Why ? BECAUSE REST API have very different populate code itself.
+//  So there is can be array, or object. Key: true for populate all in Entity service in REST API is array of strings. But if we want filter or select fields it again must be object in default to Entity format.
+//  It's not OKAY. It's too polymorphic, how combine simple populate all with specific populate ?
+//  Answer is here: key: {populate: "*} for entity analog of key: true.
+
+
+
 export class RQBuilder<
   Model extends object,
   Data extends object = {},
