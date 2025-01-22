@@ -69,6 +69,18 @@ describe("population types", () => {
     expect(populateWithType.populate.nestedList).toBe(true);
   });
 
+  it("should add populate all for keys", () => {
+    const populate = new SQBuilder<TestModel>()
+      .populates(["nested", "nestedList"])
+      .build();
+    const populateWithType: { populate: { nested: true; nestedList: true } } =
+      populate;
+
+    expect(populateWithType).toBeDefined();
+    expect(populateWithType.populate.nested).toBe(true);
+    expect(populateWithType.populate.nestedList).toBe(true);
+  });
+
   it("should add populate all for key list", () => {
     const populate = new SQBuilder<TestModel>()
       .populates(["nested", "nestedList"])

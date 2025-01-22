@@ -50,12 +50,7 @@ export class SQBuilder<
    * // { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
-  public fields<
-    F extends readonly [
-      StrapiSingleFieldInput<Model>,
-      ...StrapiSingleFieldInput<Model>[]
-    ]
-  >(fields: F) {
+  public fields<F extends readonly StrapiSingleFieldInput<Model>[]>(fields: F) {
     const currentFields = this._query.fields;
     const fieldsLength = fields.length;
 
@@ -157,9 +152,7 @@ export class SQBuilder<
    * new SQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
-  public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
-    attributes: K
-  ) {
+  public sortsAsc<K extends readonly SortKey<Model>[]>(attributes: K) {
     return this.sorts(attributes, "asc");
   }
 
@@ -172,9 +165,7 @@ export class SQBuilder<
    * new SQBuilder<Model>().sortsDesc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
-  public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
-    attributes: K
-  ) {
+  public sortsDesc<K extends readonly SortKey<Model>[]>(attributes: K) {
     return this.sorts(attributes, "desc");
   }
 
@@ -224,7 +215,7 @@ export class SQBuilder<
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sorts<
-    K extends readonly [SortKey<Model>, ...SortKey<Model>[]],
+    K extends readonly SortKey<Model>[],
     D extends StrapiSortOptions
   >(attributes: K, direction: D) {
     const currentSorts = this._query.sort;
@@ -1099,12 +1090,9 @@ export class SQBuilder<
    * new SQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
    */
-  public populates<
-    K extends readonly [
-      StrapiInputPopulateKey<Model>,
-      ...StrapiInputPopulateKey<Model>[]
-    ]
-  >(attributes: K) {
+  public populates<K extends readonly StrapiInputPopulateKey<Model>[]>(
+    attributes: K
+  ) {
     const populate = this._query.population;
 
     const attributesLength = attributes.length;

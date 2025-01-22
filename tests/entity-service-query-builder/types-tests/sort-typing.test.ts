@@ -32,7 +32,7 @@ describe("Sort types", () => {
 
   it("should sort wit list of key and single sort keys", () => {
     const nestedSortWithKeys = new SQBuilder<TestModel>()
-      .sortsAsc(["nested.name", "name"])
+      .sortsAsc(["nested.name", "name"] as const)
       .sortDesc("options")
       .build();
 

@@ -6,9 +6,9 @@ describe("type snapshot", () => {
     const query = new SQBuilder<TestModel>()
       .field("name")
       .field("id")
-      .fields(["options", "description"])
+      .fields(["options", "description"] as const)
       .sortAsc("name")
-      .sortsAsc(["options"])
+      .sortsAsc(["options"] as const)
       .eq("name", "test")
       .filterDeep(() =>
         new SQBuilder<TestModel>()

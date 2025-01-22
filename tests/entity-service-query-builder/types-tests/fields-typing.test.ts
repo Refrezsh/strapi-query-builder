@@ -40,7 +40,7 @@ describe("Fields types", () => {
   it("should merge same keys and work with fields", () => {
     const withUnionTypes = new SQBuilder<TestModel>()
       .field("id")
-      .fields(["name", "description"])
+      .fields(["name", "description"] as const)
       .field("options")
       .build();
     const withUnionTypeID: "id" = withUnionTypes.fields[0];

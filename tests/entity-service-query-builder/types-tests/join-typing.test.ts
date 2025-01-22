@@ -6,7 +6,7 @@ describe("Join functions", () => {
     const secondBuilder = new SQBuilder<TestModel>().fields([
       "options",
       "name",
-    ]);
+    ] as const);
 
     const query = new SQBuilder<TestModel>()
       .field("id")

@@ -8,7 +8,7 @@ describe("Query Engine Query Builder", () => {
   it("should create select fields", () => {
     const query = new QQBuilder<TestModel>()
       .field("id")
-      .fields(["name", "description"])
+      .fields(["name", "description"] as const)
       .build();
 
     const typedQuery: { select: ["id", "name", "description"] } = query;
