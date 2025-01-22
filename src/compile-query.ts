@@ -1,44 +1,196 @@
-import { SQBuilder } from "./sq-builder";
-import { RQBuilder } from "./rq-builder";
-import { QQBuilder } from "./qq-builder";
+export const compileStrapiQuery = (queryBuilder: {
+  build: () => any;
+}): SerializeOutput => {
+  const { data, ...query } = queryBuilder.build();
 
-// TODO: Start of experimental feature that must provide utilities for compiling any query to Object literal with strong type.
+  const deduplicatedArrays = findDeduplicatedArrays(query);
 
-// The idea is as follows.
-// Most queries are not dynamic, but static get queries, with field selection, sorting and filtering.
-// Only rare queries are created dynamically using input parameters.
-// Even though the builder is fast enough to create queries, it is still not as fast as a standard JS literal.
-// So the idea to compile queries into JS literal with type support appeared.
-// This idea has already been realized in experimental form in a personal project, and damn it works.
+  return serializeQuery({
+    query: query,
+    deduplicatedArrays: deduplicatedArrays,
+  });
+};
 
-// The burden of saving literals will be on the developer.
-// But on average it can be easily implemented in the form of factory functions that return static queries. Like {getQuery: () => {filters: [...], etc.}}
+const serializeQuery = (request: SerializeQueryRequest): SerializeOutput => {
+  return {
+    query: serializeQueryToTsObjectLiteral(request.query, [], request),
+    constants: serializeConstants(request),
+  };
+};
 
-// This is also the place where we can further optimize the creation of a literal for querys with repeating arrays.
-// So we can create a hash table and use one array in the right places, as it will reduce the number of arrays created.
+// <editor-fold desc="Serialize utils>
+const serializeQueryToTsObjectLiteral = (
+  obj: any,
+  path: string[],
+  additional: SerializeQueryRequest
+) => {
+  if (Array.isArray(obj)) {
+    const lastKey = path[path.length - 1];
+    const dotted = path.join(".");
+    const hasDuplicate = additional.deduplicatedArrays.get(dotted);
+
+    return !!hasDuplicate
+      ? hasDuplicate.constantName
+      : serializeAnyList(lastKey, obj);
+  }
+
+  const entries: string = Object.entries(obj)
+    .filter(([_, value]) => typeof value !== "function")
+    .map(([key, value]) => {
+      const safeKey = getSafeKey(key);
+
+      let serializedValue = undefined;
+
+      if (
+        typeof value === "boolean" ||
+        typeof value === "string" ||
+        typeof value === "number"
+      ) {
+        const serialized = JSON.stringify(value);
+        serializedValue = `${serialized} as ${serialized}`;
+      } else if (typeof value === "object" && value !== null) {
+        serializedValue = serializeQueryToTsObjectLiteral(
+          value,
+          [...path, key],
+          additional
+        );
+      } else {
+        serializedValue = JSON.stringify(value);
+      }
+
+      if (serializedValue === undefined) {
+        throw new Error(`Unknown serializer value for key ${safeKey}`);
+      }
+
+      return `${safeKey}:${serializedValue}`;
+    })
+    .join(",");
+
+  return `{${entries}}`;
+};
+
+const serializeAnyList = (key: string, obj: any[]): string => {
+  const selectAndOrderKeys = new Set(["fields", "sort", "select", "orderBy"]);
+
+  if (selectAndOrderKeys.has(key)) {
+    const fieldsValues = `[${obj
+      .map((value) => JSON.stringify(value))
+      .join(",")}]`;
+
+    return `${fieldsValues} as ${fieldsValues}`;
+  } else {
+    return `[${obj
+      .map((value) => {
+        if (Array.isArray(value)) {
+          throw new Error(
+            `Query list value for key '${key}' can't be an array`
+          );
+        }
+
+        return JSON.stringify(value);
+      })
+      .join(",")}]`;
+  }
+};
+
+const getSafeKey = (key: string) =>
+  isSafeKey(key) ? key : JSON.stringify(key);
+
+const isSafeKey = (key: string): boolean =>
+  /^[a-zA-Z_$][a-zA-Z_$0-9]*$/.test(key);
+// </editor-fold>
+
+// <editor-fold desc="Array deduplicate optimization>
+const serializeConstants = (request: SerializeQueryRequest): string => {
+  const constantsMap = new Map<string, string>();
+
+  const deduplicatedArrays = request.deduplicatedArrays.values();
+  for (const values of deduplicatedArrays) {
+    if (!constantsMap.has(values.constantName)) {
+      constantsMap.set(
+        values.constantName,
+        serializeAnyList("fields", values.constantArrayValue)
+      );
+    }
+  }
+
+  const constantList: string[] = [];
+  for (const [key, value] of constantsMap) {
+    constantList.push(`const ${key} = ${value};`);
+  }
+
+  return constantList.join("");
+};
+
+const findDeduplicatedArrays = (query: any) => {
+  const selectKeys = new Set(["fields", "select"]);
+  const sortKeys = new Set(["sort", "orderBy"]);
+  const arraysMap = new Map<string, { value: any[]; paths: string[] }>();
+
+  const traverse = (obj: any, path: string[]): void => {
+    if (Array.isArray(obj)) {
+      const lastKey = path[path.length - 1];
+      const isFieldKey = selectKeys.has(lastKey);
+      const isSortKey = sortKeys.has(lastKey);
+      if (!isFieldKey && !isSortKey) return;
+
+      const hash = isFieldKey ? getFieldsHash(obj) : getSortsHash(obj);
+
+      if (!arraysMap.has(hash)) {
+        arraysMap.set(hash, { value: obj, paths: [] });
+      }
+
+      arraysMap.get(hash)!.paths.push(path.join("."));
+    } else if (obj && typeof obj === "object") {
+      for (const [key, value] of Object.entries(obj)) {
+        traverse(value, [...path, key]);
+      }
+    }
+  };
+
+  traverse(query, []);
+
+  const resultHash: RepeatableArraysHash = new Map();
+  let counter = 1;
+
+  for (const [_, { value, paths }] of arraysMap) {
+    if (paths.length > 1) {
+      const constantName = `list${counter++}`;
+      for (const p of paths) {
+        resultHash.set(p, {
+          constantName: constantName,
+          constantArrayValue: value,
+        });
+      }
+    }
+  }
+
+  return resultHash;
+};
+
+const getFieldsHash = (list: any[]) =>
+  list
+    .sort()
+    .map((v) => JSON.stringify(v))
+    .join("||");
+
+const getSortsHash = (list: any[]) =>
+  list.map((v) => JSON.stringify(v)).join("||");
+// </editor-fold>
+
+// <editor-fold desc="Type utils">
+type SerializeQueryRequest = {
+  query: any;
+  deduplicatedArrays: RepeatableArraysHash;
+};
 
 interface SerializeOutput {
   query: string;
   constants: string;
 }
 
-const compileQuery = (
-  queryBuilder:
-    | SQBuilder<any, any, any>
-    | RQBuilder<any, any, any>
-    | QQBuilder<any, any, any>
-): SerializeOutput => {
-  const query = queryBuilder.build();
-  findForOptimize(query);
-
-  return serializeQuery(query);
-};
-
-const serializeQuery = (query: any): SerializeOutput => {
-  return {
-    query: `{ filters: filterKeys1 }`,
-    constants: `const filterKeys1 = ["someVeryRepitableArray"]`,
-  };
-};
-
-const findForOptimize = (query: any) => {};
+type RepeatableArraysHash = Map<
+  string,
+  { constantName: string; constantArrayValue: any[] }
+>;
+// </editor-fold>
