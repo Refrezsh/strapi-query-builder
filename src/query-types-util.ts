@@ -48,7 +48,9 @@ export type EntityFilterAttributes =
   | "$startsWith"
   | "$endsWith"
   | "$null"
-  | "$notNull";
+  | "$notNull"
+  | "$startsWithi"
+  | "$endsWithi";
 
 export type GetAttributeType<Key extends EntityFilterAttributes> = Key extends
   | "$in"

@@ -25,15 +25,12 @@ import {
   TransformNestedKeys,
 } from "./query-types-util";
 
-// TODO: Add $startsWithi $endsWithi. REST API have it Entity, Query, Document service not. OK
 // TODO: Pagination parses under pagination property. Also there is withCount prop. OK
 // TODO: Sorts parsed as strings in format of key:direction. OK
 // TODO: Populate will be limited. Why ? BECAUSE REST API have very different populate code itself.
 //  So there is can be array, or object. Key: true for populate all in Entity service in REST API is array of strings. But if we want filter or select fields it again must be object in default to Entity format.
 //  It's not OKAY. It's too polymorphic, how combine simple populate all with specific populate ?
 //  Answer is here: key: {populate: "*} for entity analog of key: true.
-
-
 
 export class RQBuilder<
   Model extends object,
@@ -861,6 +858,23 @@ export class RQBuilder<
   }
 
   /**
+   * @description Attribute starts with input value (case-insensitive)
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new RQBuilder<Model>().startsWithi("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $startsWithi: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public startsWithi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$startsWithi", value);
+  }
+
+  /**
    * @description Attribute not starts with input value
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
@@ -875,6 +889,23 @@ export class RQBuilder<
     V extends SingleAttributeType
   >(attribute: K, value: V) {
     return this.filterNot(attribute, "$startsWith", value);
+  }
+
+  /**
+   * @description Attribute not starts with input value (case-insensitive)
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new RQBuilder<Model>().notStartsWithi("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $not: { $startsWithi: "value" }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notStartsWithi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$startsWithi", value);
   }
 
   /**
@@ -895,6 +926,23 @@ export class RQBuilder<
   }
 
   /**
+   * @description Attribute ends with input value (case-insensitive)
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new RQBuilder<Model>().endsWithi("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $endsWithi: "value" }} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public endsWithi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filter(attribute, "$endsWithi", value);
+  }
+
+  /**
    * @description Attribute not ends with input value
    * @description Same keys will not be merged
    * @description Allowed "attribute.dot" notation
@@ -909,6 +957,23 @@ export class RQBuilder<
     V extends SingleAttributeType
   >(attribute: K, value: V) {
     return this.filterNot(attribute, "$endsWith", value);
+  }
+
+  /**
+   * @description Attribute not ends with input value (case-insensitive)
+   * @description Same keys will not be merged
+   * @description Allowed "attribute.dot" notation
+   * @example
+   * new RQBuilder<Model>().notEndsWithi("attribute", "value");
+   * // { filters: { $and: [{ attribute: { $not: { $endsWithi: "value" }}} ] }}
+   * @param {FilterOperatorKey} attribute Attribute
+   * @param {SingleAttributeType} value Filter by value
+   */
+  public notEndsWithi<
+    K extends FilterOperatorKey<Model>,
+    V extends SingleAttributeType
+  >(attribute: K, value: V) {
+    return this.filterNot(attribute, "$endsWithi", value);
   }
 
   /**
