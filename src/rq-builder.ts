@@ -24,11 +24,6 @@ import {
   TransformNestedKey,
 } from "./query-types-util";
 
-// TODO: Populate will be limited. Why ? BECAUSE REST API have very different populate code itself.
-//  So there is can be array, or object. Key: true for populate all in Entity service in REST API is array of strings. But if we want filter or select fields it again must be object in default to Entity format.
-//  It's not OKAY. It's too polymorphic, how combine simple populate all with specific populate ?
-//  Answer is here: key: {populate: "*} for entity analog of key: true.
-
 export class RQBuilder<
   Model extends object,
   Data extends object = {},
@@ -1140,7 +1135,7 @@ export class RQBuilder<
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
-            ? true
+            ? { populate: "*" }
             : P extends keyof Config["populates"]
             ? Config["populates"][P]
             : never;
@@ -1185,7 +1180,7 @@ export class RQBuilder<
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K[number]]: P extends K[number]
-            ? true
+            ? { populate: "*" }
             : P extends keyof Config["populates"]
             ? Config["populates"][P]
             : never;
@@ -2059,7 +2054,7 @@ export class RQBuilder<
       } else if (nestedQuery) {
         parsedPopulates[populateKey] = RQBuilder._buildQuery(nestedQuery);
       } else {
-        parsedPopulates[populateKey] = true;
+        parsedPopulates[populateKey] = { populate: "*" };
       }
     }
 

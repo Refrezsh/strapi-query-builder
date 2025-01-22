@@ -1,4 +1,7 @@
-import { TestModel } from "../entity-service-query-builder/types-tests/fields-typing.test";
+import {
+  NestedModel,
+  TestModel,
+} from "../entity-service-query-builder/types-tests/fields-typing.test";
 import { RQBuilder } from "../../lib/cjs";
 
 describe("Rest API Query Builder", () => {
@@ -103,5 +106,21 @@ describe("Rest API Query Builder", () => {
     expect(queryTyped.sort.includes("name:asc")).toBe(true);
     expect(queryTyped.sort.includes("options:asc")).toBe(true);
     expect(queryTyped.sort.includes("nested.id:asc")).toBe(true);
+  });
+
+  it("should create populate with single keys, as key with sub-populate", () => {
+    const query = new RQBuilder<TestModel>()
+      .populate("nested")
+      .populateRelation("nestedList", () =>
+        new RQBuilder<NestedModel>().field("name")
+      )
+      .build();
+
+    const queryTyped: {
+      populate: { nested: { populate: "*" }; nestedList: { fields: ["name"] } };
+    } = query;
+
+    expect(queryTyped.populate.nested.populate).toBe("*");
+    expect(queryTyped.populate.nestedList.fields[0]).toBe("name");
   });
 });
