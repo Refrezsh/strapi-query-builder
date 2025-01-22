@@ -23,7 +23,9 @@
     "strapi",
     "query",
     "utils",
-    "utilities"
+    "utilities",
+    "query builder",
+    "typed queries"
   ],
   "author": "Igor Badanyuk",
   "license": "MIT",
@@ -48,6 +50,7 @@
     "type": "git",
     "url": "https://github.com/Refrezsh/strapi-query-builder"
   },
+  "homepage": "https://github.com/Refrezsh/strapi-query-builder",
   "exports": {
     ".": {
       "import": {
