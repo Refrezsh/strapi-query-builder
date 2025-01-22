@@ -133,10 +133,10 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new QQBuilder<Model>().sortAsc("attribute");
+   * new QQBuilder<Model>().sortDesc("attribute");
    * // { orderBy: [{"attribute": "desc"}] }
    * @example
-   * new QQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new QQBuilder<Model>().sortDesc("parentKey.childKey");
    * // { orderBy: [{"parentKey": { "childKey": "desc" }}]}
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
@@ -164,7 +164,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new QQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new QQBuilder<Model>().sortsDesc(["attribute1", "attribute2"]);
    * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(

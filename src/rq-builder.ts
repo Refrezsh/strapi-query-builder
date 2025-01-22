@@ -22,10 +22,8 @@ import {
   StrapiSorts,
   StrapiUnionPagination,
   TransformNestedKey,
-  TransformNestedKeys,
 } from "./query-types-util";
 
-// TODO: Sorts parsed as strings in format of key:direction. OK
 // TODO: Populate will be limited. Why ? BECAUSE REST API have very different populate code itself.
 //  So there is can be array, or object. Key: true for populate all in Entity service in REST API is array of strings. But if we want filter or select fields it again must be object in default to Entity format.
 //  It's not OKAY. It's too polymorphic, how combine simple populate all with specific populate ?
@@ -56,12 +54,7 @@ export class RQBuilder<
    * // { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
-  public fields<
-    F extends readonly [
-      StrapiSingleFieldInput<Model>,
-      ...StrapiSingleFieldInput<Model>[]
-    ]
-  >(fields: F) {
+  public fields<F extends readonly StrapiSingleFieldInput<Model>[]>(fields: F) {
     const currentFields = this._query.fields;
     const fieldsLength = fields.length;
 
@@ -129,10 +122,10 @@ export class RQBuilder<
    * @param {SortKey} attribute Attribute
    * @example
    * new RQBuilder<Model>().sortAsc("attribute");
-   * // { sort: [{"attribute": "asc"}] }
+   * // { sort: ["attribute:asc"] }
    * @example
    * new RQBuilder<Model>().sortAsc("parentKey.childKey");
-   * // { sort: [{"parentKey": { "childKey": "asc" }}]}
+   * // { sort: ["parentKey.childKey:asc"] }
    */
   public sortAsc<K extends SortKey<Model>>(attribute: K) {
     return this.sort(attribute, "asc");
@@ -144,11 +137,11 @@ export class RQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new RQBuilder<Model>().sortAsc("attribute");
-   * // { sort: [{"attribute": "desc"}] }
+   * new RQBuilder<Model>().sortDesc("attribute");
+   * // { sort: ["attribute:desc"] }
    * @example
-   * new RQBuilder<Model>().sortAsc("parentKey.childKey");
-   * // { sort: [{"parentKey": { "childKey": "desc" }}]}
+   * new RQBuilder<Model>().sortDesc("parentKey.childKey");
+   * // { sort: ["parentKey.childKey:desc"] }
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
     return this.sort(attribute, "desc");
@@ -161,11 +154,9 @@ export class RQBuilder<
    * @param {SortKey[]} attributes Attributes list
    * @example
    * new RQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
-   * // { sort: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
+   * // { sort: ["attribute1:asc", "attribute2:asc"] }
    */
-  public sortsAsc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
-    attributes: K
-  ) {
+  public sortsAsc<K extends readonly SortKey<Model>[]>(attributes: K) {
     return this.sorts(attributes, "asc");
   }
 
@@ -175,12 +166,10 @@ export class RQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new RQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
-   * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
+   * new RQBuilder<Model>().sortsDesc(["attribute1", "attribute2"]);
+   * // { sort: ["attribute1:desc", "attribute2:desc"] }
    */
-  public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(
-    attributes: K
-  ) {
+  public sortsDesc<K extends readonly SortKey<Model>[]>(attributes: K) {
     return this.sorts(attributes, "desc");
   }
 
@@ -192,7 +181,7 @@ export class RQBuilder<
    * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
    * @example
    * new RQBuilder<Model>().sort("attribute", "asc");
-   * // { sort: [{"attribute": "asc"}] }
+   * // { sort: ["attribute:asc"] }
    */
   public sort<K extends SortKey<Model>, D extends StrapiSortOptions>(
     attribute: K,
@@ -204,7 +193,7 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], TransformNestedKey<K, D>];
+        sort: [...Config["sort"], `${K}:${D}`];
         filters: Config["filters"];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
@@ -227,10 +216,10 @@ export class RQBuilder<
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
    * new RQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
-   * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
+   * // { sort: ["attribute1:desc", "attribute2:desc"] }
    */
   public sorts<
-    K extends readonly [SortKey<Model>, ...SortKey<Model>[]],
+    K extends readonly SortKey<Model>[],
     D extends StrapiSortOptions
   >(attributes: K, direction: D) {
     const currentSorts = this._query.sort;
@@ -246,7 +235,7 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...TransformNestedKeys<K, D>];
+        sort: [...Config["sort"], ...GetSortKeys<K, D>];
         filters: Config["filters"];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
@@ -1173,12 +1162,9 @@ export class RQBuilder<
    * new RQBuilder<Model>().populates(["relation1", "relation2"]);
    * // { populate: { relation1: true, relation2: true } }
    */
-  public populates<
-    K extends readonly [
-      StrapiInputPopulateKey<Model>,
-      ...StrapiInputPopulateKey<Model>[]
-    ]
-  >(attributes: K) {
+  public populates<K extends readonly StrapiInputPopulateKey<Model>[]>(
+    attributes: K
+  ) {
     const populate = this._query.population;
 
     const attributesLength = attributes.length;
@@ -1952,7 +1938,7 @@ export class RQBuilder<
 
     const sortValues = sorts.values();
     for (let sort of sortValues) {
-      sortQuery.push(_set({}, sort.key, sort.order));
+      sortQuery.push(`${sort.key}:${sort.order}`);
     }
 
     return sortQuery;
@@ -2101,6 +2087,10 @@ export class RQBuilder<
 }
 
 // <editor-fold desc="Specific query types utils">
+export type GetSortKeys<Keys extends readonly string[], V extends string> = {
+  [K in keyof Keys]: `${Keys[K]}:${V}`;
+};
+
 type EntityBuilderConfig = {
   fields: unknown[];
   sort: unknown[];

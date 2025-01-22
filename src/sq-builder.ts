@@ -138,10 +138,10 @@ export class SQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
-   * new SQBuilder<Model>().sortAsc("attribute");
+   * new SQBuilder<Model>().sortDesc("attribute");
    * // { sort: [{"attribute": "desc"}] }
    * @example
-   * new SQBuilder<Model>().sortAsc("parentKey.childKey");
+   * new SQBuilder<Model>().sortDesc("parentKey.childKey");
    * // { sort: [{"parentKey": { "childKey": "desc" }}]}
    */
   public sortDesc<K extends SortKey<Model>>(attribute: K) {
@@ -169,7 +169,7 @@ export class SQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new SQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new SQBuilder<Model>().sortsDesc(["attribute1", "attribute2"]);
    * // { sort: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly [SortKey<Model>, ...SortKey<Model>[]]>(

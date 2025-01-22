@@ -86,4 +86,22 @@ describe("Rest API Query Builder", () => {
     expect(queryTyped.pagination.withCount).toBe(false);
     expect(queryTyped.pagination.limit).toBe(40);
   });
+
+  it("should create sort as strings", () => {
+    const query = new RQBuilder<TestModel>()
+      .sortDesc("id")
+      .sortAsc("name")
+      .sortsAsc(["options", "nested.id"] as const)
+      .build();
+
+    const queryTyped: {
+      sort: ["id:desc", "name:asc", "options:asc", "nested.id:asc"];
+    } = query;
+
+    expect(queryTyped.sort.length).toBe(4);
+    expect(queryTyped.sort.includes("id:desc")).toBe(true);
+    expect(queryTyped.sort.includes("name:asc")).toBe(true);
+    expect(queryTyped.sort.includes("options:asc")).toBe(true);
+    expect(queryTyped.sort.includes("nested.id:asc")).toBe(true);
+  });
 });
