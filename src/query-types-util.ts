@@ -124,6 +124,7 @@ export type StrapiPopulations<
 export interface StrapiUnionPagination {
   page?: number;
   pageSize?: number;
+  withCount?: boolean;
   paginationType: "page" | "limit";
 }
 // </editor-fold>

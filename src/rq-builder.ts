@@ -25,7 +25,6 @@ import {
   TransformNestedKeys,
 } from "./query-types-util";
 
-// TODO: Pagination parses under pagination property. Also there is withCount prop. OK
 // TODO: Sorts parsed as strings in format of key:direction. OK
 // TODO: Populate will be limited. Why ? BECAUSE REST API have very different populate code itself.
 //  So there is can be array, or object. Key: true for populate all in Entity service in REST API is array of strings. But if we want filter or select fields it again must be object in default to Entity format.
@@ -1373,20 +1372,26 @@ export class RQBuilder<
   /**
    * @description Pagination by page, when defining the page parameter
    * @param {number} page Select page
+   * @param {boolean} withCount Toggles displaying the total number of entries to the response
    * @example
    * new RQBuilder<TestModel>().page(1)
    * // { page: 1; }
    */
-  public page<Page extends number>(page: Page) {
+  public page<Page extends number, WithCount extends boolean = true>(
+    page: Page,
+    withCount: WithCount = true as WithCount
+  ) {
     if (!this._query.pagination) {
       this._query.pagination = {
         page: page,
         pageSize: undefined,
         paginationType: "page",
+        withCount: withCount,
       };
     } else {
       this._query.pagination.page = page;
       this._query.pagination.paginationType = "page";
+      this._query.pagination.withCount = withCount;
     }
     return this as unknown as RQBuilder<
       Model,
@@ -1399,7 +1404,11 @@ export class RQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Page; pageSize: Config["pagination"]["pageSize"] };
+        pagination: {
+          page: Page;
+          pageSize: Config["pagination"]["pageSize"];
+          withCount: WithCount;
+        };
         paginationType: "page";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
@@ -1438,7 +1447,11 @@ export class RQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Config["pagination"]["page"]; pageSize: PageSize };
+        pagination: {
+          page: Config["pagination"]["page"];
+          pageSize: PageSize;
+          withCount: Config["pagination"]["withCount"];
+        };
         paginationType: "page";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
@@ -1450,20 +1463,26 @@ export class RQBuilder<
   /**
    * @description Pagination by offset, when defining the start parameter
    * @param {number} start
+   * @param {boolean} withCount Toggles displaying the total number of entries to the response
    * @example
    * new RQBuilder<TestModel>().start(5)
    * // { start: 5; }
    */
-  public start<Start extends number>(start: Start) {
+  public start<Start extends number, WithCount extends boolean = true>(
+    start: Start,
+    withCount: WithCount = true as WithCount
+  ) {
     if (!this._query.pagination) {
       this._query.pagination = {
         page: start,
         pageSize: undefined,
         paginationType: "limit",
+        withCount: withCount,
       };
     } else {
       this._query.pagination.page = start;
       this._query.pagination.paginationType = "limit";
+      this._query.pagination.withCount = withCount;
     }
     return this as unknown as RQBuilder<
       Model,
@@ -1476,7 +1495,11 @@ export class RQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Start; pageSize: Config["pagination"]["pageSize"] };
+        pagination: {
+          page: Start;
+          pageSize: Config["pagination"]["pageSize"];
+          withCount: WithCount;
+        };
         paginationType: "limit";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
@@ -1514,7 +1537,11 @@ export class RQBuilder<
         negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Config["pagination"]["page"]; pageSize: Limit };
+        pagination: {
+          page: Config["pagination"]["page"];
+          pageSize: Limit;
+          withCount: Config["pagination"]["withCount"];
+        };
         paginationType: "limit";
         publicationState: Config["publicationState"];
         locale: Config["locale"];
@@ -1897,19 +1924,9 @@ export class RQBuilder<
       builtQuery.populate = parsedPopulation;
     }
 
-    const pagination = rawQuery.pagination;
-    if (_isDefined(pagination)) {
-      const pageKey = pagination.paginationType === "page" ? "page" : "start";
-      const pageLimitKey =
-        pagination.paginationType === "page" ? "pageSize" : "limit";
-
-      if (_isDefined(pagination.page)) {
-        builtQuery[pageKey] = pagination.page;
-      }
-
-      if (_isDefined(pagination.pageSize)) {
-        builtQuery[pageLimitKey] = pagination.pageSize;
-      }
+    const parsedPagination = RQBuilder._parsePagination(rawQuery.pagination);
+    if (_isDefined(parsedPagination)) {
+      builtQuery.pagination = parsedPagination;
     }
 
     const data = rawQuery.data;
@@ -1939,6 +1956,27 @@ export class RQBuilder<
     }
 
     return sortQuery;
+  }
+
+  private static _parsePagination(pagination?: StrapiUnionPagination) {
+    if (!_isDefined(pagination)) return undefined;
+
+    const pageKey = pagination.paginationType === "page" ? "page" : "start";
+    const pageLimitKey =
+      pagination.paginationType === "page" ? "pageSize" : "limit";
+    const paginationQuery: any = {};
+
+    if (_isDefined(pagination.page)) {
+      paginationQuery[pageKey] = pagination.page;
+    }
+
+    if (_isDefined(pagination.pageSize)) {
+      paginationQuery[pageLimitKey] = pagination.pageSize;
+    }
+
+    paginationQuery.withCount = !!pagination.withCount;
+
+    return paginationQuery;
   }
 
   private static _parseAttributeFilter<Md extends object>(
@@ -2071,7 +2109,7 @@ type EntityBuilderConfig = {
   negate: boolean;
   populateAll: boolean;
   populates: Record<string, any>;
-  pagination: { page?: number; pageSize?: number };
+  pagination: { page?: number; pageSize?: number; withCount?: boolean };
   paginationType: "page" | "limit";
   publicationState: PublicationStates;
   locale: string;
@@ -2086,7 +2124,7 @@ type InitialBuildConfig = {
   negate: false;
   populateAll: false;
   populates: {};
-  pagination: { page: never; pageSize: never };
+  pagination: { page: never; pageSize: never; withCount: never };
   paginationType: never;
   publicationState: never;
   locale: never;
@@ -2128,17 +2166,28 @@ type BuildRQOutput<Config extends EntityBuilderConfig> = {
     Config["negate"]
   >;
   populate: ParseRQBuilderPopulates<Config["populates"], Config["populateAll"]>;
-  page: Config["paginationType"] extends "page"
-    ? Config["pagination"]["page"]
-    : never;
-  pageSize: Config["paginationType"] extends "page"
-    ? Config["pagination"]["pageSize"]
-    : never;
-  start: Config["paginationType"] extends "limit"
-    ? Config["pagination"]["page"]
-    : never;
-  limit: Config["paginationType"] extends "limit"
-    ? Config["pagination"]["pageSize"]
+  pagination: Config["paginationType"] extends never
+    ? never
+    : {
+        page: Config["paginationType"] extends "page"
+          ? Config["pagination"]["page"]
+          : never;
+        pageSize: Config["paginationType"] extends "page"
+          ? Config["pagination"]["pageSize"]
+          : never;
+        start: Config["paginationType"] extends "limit"
+          ? Config["pagination"]["page"]
+          : never;
+        limit: Config["paginationType"] extends "limit"
+          ? Config["pagination"]["pageSize"]
+          : never;
+        withCount: Config["pagination"]["withCount"] extends never
+          ? never
+          : Config["pagination"]["withCount"];
+      } extends infer Result
+    ? {
+        [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
+      }
     : never;
   publicationState: Config["publicationState"] extends PublicationStates
     ? Config["publicationState"]
