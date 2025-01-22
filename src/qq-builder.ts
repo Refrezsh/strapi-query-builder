@@ -45,7 +45,7 @@ export class QQBuilder<
    * @description Select specific fields
    * @description Same keys will be merged
    * @example
-   * new QQBuilder<Model>().fields(["name", "type"]);
+   * new QQBuilder<Model>().fields(["name", "type"] as const);
    * // { select: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
@@ -144,7 +144,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new QQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new QQBuilder<Model>().sortsAsc(["attribute1", "attribute2"] as const);
    * // { orderBy: [{"attribute1": "asc"}, {"attribute2": "asc"}] }
    */
   public sortsAsc<K extends readonly SortKey<Model>[]>(attributes: K) {
@@ -157,7 +157,7 @@ export class QQBuilder<
    * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new QQBuilder<Model>().sortsDesc(["attribute1", "attribute2"]);
+   * new QQBuilder<Model>().sortsDesc(["attribute1", "attribute2"] as const);
    * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sortsDesc<K extends readonly SortKey<Model>[]>(attributes: K) {
@@ -204,7 +204,7 @@ export class QQBuilder<
    * @param {SortKey} attributes Attribute list
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
-   * new QQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
+   * new QQBuilder<Model>().sorts(["attribute1", "attribute2"] as const, "desc");
    * // { orderBy: [{"attribute1": "desc"}, {"attribute2": "desc"}] }
    */
   public sorts<

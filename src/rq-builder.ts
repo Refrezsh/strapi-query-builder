@@ -45,7 +45,7 @@ export class RQBuilder<
    * @description Select specific fields
    * @description Same keys will be merged
    * @example
-   * new RQBuilder<Model>().fields(["name", "type"]);
+   * new RQBuilder<Model>().fields(["name", "type"] as const);
    * // { fields: ["name", "type"] }
    * @param {StrapiSingleFieldInput[]} fields List of fields
    */
@@ -113,7 +113,6 @@ export class RQBuilder<
   /**
    * @description Sort results by attribute in ascending order
    * @description Same keys will be merged
-   * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
    * new RQBuilder<Model>().sortAsc("attribute");
@@ -129,7 +128,6 @@ export class RQBuilder<
   /**
    * @description Sort results by attribute in descending order
    * @description Same keys will be merged
-   * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @example
    * new RQBuilder<Model>().sortDesc("attribute");
@@ -145,10 +143,9 @@ export class RQBuilder<
   /**
    * @description Sort results by attributes list in ascending order
    * @description Same keys will be merged
-   * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new RQBuilder<Model>().sortsAsc(["attribute1", "attribute2"]);
+   * new RQBuilder<Model>().sortsAsc(["attribute1", "attribute2"] as const);
    * // { sort: ["attribute1:asc", "attribute2:asc"] }
    */
   public sortsAsc<K extends readonly SortKey<Model>[]>(attributes: K) {
@@ -158,10 +155,9 @@ export class RQBuilder<
   /**
    * @description Sort results by attributes list in descending order
    * @description Same keys will be merged
-   * @description Allowed "attribute.dot" notation
    * @param {SortKey[]} attributes Attributes list
    * @example
-   * new RQBuilder<Model>().sortsDesc(["attribute1", "attribute2"]);
+   * new RQBuilder<Model>().sortsDesc(["attribute1", "attribute2"] as const);
    * // { sort: ["attribute1:desc", "attribute2:desc"] }
    */
   public sortsDesc<K extends readonly SortKey<Model>[]>(attributes: K) {
@@ -171,7 +167,6 @@ export class RQBuilder<
   /**
    * @description Sort results by attribute and direction
    * @description Same keys will be merged
-   * @description Allowed "attribute.dot" notation
    * @param {SortKey} attribute Attribute
    * @param {StrapiSortOptions} direction Direction "asc" ord "desc"
    * @example
@@ -210,7 +205,7 @@ export class RQBuilder<
    * @param {SortKey} attributes Attribute list
    * @param {StrapiSortOptions} direction Direction "asc" or "desc"
    * @example
-   * new RQBuilder<Model>().sorts(["attribute1", "attribute2"], "desc");
+   * new RQBuilder<Model>().sorts(["attribute1", "attribute2"] as const, "desc");
    * // { sort: ["attribute1:desc", "attribute2:desc"] }
    */
   public sorts<
@@ -1115,11 +1110,12 @@ export class RQBuilder<
 
   /**
    * @description Populate all model by attribute
+   * @description Rest API query builder can't create array of population string. Instead, it creates a key with the value { populate: “*” }
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey} attribute Attribute
    * @example
    * new RQBuilder<Model>().populate("relation");
-   * // { populate: { relation: true } }
+   * // { populate: { relation: { populate: "*" } } }
    */
   public populate<K extends StrapiInputPopulateKey<Model>>(attribute: K) {
     this._query.population.set(attribute, { key: attribute });
@@ -1151,11 +1147,12 @@ export class RQBuilder<
 
   /**
    * @description Populate all models by attributes list
+   * @description Rest API query builder can't create array of population string. Instead, it creates a key with the value { populate: “*” }
    * @description Same keys will be overriding by last operator
    * @param {StrapiInputPopulateKey[]} attributes Attributes list
    * @example
    * new RQBuilder<Model>().populates(["relation1", "relation2"]);
-   * // { populate: { relation1: true, relation2: true } }
+   * // { populate: { relation1: { populate: "*" }, relation2: { populate: "*" } } }
    */
   public populates<K extends readonly StrapiInputPopulateKey<Model>[]>(
     attributes: K
