@@ -4,7 +4,6 @@ import {
   FilterOperatorKey,
   FilterRelationKey,
   GetAttributeType,
-  IsAttribute,
   MultipleAttributeType,
   OnType,
   ParseFilters,
@@ -2064,77 +2063,4 @@ type BuildSQOutput<Config extends EntityBuilderConfig> = {
       [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
     }
   : never;
-// </editor-fold>
-
-// <editor-fold desc="Experimental resolve model by query">
-type GenericEntityQuery = {
-  fields?: string[];
-  populate?:
-    | {
-        [key: string]: boolean | GenericEntityQuery;
-      }
-    | "*";
-};
-
-type ResolveArray<T, Q extends GenericEntityQuery> = T extends (infer U)[]
-  ? ApplyEntityQuery<U, Q>[]
-  : never;
-
-type ResolveOptional<T, Q extends GenericEntityQuery> = T extends undefined
-  ? undefined
-  : T extends null
-  ? null
-  : T extends (infer U)[]
-  ? ResolveArray<T, Q> | Extract<T, undefined | null>
-  : ApplyEntityQuery<NonNullable<T>, Q>;
-
-export type ApplyEntityQuery<
-  T,
-  Q extends GenericEntityQuery
-> = keyof Q extends never
-  ? {
-      // Case 1: Query is empty, return only `IsAttribute` fields
-      [K in keyof T as K extends IsAttribute<K & string, T[K]>
-        ? K
-        : never]: T[K];
-    }
-  : {
-      // Handle both `fields` and `populate`
-      [K in keyof T as K extends IsAttribute<K & string, T[K]>
-        ? Q["fields"] extends (keyof T)[]
-          ? // Case 3: Fields specified, only include listed `IsAttribute` fields
-            K extends Q["fields"][number]
-            ? K
-            : never
-          : // Case 1: Fields not specified, include all `IsAttribute` fields
-            K
-        : Q["populate"] extends "*"
-        ? // Case 2: Populate is '*', include all `IsNotAttribute` fields
-          K
-        : Q["populate"] extends Record<string, any>
-        ? // Case 3: Populate is an object
-          K extends keyof Q["populate"]
-          ? Q["populate"][K] extends true
-            ? K
-            : Q["populate"][K] extends GenericEntityQuery
-            ? K
-            : never
-          : never
-        : never]: K extends IsAttribute<K & string, T[K]>
-        ? T[K] // `IsAttribute` fields retain their original type
-        : Q["populate"] extends "*"
-        ? // Case 2: Populate '*', include `IsNotAttribute` fields shallowly
-          ResolveOptional<T[K], {}>
-        : Q["populate"] extends Record<string, any>
-        ? K extends keyof Q["populate"]
-          ? Q["populate"][K] extends true
-            ? // Case 3: Populate object with `true`, shallowly include `IsNotAttribute` fields
-              ResolveOptional<T[K], {}>
-            : Q["populate"][K] extends GenericEntityQuery
-            ? // Case 3: Populate object with nested query
-              ResolveOptional<T[K], Q["populate"][K]>
-            : never
-          : never
-        : never;
-    };
 // </editor-fold>
