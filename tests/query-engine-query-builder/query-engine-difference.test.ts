@@ -75,6 +75,12 @@ describe("Query Engine Query Builder", () => {
     expect(typedQuery["offset"]).toBeUndefined();
   });
 
+  it("should populate all", () => {
+    const populate = new QQBuilder<TestModel>().populateAll().build();
+    const typedQuery: { populate: true } = populate;
+    expect(typedQuery.populate).toBe(true);
+  });
+
   it("should combine limit and offset in any direction", () => {
     const limitOffset = new QQBuilder<TestModel>().limit(20).start(5).build();
     const typedLimitOffset: { offset: 5; limit: 20 } = limitOffset;

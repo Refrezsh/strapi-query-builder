@@ -40,6 +40,12 @@ describe("population types", () => {
     );
   });
 
+  it("should populate all", () => {
+    const populate = new SQBuilder<TestModel>().populateAll().build();
+    const typedQuery: { populate: "*" } = populate;
+    expect(typedQuery.populate).toBe("*");
+  });
+
   it("should override prev populates wen populate all", () => {
     const population = new SQBuilder<TestModel>()
       .populateRelation("nested", () =>

@@ -1804,7 +1804,7 @@ type QQBuilderCallback<
 type ParseQQBuilderPopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
-> = keyof P extends never ? never : PopulateAll extends true ? true : P;
+> = PopulateAll extends true ? true : keyof P extends never ? never : P;
 
 type BuildQQCallback<Config extends QueryEngineBuilderConfig> = {
   select: ParseList<Config["fields"]>;

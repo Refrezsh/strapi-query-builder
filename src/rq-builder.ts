@@ -2122,7 +2122,7 @@ type RQBuilderCallback<
 type ParseRQBuilderPopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
-> = keyof P extends never ? never : PopulateAll extends true ? "*" : P;
+> = PopulateAll extends true ? "*" : keyof P extends never ? never : P;
 
 type BuildRQCallback<Config extends EntityBuilderConfig> = {
   fields: ParseList<Config["fields"]>;

@@ -237,7 +237,7 @@ type ModelPrimitive =
   | number[]
   | boolean[];
 
-type IsAttribute<Key extends string | number, Value> = [Value] extends [
+export type IsAttribute<Key extends string | number, Value> = [Value] extends [
   ModelPrimitive
 ]
   ? Key
@@ -249,7 +249,7 @@ type IsAttribute<Key extends string | number, Value> = [Value] extends [
   ? Key
   : never;
 
-type IsNotAttribute<
+export type IsNotAttribute<
   Key extends string | number,
   Value
 > = Value extends ModelPrimitive
