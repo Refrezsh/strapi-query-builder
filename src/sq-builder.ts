@@ -2,6 +2,7 @@ import { _isDefined, _set } from "./query-utils";
 import {
   EntityFilterAttributes,
   FilterOperatorKey,
+  FilterRelationKey,
   GetAttributeType,
   MultipleAttributeType,
   OnType,
@@ -402,12 +403,12 @@ export class SQBuilder<
    * //        $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
    * //      }
    * // }
-   * @param {FilterOperatorKey} attribute Attribute
+   * @param {FilterRelationKey} attribute Attribute
    * @param {SQBuilderCallback} builderFactory Fabric function that returns builder with filters for relation model
    */
   public filterRelation<
     RelationModel extends object,
-    K extends FilterOperatorKey<Model>,
+    K extends FilterRelationKey<Model>,
     RelationConfig extends EntityBuilderConfig
   >(
     attribute: K,
@@ -428,14 +429,13 @@ export class SQBuilder<
         sort: Config["sort"];
         filters: [
           ...Config["filters"],
-          TransformNestedKey<
-            K,
-            ParseFilters<
+          {
+            [R in K]: ParseFilters<
               RelationConfig["filters"],
               RelationConfig["rootLogical"],
               RelationConfig["negate"]
-            >
-          >
+            >;
+          }
         ];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
@@ -1866,7 +1866,7 @@ export class SQBuilder<
 
       return !_isDefined(filterKey)
         ? parsedNestedFilters
-        : _set({}, filterKey, parsedNestedFilters);
+        : { [filterKey]: parsedNestedFilters };
     }
 
     const filterType = filter.type;

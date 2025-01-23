@@ -1,8 +1,15 @@
 import { SQBuilder } from "../../../lib/cjs";
 
+export interface DeepModel {
+  id: string;
+  deepProp: string;
+}
+
 export interface NestedModel {
   id: string;
   name: string;
+  deepNested?: DeepModel;
+  deepNestedList?: DeepModel[];
 }
 
 export interface TestModel {
@@ -10,9 +17,22 @@ export interface TestModel {
   name: string;
   description: string;
   options: string;
+  notNestedEnumeration: string[];
+  someOptional?: string;
+  notNestedEnumerationOptional?: string[];
+  optionalAndNullable?: string | null;
+  optionalNullableUndefined?: string | null | undefined;
+  nullableUndefined: string | null | undefined;
   nested: NestedModel;
   nestedList: NestedModel[];
-  notNestedEnumeration: string[];
+  nestedOptional?: NestedModel;
+  nestedOptionalList?: NestedModel[];
+  cyclicRelationList: TestModel[];
+  cyclicRelation: TestModel;
+  nestedOptionalNullable?: NestedModel | null;
+  nestedOptionalNullableUndefined?: NestedModel | null | undefined;
+  nestedNullableUndefined: NestedModel | null | undefined;
+  nestedListOptionalNullableUndefined?: NestedModel[] | null | undefined;
 }
 
 describe("Fields types", () => {

@@ -1,3 +1,13 @@
+declare global {
+  namespace QueryBuilderConfig {
+    /**
+     * Default recursion depth for the "key.subKey" type. Default is 2 levels max is 5 levels
+     * The larger the number, the greater the load on the Typescript engine.
+     */
+    type DefaultScanDepth = 2;
+  }
+}
+
 // <editor-fold desc="Field types">
 export type StrapiSingleFieldInput<Model extends object> = GetStrictOrWeak<
   Model,
@@ -15,8 +25,8 @@ export type StrapiSortOptions = "desc" | "asc";
 
 export type SortKey<Model extends object> = GetStrictOrWeak<
   Model,
-  FieldPath<Model>,
-  FieldPath<Model> | string
+  FiltersAndSortDotPath<Model>,
+  FiltersAndSortDotPath<Model> | string
 >;
 
 export type StrapiSorts<Model extends object> = Map<
@@ -61,8 +71,14 @@ export type GetAttributeType<Key extends EntityFilterAttributes> = Key extends
 
 export type FilterOperatorKey<Model extends object> = GetStrictOrWeak<
   Model,
-  FieldPath<Model>,
-  FieldPath<Model> | string
+  FiltersAndSortDotPath<Model>,
+  FiltersAndSortDotPath<Model> | string
+>;
+
+export type FilterRelationKey<Model extends object> = GetStrictOrWeak<
+  Model,
+  GetRelations<Model>,
+  GetRelations<Model> | string
 >;
 
 export type AttributeValues = string | string[] | number | number[] | boolean;
@@ -71,7 +87,7 @@ export interface StrapiAttributesFilter<
   Model extends object,
   NestedModel extends object = {}
 > {
-  key?: FilterOperatorKey<Model>;
+  key?: FilterOperatorKey<Model> | FilterRelationKey<Model>;
   type?: EntityFilterAttributes;
   value?: AttributeValues;
   negate?: boolean;
@@ -148,18 +164,6 @@ export interface QueryRawInfo<Model extends object, Data extends object> {
 // </editor-fold>
 
 // <editor-fold desc="Input type check utils">
-type Primitive =
-  | null
-  | undefined
-  | string
-  | number
-  | boolean
-  | symbol
-  | bigint
-  | string[]
-  | number[]
-  | boolean[];
-
 type IsTuple<T extends ReadonlyArray<any>> = number extends T["length"]
   ? false
   : true;
@@ -168,55 +172,60 @@ type TupleKey<T extends ReadonlyArray<any>> = Exclude<keyof T, keyof any[]>;
 
 type IsSameType<T1, T2> = T1 extends T2 ? true : false;
 
+type Decrement<T extends number> = T extends 5
+  ? 4
+  : T extends 4
+  ? 3
+  : T extends 3
+  ? 2
+  : T extends 2
+  ? 1
+  : T extends 1
+  ? 0
+  : never;
+
 type PathImpl<
   Key extends string | number,
   Value,
-  BaseType
-> = Value extends Primitive
-  ? `${Key}`
-  : IsSameType<Value, BaseType> extends true // There is trick to prevent typescript crush on cyclic dependencies
-  ? `${Key}` | `${Key}.${keyof Value & string}`
-  : `${Key}` | `${Key}.${Path<Value>}`;
-
-type Path<Model> = Model extends ReadonlyArray<infer Value>
-  ? IsTuple<Model> extends true
-    ? {
-        [K in TupleKey<Model>]-?: PathImpl<K & string, Model[K], Model>;
-      }[TupleKey<Model>]
-    : { [Key in keyof Model[0]]-?: Key & string }[keyof Model[0]]
-  : {
-      [Key in keyof Model]-?: PathImpl<Key & string, Model[Key], Model>;
-    }[keyof Model];
-
-type FieldPath<TFieldValues extends object> = Path<TFieldValues>;
-
-type ArrayPathImpl<
-  Key extends string | number,
-  Value,
-  BaseType
-> = Value extends Primitive
+  BaseType,
+  Depth extends number
+> = Depth extends 0 // Prevent infinite dependency
   ? never
-  : Value extends ReadonlyArray<infer U>
-  ? U extends Primitive
-    ? never
-    : IsSameType<Value, BaseType> extends true // There is trick to prevent typescript crush on cyclic dependencies
-    ? `${Key}CyclicDepsFounded`
-    : `${Key}` | `${Key}.${ArrayPath<Value>}`
-  : `${Key}.${ArrayPath<Value>}`;
+  : [Value] extends [ModelPrimitive]
+  ? Key
+  : [Value] extends [ModelPrimitive | undefined]
+  ? Key
+  : [Value] extends [ModelPrimitive | null]
+  ? Key
+  : [Value] extends [ModelPrimitive | null | undefined]
+  ? Key
+  : IsSameType<Value, BaseType> extends true // Prevent cyclic dependency
+  ? never
+  : `${Key}.${Path<Value, Decrement<Depth>>}`;
 
-type ArrayPath<Model> = Model extends ReadonlyArray<infer V>
+type Path<
+  Model,
+  Depth extends number = QueryBuilderConfig.DefaultScanDepth extends number
+    ? QueryBuilderConfig.DefaultScanDepth
+    : 2
+> = Model extends ReadonlyArray<infer Value>
   ? IsTuple<Model> extends true
     ? {
-        [Key in TupleKey<Model>]-?: ArrayPathImpl<
-          Key & string,
-          Model[Key],
-          Model
-        >;
+        [K in TupleKey<Model>]-?: PathImpl<K & string, Model[K], Model, Depth>;
       }[TupleKey<Model>]
-    : { [Key in keyof Model[0]]-?: Key & string }[keyof Model[0]]
+    : {
+        [Key in keyof Model[0]]-?: PathImpl<
+          Key & string,
+          Model[0][Key],
+          Model,
+          Depth
+        >;
+      }[keyof Model[0]]
   : {
-      [Key in keyof Model]-?: ArrayPathImpl<Key & string, Model[Key], Model>;
+      [Key in keyof Model]-?: PathImpl<Key & string, Model[Key], Model, Depth>;
     }[keyof Model];
+
+type FiltersAndSortDotPath<TFieldValues extends object> = Path<TFieldValues>;
 
 type ModelPrimitive =
   | string
@@ -228,15 +237,30 @@ type ModelPrimitive =
   | number[]
   | boolean[];
 
-type IsAttribute<
-  Key extends string | number,
-  Value
-> = Value extends ModelPrimitive ? `${Key}` : never;
+type IsAttribute<Key extends string | number, Value> = [Value] extends [
+  ModelPrimitive
+]
+  ? Key
+  : [Value] extends [ModelPrimitive | undefined]
+  ? Key
+  : [Value] extends [ModelPrimitive | null]
+  ? Key
+  : [Value] extends [ModelPrimitive | null | undefined]
+  ? Key
+  : never;
 
 type IsNotAttribute<
   Key extends string | number,
   Value
-> = Value extends ModelPrimitive ? never : `${Key}`;
+> = Value extends ModelPrimitive
+  ? never
+  : Value extends ModelPrimitive | undefined
+  ? never
+  : Value extends ModelPrimitive | null
+  ? never
+  : Value extends ModelPrimitive | null | undefined
+  ? never
+  : Key;
 
 type GetStrictOrWeak<Model extends object, Strict, Weak> = Model extends {
   id: infer U;
