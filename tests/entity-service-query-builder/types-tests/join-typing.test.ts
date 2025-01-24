@@ -122,6 +122,24 @@ describe("Join functions", () => {
     );
   });
 
+  it("should join populate with populateAll override", () => {
+    const secondBuilder = new SQBuilder<TestModel>().populateAll();
+
+    const query = new SQBuilder<TestModel>()
+      .populateRelation("nested", () =>
+        new SQBuilder<NestedModel>().field("id")
+      )
+      .joinPopulate(secondBuilder)
+      .build();
+
+    const typedQuery: {
+      populate: "*";
+    } = query;
+
+    expect(typedQuery).toBeDefined();
+    expect(typedQuery.populate).toEqual("*");
+  });
+
   it("should join pagination on query", () => {
     const secondQuery = new SQBuilder<TestModel>().page(1).pageSize(26);
     const query = new SQBuilder<TestModel>()
@@ -160,7 +178,9 @@ describe("Join functions", () => {
       .filterRelation("nested", () =>
         new SQBuilder<NestedModel>().eq("name", "value")
       )
-      .populate("nested");
+      .populate("nested")
+      .page(2)
+      .pageSize(26);
 
     const query = new SQBuilder<TestModel>()
       .field("description")
@@ -192,6 +212,8 @@ describe("Join functions", () => {
         };
         nested: true;
       };
+      page: 2;
+      pageSize: 26;
     } = query;
 
     expect(typedQuery).toBeDefined();
@@ -209,5 +231,7 @@ describe("Join functions", () => {
 
     expect(typedQuery.populate.nestedList.fields[0]).toEqual("name");
     expect(typedQuery.populate.nested).toEqual(true);
+    expect(typedQuery.page).toBe(2);
+    expect(typedQuery.pageSize).toBe(26);
   });
 });

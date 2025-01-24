@@ -55,8 +55,7 @@ export class QQBuilder<
     const fieldsLength = fields.length;
 
     for (let i = 0; i < fieldsLength; i++) {
-      const field = fields[i];
-      currentFields.add(field);
+      currentFields.add(fields[i]);
     }
 
     return this as unknown as QQBuilder<
@@ -1201,15 +1200,13 @@ export class QQBuilder<
 
     const currentQuery = populate.get(attribute);
     const currentDynamic = currentQuery?.dynamicQuery || {};
-    const newQuery = {
+    currentDynamic[componentKey] = {
       componentKey: componentKey,
       fields: populateBuilder.getRawFields(),
       sort: populateBuilder.getRawSort(),
       population: populateBuilder.getRawPopulation(),
       filters: populateBuilder.getRawFilters(),
     };
-
-    currentDynamic[componentKey] = newQuery;
 
     populate.set(attribute, {
       key: attribute,
@@ -1498,7 +1495,7 @@ export class QQBuilder<
         filters: Config["filters"];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
-        populateAll: Config["populateAll"];
+        populateAll: DeepConfig["populateAll"];
         populates: {
           [P in
             | keyof Config["populates"]
@@ -1556,6 +1553,7 @@ export class QQBuilder<
     this.joinPopulate(builder);
     this.joinFilters(builder);
     this.joinSort(builder);
+    this.joinPagination(builder);
     this.joinFields(builder);
 
     return this as unknown as QQBuilder<
@@ -1567,7 +1565,7 @@ export class QQBuilder<
         filters: [...Config["filters"], ...DeepConfig["filters"]];
         rootLogical: Config["rootLogical"];
         negate: Config["negate"];
-        populateAll: Config["populateAll"];
+        populateAll: DeepConfig["populateAll"];
         populates: {
           [P in
             | keyof Config["populates"]
@@ -1577,8 +1575,8 @@ export class QQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
+        pagination: DeepConfig["pagination"];
+        paginationType: DeepConfig["paginationType"];
         data: Config["data"];
       }
     >;
@@ -1697,8 +1695,9 @@ export class QQBuilder<
 
     const parsedFilters: any[] = [];
     for (let i = 0; i < filtersLength; i++) {
-      const attributeQuery = attributeFilters[i];
-      const parsedAttribute = QQBuilder._parseAttributeFilter(attributeQuery);
+      const parsedAttribute = QQBuilder._parseAttributeFilter(
+        attributeFilters[i]
+      );
       if (!_isDefined(parsedAttribute)) continue;
       parsedFilters.push(parsedAttribute);
     }
