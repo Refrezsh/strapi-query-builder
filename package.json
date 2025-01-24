@@ -13,7 +13,7 @@
     "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run pretty",
     "prepack": "npm run build",
     "test": "npm run build && jest",
-    "perfomance": "node tests/performance-test.js",
+    "performance": "node tests/performance-test.js",
     "performance-trace-deopt": "node --prof --trace-deopt --logfile=performance-v8.log tests/performance-test.js",
     "performance-trace-gc": "node --prof --trace-gc --logfile=performance-v8.log tests/performance-test.js",
     "performance-trace-opt": "node --prof --trace-opt --logfile=performance-v8.log tests/performance-test.js",
