@@ -1613,20 +1613,12 @@ export class QQBuilder<
       builtQuery.where = parsedFilters;
     }
 
-    const parsedPopulation = QQBuilder._parsePopulate(rawQuery.population);
-    if (_isDefined(parsedPopulation)) {
-      builtQuery.populate = parsedPopulation;
+    const parsedPopulate = QQBuilder._parsePopulate(rawQuery.population);
+    if (_isDefined(parsedPopulate)) {
+      builtQuery.populate = parsedPopulate;
     }
 
-    const pagination = rawQuery.pagination;
-    if (_isDefined(pagination)) {
-      if (_isDefined(pagination.page)) {
-        builtQuery.offset = pagination.page;
-      }
-      if (_isDefined(pagination.pageSize)) {
-        builtQuery.limit = pagination.pageSize;
-      }
-    }
+    QQBuilder._parsePagination(rawQuery.pagination, builtQuery);
 
     const data = rawQuery.data;
     if (_isDefined(data)) {
@@ -1745,6 +1737,21 @@ export class QQBuilder<
     }
 
     return parsedPopulates;
+  }
+
+  private static _parsePagination(
+    pagination: StrapiUnionPagination | undefined,
+    parsedQuery: any
+  ) {
+    if (!_isDefined(pagination)) return;
+
+    if (_isDefined(pagination.page)) {
+      parsedQuery.offset = pagination.page;
+    }
+
+    if (_isDefined(pagination.pageSize)) {
+      parsedQuery.limit = pagination.pageSize;
+    }
   }
   //</editor-fold>
 

@@ -1895,9 +1895,9 @@ export class RQBuilder<
       builtQuery.filters = parsedFilters;
     }
 
-    const parsedPopulation = RQBuilder._parsePopulate(rawQuery.population);
-    if (_isDefined(parsedPopulation)) {
-      builtQuery.populate = parsedPopulation;
+    const parsedPopulate = RQBuilder._parsePopulate(rawQuery.population);
+    if (_isDefined(parsedPopulate)) {
+      builtQuery.populate = parsedPopulate;
     }
 
     const parsedPagination = RQBuilder._parsePagination(rawQuery.pagination);
@@ -1936,17 +1936,17 @@ export class RQBuilder<
 
   private static _parsePagination(pagination?: StrapiUnionPagination) {
     if (!_isDefined(pagination)) return undefined;
+    const paginationType = pagination.paginationType;
 
-    const pageKey = pagination.paginationType === "page" ? "page" : "start";
-    const pageLimitKey =
-      pagination.paginationType === "page" ? "pageSize" : "limit";
     const paginationQuery: any = {};
 
     if (_isDefined(pagination.page)) {
+      const pageKey = paginationType === "page" ? "page" : "start";
       paginationQuery[pageKey] = pagination.page;
     }
 
     if (_isDefined(pagination.pageSize)) {
+      const pageLimitKey = paginationType === "page" ? "pageSize" : "limit";
       paginationQuery[pageLimitKey] = pagination.pageSize;
     }
 

@@ -1803,25 +1803,12 @@ export class SQBuilder<
       builtQuery.filters = parsedFilters;
     }
 
-    const parsedPopulation = SQBuilder._parsePopulate(rawQuery.population);
-    if (_isDefined(parsedPopulation)) {
-      builtQuery.populate = parsedPopulation;
+    const parsedPopulate = SQBuilder._parsePopulate(rawQuery.population);
+    if (_isDefined(parsedPopulate)) {
+      builtQuery.populate = parsedPopulate;
     }
 
-    const pagination = rawQuery.pagination;
-    if (_isDefined(pagination)) {
-      const pageKey = pagination.paginationType === "page" ? "page" : "start";
-      const pageLimitKey =
-        pagination.paginationType === "page" ? "pageSize" : "limit";
-
-      if (_isDefined(pagination.page)) {
-        builtQuery[pageKey] = pagination.page;
-      }
-
-      if (_isDefined(pagination.pageSize)) {
-        builtQuery[pageLimitKey] = pagination.pageSize;
-      }
-    }
+    SQBuilder._parsePagination(rawQuery.pagination, builtQuery);
 
     const data = rawQuery.data;
     if (_isDefined(data)) {
@@ -1952,6 +1939,24 @@ export class SQBuilder<
     }
 
     return parsedPopulates;
+  }
+
+  private static _parsePagination(
+    pagination: StrapiUnionPagination | undefined,
+    parsedQuery: any
+  ) {
+    if (!_isDefined(pagination)) return;
+    const paginationType = pagination.paginationType;
+
+    if (_isDefined(pagination.page)) {
+      const pageKey = paginationType === "page" ? "page" : "start";
+      parsedQuery[pageKey] = pagination.page;
+    }
+
+    if (_isDefined(pagination.pageSize)) {
+      const pageLimitKey = paginationType === "page" ? "pageSize" : "limit";
+      parsedQuery[pageLimitKey] = pagination.pageSize;
+    }
   }
   //</editor-fold>
 
