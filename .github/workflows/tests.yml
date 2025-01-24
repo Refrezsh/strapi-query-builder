@@ -25,4 +25,4 @@ jobs:
       - name: Test
         run: npm test
       - name: Performance
-        run: npm performance
+        run: npm run performance
