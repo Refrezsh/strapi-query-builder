@@ -1,6 +1,9 @@
-export const compileStrapiQuery = (queryBuilder: {
-  build: () => any;
-}): SerializeOutput => {
+export const compileStrapiQuery = (
+  queryBuilder: {
+    build: () => any;
+  },
+  config?: SerializationConfig
+): SerializeOutput => {
   const { data, ...query } = queryBuilder.build();
 
   const deduplicatedArrays = findDeduplicatedArrays(query);
@@ -8,6 +11,7 @@ export const compileStrapiQuery = (queryBuilder: {
   return serializeQuery({
     query: query,
     deduplicatedArrays: deduplicatedArrays,
+    compileSource: config?.compileSource || "typescript",
   });
 };
 
@@ -24,6 +28,8 @@ const serializeQueryToTsObjectLiteral = (
   path: string[],
   additional: SerializeQueryRequest
 ) => {
+  const compileSource = additional.compileSource;
+
   if (Array.isArray(obj)) {
     const lastKey = path[path.length - 1];
     const dotted = path.join(".");
@@ -31,7 +37,7 @@ const serializeQueryToTsObjectLiteral = (
 
     return !!hasDuplicate
       ? hasDuplicate.constantName
-      : serializeAnyList(lastKey, obj);
+      : serializeAnyList(lastKey, obj, compileSource);
   }
 
   const entries: string = Object.entries(obj)
@@ -47,7 +53,10 @@ const serializeQueryToTsObjectLiteral = (
         typeof value === "number"
       ) {
         const serialized = JSON.stringify(value);
-        serializedValue = `${serialized} as ${serialized}`;
+        serializedValue =
+          compileSource === "typescript"
+            ? `${serialized} as ${serialized}`
+            : serialized;
       } else if (typeof value === "object" && value !== null) {
         serializedValue = serializeQueryToTsObjectLiteral(
           value,
@@ -69,7 +78,11 @@ const serializeQueryToTsObjectLiteral = (
   return `{${entries}}`;
 };
 
-const serializeAnyList = (key: string, obj: any[]): string => {
+const serializeAnyList = (
+  key: string,
+  obj: any[],
+  source: SerializeQueryRequest["compileSource"]
+): string => {
   const selectAndOrderKeys = new Set(["fields", "sort", "select", "orderBy"]);
 
   if (selectAndOrderKeys.has(key)) {
@@ -77,7 +90,9 @@ const serializeAnyList = (key: string, obj: any[]): string => {
       .map((value) => JSON.stringify(value))
       .join(",")}]`;
 
-    return `${fieldsValues} as ${fieldsValues}`;
+    return source === "typescript"
+      ? `${fieldsValues} as ${fieldsValues}`
+      : fieldsValues;
   } else {
     return `[${obj
       .map((value) => {
@@ -109,7 +124,11 @@ const serializeConstants = (request: SerializeQueryRequest): string => {
     if (!constantsMap.has(values.constantName)) {
       constantsMap.set(
         values.constantName,
-        serializeAnyList("fields", values.constantArrayValue)
+        serializeAnyList(
+          "fields",
+          values.constantArrayValue,
+          request.compileSource
+        )
       );
     }
   }
@@ -182,7 +201,12 @@ const getSortsHash = (list: any[]) =>
 type SerializeQueryRequest = {
   query: any;
   deduplicatedArrays: RepeatableArraysHash;
+  compileSource: "typescript" | "javascript";
 };
+
+interface SerializationConfig {
+  compileSource?: SerializeQueryRequest["compileSource"];
+}
 
 interface SerializeOutput {
   query: string;

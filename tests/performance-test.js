@@ -1,4 +1,6 @@
-const SQBuilder = require("../lib/cjs/index").SQBuilder;
+const { SQBuilder, compileStrapiQuery } = require("../lib/cjs/index");
+const fs = require("fs");
+const path = require("path");
 const times = 500;
 
 let query;
@@ -111,3 +113,42 @@ console.log(
     assignAndBuild / times
   }`
 );
+
+const compiledQueryPath = path.join(__dirname, "performance-test-compiled.js");
+
+const generateStaticQueryPerformanceTest = () => {
+  const compiled = compileStrapiQuery(query, { compileSource: "javascript" });
+
+  const scriptContent = `const times = 500;
+
+const getQueryCompiled = () => {
+${compiled.constants}
+return ${compiled.query};
+}
+
+const buildStarts = performance.now();
+for (let i = 0; i < times; i++) {
+  getQueryCompiled();
+}
+const buildEnds = performance.now();
+
+const meanBuildTime = buildEnds - buildStarts;
+
+console.log(
+  \`Average compiled query performance: \${meanBuildTime}ms\ for \${times}times\. Av: \${
+    meanBuildTime / times
+  }\`
+);
+`;
+
+  fs.writeFileSync(compiledQueryPath, scriptContent, "utf8");
+};
+
+generateStaticQueryPerformanceTest();
+(async () => {
+  try {
+    await import(compiledQueryPath);
+  } catch (err) {
+    console.error("Error importing the file:", err);
+  }
+})();
