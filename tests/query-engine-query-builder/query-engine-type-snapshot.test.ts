@@ -23,6 +23,9 @@ describe("Query engine type snapshot", () => {
               .eq("nested.name", "value")
           )
       )
+      .filterRelation("nestedList", () =>
+        new QQBuilder<NestedModel>().contains("deepNestedList.deepProp", "test")
+      )
       .populateDynamic("nested", "component.1", () =>
         new QQBuilder<NestedModel>().eq("id", "value")
       )
@@ -32,6 +35,9 @@ describe("Query engine type snapshot", () => {
       .populateRelation("nestedList", () =>
         new QQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
+      .populate("nestedListOptionalNullableUndefined")
+      .start(1)
+      .limit(30)
       .build();
 
     const assignedQuery: {
@@ -51,6 +57,11 @@ describe("Query engine type snapshot", () => {
                 ];
               }
             ];
+          },
+          {
+            nestedList: {
+              $and: [{ deepNestedList: { deepProp: { $contains: "test" } } }];
+            };
           }
         ];
       };
@@ -67,7 +78,10 @@ describe("Query engine type snapshot", () => {
           select: ["name"];
           where: { $and: [{ name: { $eq: "value2" } }] };
         };
+        nestedListOptionalNullableUndefined: true;
       };
+      offset: 1;
+      limit: 30;
     } = query;
 
     expect(assignedQuery).toBeDefined();
@@ -92,6 +106,11 @@ describe("Query engine type snapshot", () => {
     );
 
     expect(
+      assignedQuery.where.$and[2].nestedList.$and[0].deepNestedList.deepProp
+        .$contains
+    ).toEqual("test");
+
+    expect(
       assignedQuery.populate.nested.on["component.1"].where.$and[0].id.$eq
     ).toBe("value");
     expect(
@@ -101,5 +120,11 @@ describe("Query engine type snapshot", () => {
     expect(assignedQuery.populate.nestedList.where.$and[0].name.$eq).toBe(
       "value2"
     );
+    expect(assignedQuery.populate.nestedListOptionalNullableUndefined).toBe(
+      true
+    );
+
+    expect(assignedQuery.offset).toBe(1);
+    expect(assignedQuery.limit).toBe(30);
   });
 });

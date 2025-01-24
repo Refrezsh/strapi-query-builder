@@ -20,6 +20,9 @@ describe("type snapshot", () => {
               .eq("nested.name", "value")
           )
       )
+      .filterRelation("nestedList", () =>
+        new SQBuilder<NestedModel>().contains("deepNestedList.deepProp", "test")
+      )
       .populateDynamic("nested", "component.1", () =>
         new SQBuilder<NestedModel>().eq("id", "value")
       )
@@ -29,6 +32,11 @@ describe("type snapshot", () => {
       .populateRelation("nestedList", () =>
         new SQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
+      .populate("nestedListOptionalNullableUndefined")
+      .publicationState("preview")
+      .locale("en")
+      .page(1)
+      .pageSize(30)
       .build();
 
     const assignedQuery: {
@@ -48,6 +56,11 @@ describe("type snapshot", () => {
                 ];
               }
             ];
+          },
+          {
+            nestedList: {
+              $and: [{ deepNestedList: { deepProp: { $contains: "test" } } }];
+            };
           }
         ];
       };
@@ -64,7 +77,12 @@ describe("type snapshot", () => {
           fields: ["name"];
           filters: { $and: [{ name: { $eq: "value2" } }] };
         };
+        nestedListOptionalNullableUndefined: true;
       };
+      publicationState: "preview";
+      locale: "en";
+      page: 1;
+      pageSize: 30;
     } = query;
 
     expect(assignedQuery).toBeDefined();
@@ -87,6 +105,10 @@ describe("type snapshot", () => {
     expect(assignedQuery.filters.$and[1].$and[2].$and[1].nested.name.$eq).toBe(
       "value"
     );
+    expect(
+      assignedQuery.filters.$and[2].nestedList.$and[0].deepNestedList.deepProp
+        .$contains
+    ).toEqual("test");
 
     expect(
       assignedQuery.populate.nested.on["component.1"].filters.$and[0].id.$eq
@@ -99,5 +121,12 @@ describe("type snapshot", () => {
     expect(assignedQuery.populate.nestedList.filters.$and[0].name.$eq).toBe(
       "value2"
     );
+    expect(assignedQuery.populate.nestedListOptionalNullableUndefined).toBe(
+      true
+    );
+    expect(assignedQuery.publicationState).toEqual("preview");
+    expect(assignedQuery.locale).toEqual("en");
+    expect(assignedQuery.page).toEqual(1);
+    expect(assignedQuery.pageSize).toEqual(30);
   });
 });

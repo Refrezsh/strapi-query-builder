@@ -1806,7 +1806,7 @@ export class RQBuilder<
   //<editor-fold desc="Service specific">
   /**
    * @description Set locale code
-   * @description Entity Service Specific
+   * @description REST API Specific
    * @param {string} code Locale code
    * @example
    * new RQBuilder<TestModel>().locale("ua")
@@ -1836,7 +1836,7 @@ export class RQBuilder<
 
   /**
    * @description Set publication state for draft & publish
-   * @description Entity Service Specific
+   * @description REST API Specific
    * @param {PublicationStates} state Publication state
    * @example
    * new RQBuilder<TestModel>().publicationState("live")
@@ -1867,7 +1867,7 @@ export class RQBuilder<
 
   //<editor-fold desc="Build process">
   /**
-   * @description Build the current query into the final Strapi Entity Service format
+   * @description Build the current query into the final Strapi REST Api format
    * @return Query with dynamically generated query type
    */
   public build() {
