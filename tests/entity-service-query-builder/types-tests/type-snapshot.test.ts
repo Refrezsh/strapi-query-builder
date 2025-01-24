@@ -1,7 +1,7 @@
 import { SQBuilder } from "../../../lib/cjs";
 import { NestedModel, TestModel } from "./fields-typing.test";
 
-describe("type snapshot", () => {
+describe("SQBuilder type snapshot", () => {
   it("should create right type", () => {
     const query = new SQBuilder<TestModel>()
       .field("name")

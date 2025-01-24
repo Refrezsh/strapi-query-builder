@@ -1,47 +1,47 @@
-import { SQBuilder } from "../../../lib/cjs";
-import { TestModel } from "./fields-typing.test";
+import { QQBuilder } from "../../../lib/cjs";
+import { TestModel } from "../../entity-service-query-builder/types-tests/fields-typing.test";
 
-describe("SQBuilder sort", () => {
-  it("should produce single nested asc sort", () => {
-    const nestedType = new SQBuilder<TestModel>()
+describe("QQBuilder orderBy", () => {
+  it("should produce single nested asc orderBy", () => {
+    const nestedType = new QQBuilder<TestModel>()
       .sortAsc("nested.name")
       .build();
 
-    const nestedTypeAscending: "asc" = nestedType.sort[0].nested.name;
+    const nestedTypeAscending: "asc" = nestedType.orderBy[0].nested.name;
     expect(nestedTypeAscending).toBe("asc");
   });
 
-  it("should produce asc sort with nested and default keys", () => {
-    const combinedWithOtherSort = new SQBuilder<TestModel>()
+  it("should produce asc orderBy with nested and default keys", () => {
+    const combinedWithOtherSort = new QQBuilder<TestModel>()
       .sortAsc("nested.name")
       .sortAsc("name")
       .sortDesc("options")
       .build();
 
     const combinedWithOtherSortAscendingNested: "asc" =
-      combinedWithOtherSort.sort[0].nested.name;
+      combinedWithOtherSort.orderBy[0].nested.name;
     const combinedWithOtherSortAscendingName: "asc" =
-      combinedWithOtherSort.sort[1].name;
+      combinedWithOtherSort.orderBy[1].name;
     const combinedWithOtherSortAscendingOptions: "desc" =
-      combinedWithOtherSort.sort[2].options;
+      combinedWithOtherSort.orderBy[2].options;
 
     expect(combinedWithOtherSortAscendingNested).toBe("asc");
     expect(combinedWithOtherSortAscendingName).toBe("asc");
     expect(combinedWithOtherSortAscendingOptions).toBe("desc");
   });
 
-  it("should sort with list of key and single sort keys", () => {
-    const nestedSortWithKeys = new SQBuilder<TestModel>()
+  it("should orderBy with list of key and single orderBy keys", () => {
+    const nestedSortWithKeys = new QQBuilder<TestModel>()
       .sortsAsc(["nested.name", "name"] as const)
       .sortDesc("options")
       .build();
 
     const combinedWithOtherSortAscendingNested: "asc" =
-      nestedSortWithKeys.sort[0].nested.name;
+      nestedSortWithKeys.orderBy[0].nested.name;
     const combinedWithOtherSortAscendingName: "asc" =
-      nestedSortWithKeys.sort[1].name;
+      nestedSortWithKeys.orderBy[1].name;
     const combinedWithOtherSortAscendingOptions: "desc" =
-      nestedSortWithKeys.sort[2].options;
+      nestedSortWithKeys.orderBy[2].options;
 
     expect(combinedWithOtherSortAscendingNested).toBe("asc");
     expect(combinedWithOtherSortAscendingName).toBe("asc");
@@ -49,12 +49,12 @@ describe("SQBuilder sort", () => {
   });
 
   it("should create cross type", () => {
-    const withFields = new SQBuilder<TestModel>()
+    const withFields = new QQBuilder<TestModel>()
       .sortsDesc(["name"])
       .field("options")
       .build();
-    const withFieldsOptions: "options" = withFields.fields[0];
-    const withFieldSort: "desc" = withFields.sort[0].name;
+    const withFieldsOptions: "options" = withFields.select[0];
+    const withFieldSort: "desc" = withFields.orderBy[0].name;
     expect(withFieldsOptions).toBe("options");
     expect(withFieldSort).toBe("desc");
   });

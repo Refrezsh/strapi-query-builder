@@ -1,49 +1,15 @@
-import { SQBuilder } from "../../../lib/cjs";
+import { RQBuilder } from "../../../lib/cjs";
+import { TestModel } from "../../entity-service-query-builder/types-tests/fields-typing.test";
 
-export interface DeepModel {
-  id: string;
-  deepProp: string;
-}
-
-export interface NestedModel {
-  id: string;
-  name: string;
-  deepNested?: DeepModel;
-  deepNestedList?: DeepModel[];
-}
-
-export interface TestModel {
-  id: string;
-  name: string;
-  description: string;
-  options: string;
-  notNestedEnumeration: string[];
-  someOptional?: string;
-  notNestedEnumerationOptional?: string[];
-  optionalAndNullable?: string | null;
-  optionalNullableUndefined?: string | null | undefined;
-  nullableUndefined: string | null | undefined;
-  nested: NestedModel;
-  nestedList: NestedModel[];
-  nestedOptional?: NestedModel;
-  nestedOptionalList?: NestedModel[];
-  cyclicRelationList: TestModel[];
-  cyclicRelation: TestModel;
-  nestedOptionalNullable?: NestedModel | null;
-  nestedOptionalNullableUndefined?: NestedModel | null | undefined;
-  nestedNullableUndefined: NestedModel | null | undefined;
-  nestedListOptionalNullableUndefined?: NestedModel[] | null | undefined;
-}
-
-describe("SQBuilder fields", () => {
+describe("RQBuilder fields", () => {
   it("should produce single type with constant types and right value", () => {
-    const singleType = new SQBuilder<TestModel>().field("id").build();
+    const singleType = new RQBuilder<TestModel>().field("id").build();
     const singleTypeId: "id" = singleType.fields[0];
     expect(singleTypeId).toEqual("id");
   });
 
   it("should product multiple type with chain", () => {
-    const multipleTypes = new SQBuilder<TestModel>()
+    const multipleTypes = new RQBuilder<TestModel>()
       .field("id")
       .field("name")
       .field("description")
@@ -58,7 +24,7 @@ describe("SQBuilder fields", () => {
   });
 
   it("should merge same keys and work with fields", () => {
-    const withUnionTypes = new SQBuilder<TestModel>()
+    const withUnionTypes = new RQBuilder<TestModel>()
       .field("id")
       .fields(["name", "description"] as const)
       .field("options")
@@ -78,7 +44,7 @@ describe("SQBuilder fields", () => {
     const primitiveFilters: {
       fields: ["notNestedEnumeration"];
       filters: { $and: [{ notNestedEnumeration: { $eq: "value" } }] };
-    } = new SQBuilder<TestModel>()
+    } = new RQBuilder<TestModel>()
       .field("notNestedEnumeration")
       .eq("notNestedEnumeration", "value")
       .build();

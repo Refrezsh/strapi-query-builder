@@ -1,16 +1,16 @@
-import { SQBuilder } from "../../../lib/cjs";
-import { TestModel } from "./fields-typing.test";
+import { RQBuilder } from "../../../lib/cjs";
+import { TestModel } from "../../entity-service-query-builder/types-tests/fields-typing.test";
 
-describe("SQBuilder service specific", () => {
+describe("Service specific types", () => {
   it("should set live publication state", () => {
-    const query = new SQBuilder<TestModel>().publicationState("live").build();
+    const query = new RQBuilder<TestModel>().publicationState("live").build();
     const typedQuery: { publicationState: "live" } = query;
 
     expect(typedQuery.publicationState).toEqual("live");
   });
 
   it("should set preivew publication state", () => {
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .publicationState("preview")
       .build();
     const typedQuery: { publicationState: "preview" } = query;
@@ -19,7 +19,7 @@ describe("SQBuilder service specific", () => {
   });
 
   it("should set any locale", () => {
-    const query = new SQBuilder<TestModel>().locale("ua").build();
+    const query = new RQBuilder<TestModel>().locale("ua").build();
     const typedQuery: { locale: "ua" } = query;
 
     expect(typedQuery.locale).toEqual("ua");

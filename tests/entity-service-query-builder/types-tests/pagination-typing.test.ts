@@ -1,7 +1,7 @@
 import { SQBuilder } from "../../../lib/cjs";
 import { TestModel } from "./fields-typing.test";
 
-describe("Pagination types", () => {
+describe("SQBuilder pagination", () => {
   it("should crate page query", () => {
     const query = new SQBuilder<TestModel>().page(1).build();
     const typedQuery: { page: 1 } = query;

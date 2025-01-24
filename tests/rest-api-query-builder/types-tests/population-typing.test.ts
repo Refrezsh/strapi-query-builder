@@ -1,14 +1,17 @@
-import { SQBuilder } from "../../../lib/cjs";
-import { NestedModel, TestModel } from "./fields-typing.test";
+import { RQBuilder } from "../../../lib/cjs";
+import {
+  NestedModel,
+  TestModel,
+} from "../../entity-service-query-builder/types-tests/fields-typing.test";
 
-describe("SQBuilder populate", () => {
+describe("population types", () => {
   it("should create right populateRelation type", () => {
-    const population = new SQBuilder<TestModel>()
+    const population = new RQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new SQBuilder<NestedModel>().eq("id", "value").field("id")
+        new RQBuilder<NestedModel>().eq("id", "value").field("id")
       )
       .populateRelation("nestedList", () =>
-        new SQBuilder<NestedModel>().eq("name", "value2").field("name")
+        new RQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .build();
 
@@ -41,18 +44,18 @@ describe("SQBuilder populate", () => {
   });
 
   it("should populate all", () => {
-    const populate = new SQBuilder<TestModel>().populateAll().build();
+    const populate = new RQBuilder<TestModel>().populateAll().build();
     const typedQuery: { populate: "*" } = populate;
     expect(typedQuery.populate).toBe("*");
   });
 
   it("should override prev populates wen populate all", () => {
-    const population = new SQBuilder<TestModel>()
+    const population = new RQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new SQBuilder<NestedModel>().eq("id", "value").field("id")
+        new RQBuilder<NestedModel>().eq("id", "value").field("id")
       )
       .populateRelation("nestedList", () =>
-        new SQBuilder<NestedModel>().eq("name", "value2").field("name")
+        new RQBuilder<NestedModel>().eq("name", "value2").field("name")
       )
       .populateAll()
       .build();
@@ -63,37 +66,39 @@ describe("SQBuilder populate", () => {
   });
 
   it("should add populate all for key", () => {
-    const populate = new SQBuilder<TestModel>()
+    const populate = new RQBuilder<TestModel>()
       .populate("nested")
       .populate("nestedList")
       .build();
-    const populateWithType: { populate: { nested: true; nestedList: true } } =
-      populate;
+    const populateWithType: {
+      populate: { nested: { populate: "*" }; nestedList: { populate: "*" } };
+    } = populate;
 
     expect(populateWithType).toBeDefined();
-    expect(populateWithType.populate.nested).toBe(true);
-    expect(populateWithType.populate.nestedList).toBe(true);
+    expect(populateWithType.populate.nested.populate).toBe("*");
+    expect(populateWithType.populate.nestedList.populate).toBe("*");
   });
 
   it("should add populate all for keys", () => {
-    const populate = new SQBuilder<TestModel>()
+    const populate = new RQBuilder<TestModel>()
       .populates(["nested", "nestedList"])
       .build();
-    const populateWithType: { populate: { nested: true; nestedList: true } } =
-      populate;
+    const populateWithType: {
+      populate: { nested: { populate: "*" }; nestedList: { populate: "*" } };
+    } = populate;
 
     expect(populateWithType).toBeDefined();
-    expect(populateWithType.populate.nested).toBe(true);
-    expect(populateWithType.populate.nestedList).toBe(true);
+    expect(populateWithType.populate.nested.populate).toBe("*");
+    expect(populateWithType.populate.nestedList.populate).toBe("*");
   });
 
   it("should merge same keys", () => {
-    const populate = new SQBuilder<TestModel>()
+    const populate = new RQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new SQBuilder<NestedModel>().eq("id", "value").field("id")
+        new RQBuilder<NestedModel>().eq("id", "value").field("id")
       )
       .populateRelation("nested", () =>
-        new SQBuilder<NestedModel>().notEq("name", "value2")
+        new RQBuilder<NestedModel>().notEq("name", "value2")
       )
       .build();
 
@@ -110,15 +115,15 @@ describe("SQBuilder populate", () => {
   });
 
   it("should create right populateDynamic type", () => {
-    const dynamicZone = new SQBuilder<TestModel>()
+    const dynamicZone = new RQBuilder<TestModel>()
       .populateDynamic("nested", "component.1", () =>
-        new SQBuilder<NestedModel>().eq("id", "value")
+        new RQBuilder<NestedModel>().eq("id", "value")
       )
       .populateDynamic("nested", "component.2", () =>
-        new SQBuilder<NestedModel>().notEq("id", "value1")
+        new RQBuilder<NestedModel>().notEq("id", "value1")
       )
       .populateDynamic("nested", "component.2", () =>
-        new SQBuilder<NestedModel>().notEq("id", "value3")
+        new RQBuilder<NestedModel>().notEq("id", "value3")
       )
       .build();
 

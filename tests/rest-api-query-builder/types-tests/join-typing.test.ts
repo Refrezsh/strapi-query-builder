@@ -1,14 +1,17 @@
-import { SQBuilder } from "../../../lib/cjs";
-import { NestedModel, TestModel } from "./fields-typing.test";
+import { RQBuilder } from "../../../lib/cjs";
+import {
+  NestedModel,
+  TestModel,
+} from "../../entity-service-query-builder/types-tests/fields-typing.test";
 
-describe("SQBuilder join functions", () => {
+describe("Join functions", () => {
   it("should join fields", () => {
-    const secondBuilder = new SQBuilder<TestModel>().fields([
+    const secondBuilder = new RQBuilder<TestModel>().fields([
       "options",
       "name",
     ] as const);
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .field("id")
       .joinFields(secondBuilder)
       .build();
@@ -21,30 +24,29 @@ describe("SQBuilder join functions", () => {
   });
 
   it("should join sorts", () => {
-    const secondBuilder = new SQBuilder<TestModel>().sortAsc("nested.id");
+    const secondBuilder = new RQBuilder<TestModel>().sortAsc("nested.id");
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .sortAsc("name")
       .joinSort(secondBuilder)
       .build();
 
-    const typedQuery: { sort: [{ name: "asc" }, { nested: { id: "asc" } }] } =
-      query;
+    const typedQuery: { sort: ["name:asc", "nested.id:asc"] } = query;
 
     expect(typedQuery).toBeDefined();
-    expect(typedQuery.sort[0].name).toEqual("asc");
-    expect(typedQuery.sort[1].nested.id).toEqual("asc");
+    expect(typedQuery.sort[0]).toEqual("name:asc");
+    expect(typedQuery.sort[1]).toEqual("nested.id:asc");
   });
 
   it("should join filters without merging root logical", () => {
-    const secondBuilder = new SQBuilder<TestModel>()
+    const secondBuilder = new RQBuilder<TestModel>()
       .not()
       .or()
       .filterRelation("nested", () =>
-        new SQBuilder<NestedModel>().not().or().eq("id", "1")
+        new RQBuilder<NestedModel>().not().or().eq("id", "1")
       );
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .eq("description", "value")
       .joinFilters(secondBuilder)
       .build();
@@ -64,14 +66,14 @@ describe("SQBuilder join functions", () => {
   });
 
   it("should join filters with merging root logical", () => {
-    const secondBuilder = new SQBuilder<TestModel>()
+    const secondBuilder = new RQBuilder<TestModel>()
       .not()
       .or()
       .filterRelation("nested", () =>
-        new SQBuilder<NestedModel>().not().or().eq("id", "1")
+        new RQBuilder<NestedModel>().not().or().eq("id", "1")
       );
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .eq("description", "value")
       .joinFilters(secondBuilder, true, true)
       .build();
@@ -95,15 +97,15 @@ describe("SQBuilder join functions", () => {
   });
 
   it("should join populate", () => {
-    const secondBuilder = new SQBuilder<TestModel>().populateDynamic(
+    const secondBuilder = new RQBuilder<TestModel>().populateDynamic(
       "nestedList",
       "component.1",
-      () => new SQBuilder<NestedModel>().field("name")
+      () => new RQBuilder<NestedModel>().field("name")
     );
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new SQBuilder<NestedModel>().field("id")
+        new RQBuilder<NestedModel>().field("id")
       )
       .joinPopulate(secondBuilder)
       .build();
@@ -123,11 +125,11 @@ describe("SQBuilder join functions", () => {
   });
 
   it("should join populate with populateAll override", () => {
-    const secondBuilder = new SQBuilder<TestModel>().populateAll();
+    const secondBuilder = new RQBuilder<TestModel>().populateAll();
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .populateRelation("nested", () =>
-        new SQBuilder<NestedModel>().field("id")
+        new RQBuilder<NestedModel>().field("id")
       )
       .joinPopulate(secondBuilder)
       .build();
@@ -141,63 +143,67 @@ describe("SQBuilder join functions", () => {
   });
 
   it("should join pagination on query", () => {
-    const secondQuery = new SQBuilder<TestModel>().page(1).pageSize(26);
-    const query = new SQBuilder<TestModel>()
+    const secondQuery = new RQBuilder<TestModel>().page(1).pageSize(26);
+    const query = new RQBuilder<TestModel>()
       .field("id")
       .joinPagination(secondQuery)
       .build();
 
-    const typedQuery: { fields: ["id"]; page: 1; pageSize: 26 } = query;
+    const typedQuery: {
+      fields: ["id"];
+      pagination: { page: 1; pageSize: 26 };
+    } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.fields[0]).toEqual("id");
-    expect(typedQuery.page).toBe(1);
-    expect(typedQuery.pageSize).toBe(26);
+    expect(typedQuery.pagination.page).toBe(1);
+    expect(typedQuery.pagination.pageSize).toBe(26);
   });
 
   it("should join and override pagination on query", () => {
-    const secondQuery = new SQBuilder<TestModel>().start(1).limit(26);
-    const query = new SQBuilder<TestModel>()
+    const secondQuery = new RQBuilder<TestModel>().start(1).limit(26);
+    const query = new RQBuilder<TestModel>()
       .field("id")
       .page(1)
       .pageSize(40)
       .joinPagination(secondQuery)
       .build();
 
-    const typedQuery: { fields: ["id"]; start: 1; limit: 26 } = query;
+    const typedQuery: { fields: ["id"]; pagination: { start: 1; limit: 26 } } =
+      query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.fields[0]).toEqual("id");
-    expect(typedQuery.start).toBe(1);
-    expect(typedQuery.limit).toBe(26);
+    expect(typedQuery.pagination.start).toBe(1);
+    expect(typedQuery.pagination.limit).toBe(26);
   });
 
   it("should join all", () => {
-    const joinQuery = new SQBuilder<TestModel>()
+    const joinQuery = new RQBuilder<TestModel>()
       .field("id")
       .sortAsc("id")
       .eq("id", "1")
       .filterRelation("nested", () =>
-        new SQBuilder<NestedModel>().eq("name", "value")
+        new RQBuilder<NestedModel>().eq("name", "value")
       )
       .populate("nested")
       .page(2)
       .pageSize(26);
 
-    const query = new SQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .field("description")
       .sortAsc("options")
       .eq("notNestedEnumeration", "test")
       .filterDeep(() =>
-        new SQBuilder<TestModel>().or().eq("name", "test").eq("name", "test2")
+        new RQBuilder<TestModel>().or().eq("name", "test").eq("name", "test2")
       )
       .populateRelation("nestedList", () =>
-        new SQBuilder<NestedModel>().field("name")
+        new RQBuilder<NestedModel>().field("name")
       )
       .joinQuery(joinQuery)
       .build();
 
     const typedQuery: {
       fields: ["description", "id"];
-      sort: [{ options: "asc" }, { id: "asc" }];
+      sort: ["options:asc", "id:asc"];
       filters: {
         $and: [
           { notNestedEnumeration: { $eq: "test" } },
@@ -210,18 +216,17 @@ describe("SQBuilder join functions", () => {
         nestedList: {
           fields: ["name"];
         };
-        nested: true;
+        nested: { populate: "*" };
       };
-      page: 2;
-      pageSize: 26;
+      pagination: { page: 2; pageSize: 26 };
     } = query;
 
     expect(typedQuery).toBeDefined();
     expect(typedQuery.fields[0]).toEqual("description");
     expect(typedQuery.fields[1]).toEqual("id");
 
-    expect(typedQuery.sort[0].options).toEqual("asc");
-    expect(typedQuery.sort[1].id).toEqual("asc");
+    expect(typedQuery.sort[0]).toEqual("options:asc");
+    expect(typedQuery.sort[1]).toEqual("id:asc");
 
     expect(typedQuery.filters.$and[0].notNestedEnumeration.$eq).toEqual("test");
     expect(typedQuery.filters.$and[1].$or[0].name.$eq).toEqual("test");
@@ -230,8 +235,8 @@ describe("SQBuilder join functions", () => {
     expect(typedQuery.filters.$and[3].nested.$and[0].name.$eq).toEqual("value");
 
     expect(typedQuery.populate.nestedList.fields[0]).toEqual("name");
-    expect(typedQuery.populate.nested).toEqual(true);
-    expect(typedQuery.page).toBe(2);
-    expect(typedQuery.pageSize).toBe(26);
+    expect(typedQuery.populate.nested.populate).toEqual("*");
+    expect(typedQuery.pagination.page).toBe(2);
+    expect(typedQuery.pagination.pageSize).toBe(26);
   });
 });

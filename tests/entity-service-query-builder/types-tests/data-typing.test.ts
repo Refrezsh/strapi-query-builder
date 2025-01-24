@@ -1,7 +1,7 @@
 import { TestModel } from "./fields-typing.test";
 import { SQBuilder } from "../../../lib/cjs";
 
-describe("Data types", () => {
+describe("SQBuilder data", () => {
   it("should set data with right type", () => {
     const query = new SQBuilder<TestModel, Partial<TestModel>>()
       .data({ id: "2" })
