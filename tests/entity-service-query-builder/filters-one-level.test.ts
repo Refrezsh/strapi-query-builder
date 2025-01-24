@@ -1,4 +1,4 @@
-import { SQBuilder } from "../../lib/cjs";
+import { SQBuilder, RQBuilder, QQBuilder } from "../../lib/cjs";
 
 const attribute = "attribute";
 const value = "value";
@@ -25,15 +25,23 @@ export const attributeFilters = [
   "$notNull",
 ] as const;
 
-const getResult = (type: string, negate = false) =>
+const getResult = (type: string, negate = false, queryEngine = false) =>
   negate
-    ? { filters: { $and: [{ attribute: { $not: { [type]: value } } }] } }
-    : { filters: { $and: [{ attribute: { [type]: value } }] } };
+    ? {
+        [queryEngine ? "where" : "filters"]: {
+          $and: [{ attribute: { $not: { [type]: value } } }],
+        },
+      }
+    : {
+        [queryEngine ? "where" : "filters"]: {
+          $and: [{ attribute: { [type]: value } }],
+        },
+      };
 
-const getTwoResults = (type: string, negateRoot = false) =>
+const getTwoResults = (type: string, negateRoot = false, queryEngine = false) =>
   negateRoot
     ? {
-        filters: {
+        [queryEngine ? "where" : "filters"]: {
           $not: {
             $and: [
               { attribute: { [type]: value } },
@@ -43,7 +51,7 @@ const getTwoResults = (type: string, negateRoot = false) =>
         },
       }
     : {
-        filters: {
+        [queryEngine ? "where" : "filters"]: {
           $and: [
             { attribute: { [type]: value } },
             { attribute: { [type]: value } },
@@ -59,7 +67,7 @@ describe("Filters operator", () => {
     }
   });
 
-  it("should create query for single attribute and all operators", () => {
+  it("should create query for single attribute and all operators of SQBuilder", () => {
     for (const atr of attributeFilters) {
       const builtQuery = new SQBuilder()
         .and()
@@ -71,7 +79,31 @@ describe("Filters operator", () => {
     }
   });
 
-  it("should create query with not for single attribute and all operators", () => {
+  it("should create query for single attribute and all operators of RQBuilder", () => {
+    for (const atr of attributeFilters) {
+      const builtQuery = new RQBuilder()
+        .and()
+        .filter(attribute, atr, value)
+        .filter(attribute, atr, value)
+        .build();
+
+      expect(builtQuery).toEqual(getTwoResults(atr));
+    }
+  });
+
+  it("should create query for single attribute and all operators of QQBuilder", () => {
+    for (const atr of attributeFilters) {
+      const builtQuery = new QQBuilder()
+        .and()
+        .filter(attribute, atr, value)
+        .filter(attribute, atr, value)
+        .build();
+
+      expect(builtQuery).toEqual(getTwoResults(atr, false, true));
+    }
+  });
+
+  it("should create query with not for single attribute and all operators SQBuilder", () => {
     for (const atr of attributeFilters) {
       const builtQuery = new SQBuilder()
         .filterNot(attribute, atr, value)
@@ -81,7 +113,27 @@ describe("Filters operator", () => {
     }
   });
 
-  it("should add not operator to root query", () => {
+  it("should create query with not for single attribute and all operators RQBuilder", () => {
+    for (const atr of attributeFilters) {
+      const builtQuery = new RQBuilder()
+        .filterNot(attribute, atr, value)
+        .build();
+
+      expect(builtQuery).toEqual(getResult(atr, true));
+    }
+  });
+
+  it("should create query with not for single attribute and all operators QQBuilder", () => {
+    for (const atr of attributeFilters) {
+      const builtQuery = new QQBuilder()
+        .filterNot(attribute, atr, value)
+        .build();
+
+      expect(builtQuery).toEqual(getResult(atr, true, true));
+    }
+  });
+
+  it("should add not operator to root query SQBuilder", () => {
     for (const atr of attributeFilters) {
       const builtQuery = new SQBuilder()
         .not()
@@ -91,6 +143,32 @@ describe("Filters operator", () => {
         .build();
 
       expect(builtQuery).toEqual(getTwoResults(atr, true));
+    }
+  });
+
+  it("should add not operator to root query QQBuilder", () => {
+    for (const atr of attributeFilters) {
+      const builtQuery = new QQBuilder()
+        .not()
+        .and()
+        .filter(attribute, atr, value)
+        .filter(attribute, atr, value)
+        .build();
+
+      expect(builtQuery).toEqual(getTwoResults(atr, true, true));
+    }
+  });
+
+  it("should add not operator to root query RQBuilder", () => {
+    for (const atr of attributeFilters) {
+      const builtQuery = new RQBuilder()
+        .not()
+        .and()
+        .filter(attribute, atr, value)
+        .filter(attribute, atr, value)
+        .build();
+
+      expect(builtQuery).toEqual(getTwoResults(atr, true, false));
     }
   });
 
