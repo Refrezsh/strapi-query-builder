@@ -272,7 +272,7 @@ const populateAll = new SQBuilder().populateAll().build();
 Or use the key list to populate.
 
 ```ts
-const populateWithList = new SQBuilder().populates(["Category", "Seo"]).build();
+const populateWithList = new SQBuilder().populates(["Category", "Seo"] as const).build();
 // Or
 const populateSpecific = new SQBuilder().populate("Category").populate("Seo").build();
 ```
@@ -313,7 +313,7 @@ You can sort by key or by array of keys. [Strapi Ordering](https://docs-v4.strap
 ```ts
 const filterCategories = new SQBuilder() 
   .sortAsc("key1") // Sort by one key
-  .sortsAsc(["key2", "key3"]) // Sort by array of keys
+  .sortsAsc(["key2", "key3"] as const) // Sort by array of keys
   .sortDesc("key8.subkey") // Set "key8.subkey" as desc
   .sort("key4", "$asc") // Set sorting explicitly
   .build();
@@ -331,7 +331,7 @@ as well, as the same keys are merged.
 ```ts
 const filterCategories = new SQBuilder()
   .field("key1") // Single attribute
-  .fields(["key2", "key3"]) // Array of attributes
+  .fields(["key2", "key3"] as const) // Array of attributes
   .build();
 ```
 > Same keys will be merged.
@@ -418,7 +418,7 @@ But, Here is an example of a real query to populate certain fields from a dynami
 ```ts
 const dynamicLayoutPopulate = new SQBuilder()
   .populateDynamic("Layout", "layout.alert", () => new SQBuilder<IAlert>()
-    .fields(["type", "message"])
+    .fields(["type", "message"] as const)
   )
   .populateDynamic("Layout", "layout.article", () => new SQBuilder<IArticle>().field("Article"))
   .populateDynamic("Layout", "layout.slider", () => new SQBuilder<ISlider>()
@@ -428,18 +428,18 @@ const dynamicLayoutPopulate = new SQBuilder()
       "Arrows",
       "AutoScroll",
       "SideImages",
-    ])
+    ] as const)
     .populateRelation("Slides", () => new SQBuilder<ILinkImage>()
       .field("Link")
       .populateRelation("Image", () => GenericBuilder.imgBuilder())
     )
   )
   .populateDynamic("Layout", "layout.faq", () => new SQBuilder<IFaq>()
-    .fields(["Question", "Answer"])
+    .fields(["Question", "Answer"] as const)
   )
   .populateDynamic("Layout", "layout.cardlist", () => new SQBuilder<IServerCard>()
     .populateRelation("Cards", () => new SQBuilder<IServerCard>()
-      .fields(["Title", "Description"])
+      .fields(["Title", "Description"] as const)
       .populateRelation("Image", () => GenericBuilder.imgBuilder())
     )
   );
