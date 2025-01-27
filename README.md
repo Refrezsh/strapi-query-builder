@@ -1,25 +1,20 @@
-# Strapi query builder
+# Strapi Query Builder v4
 
 Utility for type safe queries for [Strapi Headless CMS](https://strapi.io/)
 
 ```bash
 # via npm
-npm install strapi-query-builder
+npm install strapi-query-builder // Old version not-recomended and will be updated to v5 soon
+npm install strapi-query-builder@v4 // Strapi v4 version
 ```
 
-Use with [Node.js](https://nodejs.org/en/):
+Import with:
 
 ```js
-const SQLBuilder = require("strapi-query-builder");
+const { SQBuilder } = require("strapi-query-builder");
+// or
+import { SQBuilder } from "strapi-query-builder";
 ```
-
-or
-
-```ts
-import SQLBuilder from "strapi-query-builder";
-```
-
-Requirement: Strapi v4 or above.
 
 ## Why?
 
@@ -27,18 +22,32 @@ Strapi has flexible syntax for building queries, as the project grows the logic 
 
 > For get the most out of the library use it with Typescript.
 
+## Features
+
+- Advanced typescript autocompletion. When passing the model type to the queried builder, it will give precise hints on which keys to use.
+- Builder has two validation modes. Strict and non-strict. Strict mode works if there is `id` property in the model.
+- Builder creates the exact type of query on the output. This makes it easy to integrate with the internal typing of Strapi services themselves.
+- The ability to attach query. You can write separate parts of a queries and then prepare complex query on the fly.
+- Query compilation. Queries can be serialized into a TS/JS template and saved in the desired location. This way we can get complex and correct queries as if written by hand.
+
 ## Basic example
 
+### Naming
+- `SQBuilder`: Main entity service. For Strapi v4 it's [Entity Service](https://docs-v4.strapi.io/dev-docs/api/entity-service).
+- `QQBuilder`: [Strapi Query Engine](https://docs-v4.strapi.io/dev-docs/api/query-engine).
+- `RQBuilder`: [REST API](https://docs-v4.strapi.io/dev-docs/api/rest).
+
+
 ```ts
-import SQLBuilder from "strapi-query-builder";
+import { SQBuilder } from "strapi-query-builder";
 
 const query = new SQBuilder()
-  .filters("title").eq("Hello World")
-  .filters("createdAt").gte("2021-11-17T14:28:25.843Z")
+  .eq("title", "Hello World")
+  .gte("createdAt", "2021-11-17T14:28:25.843Z")
   .build();
 ```
 
-This is equivalent to writing.
+Creates next query.
 
 ```ts
 const query = {
@@ -52,42 +61,33 @@ const query = {
       },
     ],
   },
-};
+}; // Query has exact type so Entity Service can return correct return type.
 ```
 
-We can improve readability through callbacks and add IDE autocompletion if we provide the type for which the query is executed.
+We can improve readability through IDE autocompletion if we provide the type for which the query is executed.
 
 ```ts
-import SQLBuilder from "strapi-query-builder";
+import { SQBuilder } from "strapi-query-builder";
+
+type Relation = {
+  id: number; 
+  option: string;
+}
 
 type Entity = {
+  id: number; 
   title: string;
   createdAt: string;
+  category: Relation
 };
 
 const query = new SQBuilder<Entity>()
-  .filters("title", (b) => b.eq("Hello World"))
-  .filters("createdAt", (b) => b.gte("2021-11-17T14:28:25.843Z"))
+  .eq("title", "Hello World")
+  .gte("createdAt", "2021-11-17T14:28:25.843Z")
+  .eq("prop", "error") // Will give TS error, because this property does not exist in Entity.
+  .eq("category", "error") // Will give TS error, because category is a Relation, and we can't filter just by category, but only by its properties.
+  .eq("category.option", "Hello World") // No error, besides IDE will also give autocompletion on Relation keys.
   .build();
-```
-
-This is a small example of filtering, but you can already build query for 3 Strapi types.
-It's similar but has different syntax's for query.
-
-1. [Strapi Service (Rest API Query)](https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest/api-parameters.html)
-2. [Strapi Entity Service](https://docs.strapi.io/dev-docs/api/entity-service)
-3. [Strapi Query Engine](https://docs.strapi.io/dev-docs/api/query-engine)
-
-```ts
-const serviceBuilt = query.buildStrapiService(); // Build for strapi "service factory" query
-const entityServiceBuilt = query.buildEntityService(); // Build for strapi entity query
-const queryEngineBuilt = query.buildQueryEngine(); // Build for strapi query engine
-
-// or
-
-query.build("strapiService"); // Default
-query.build("entityService");
-query.build("queryEngine");
 ```
 
 ## Types
@@ -95,7 +95,7 @@ query.build("queryEngine");
 This util can be used without type, with type, and in strict typing mode.
 Strict type is defined by the presence of an `id` attribute in the type.
 
-For example, this one will display autocompletion for filtering, sorting, and population, but will not strictly require right keys.
+For example, this one will display autocompletion for filtering, sorting, and populate, but will not strictly require right keys.
 
 ```ts
 type Entity = {
@@ -104,7 +104,7 @@ type Entity = {
 };
 ```
 
-This type will strictly require type keys, and will create type error if keys not provided correctly
+This type will strictly require type keys, and will create type error if keys not provided correctly.
 
 ```ts
 type Entity = {
@@ -118,34 +118,22 @@ type Entity = {
 
 ## Filtering
 
-To start the filters, call the `.filters()` operator. The first argument can be an attribute, a callback, or just an empty filter.
+Builder contains all filter operators like .`eq()`, `notEq()`, `contains()`, etc. Besides, there are special operators for adding deep filtering for the current model `filterDeep()` or filtering for Relation, `filterRelation()`.
 
 ```ts
-const query = new SQBuilder()
-  .filters("title", (b) => b.eq("Hello World")) // Callback value "b" is the same builder
-  .filters("updatedAt").contains("24.02.2022") 
-  .filters(
-    (b) =>
-      // Empty filter to start another filter with deep nested query
-      b.with((nestedBuilder) => nestedBuilder.filters("nested").eq("other")) // With creates new builder for nesting.
-  )
+const query = new SQBuilder<Entity>()
+  .eq("title", "Hello World") // or .filter("title", "$eq", "Hello World")
+  .filterDeep(() => new SQBuilder<Entity>()
+    .or()
+    .contains("updatedAt", "17.03.2022")
+    .contains("updatedAt", "24.02.2022")) // Creates another $or: [...] filter in current filters.
+  .filterRelation("category", () => new SQBuilder<Relation>().eq("option", "Hello")) // Autocompletion for all Relation keys of Entity. Creates a filter to filter by Relation.
   .build();
 ```
 
 ### Attributes
 
-All attributes from the Strapi docs are supported. [Strapi filters](https://docs.strapi.io/dev-docs/api/entity-service/filter)
-
-```ts
-const query = new SQBuilder()
-  .filters("title")
-  .eq("one")
-  .containsi("two")
-  .in(["three"])
-  .null(false)
-  .between(["five", "six"]) // For this chain last ".between()" filter will be applied for "title"
-  .build();
-```
+All attributes from the Strapi docs are supported. [Strapi filters](https://docs-v4.strapi.io/dev-docs/api/entity-service/filter)
 
 ### Logical filter
 
@@ -158,8 +146,8 @@ By standard, as in Strapi root filter is `$and`
 ```ts
 const query = new SQBuilder()
   .and() // For this case "and" is default and can be omited.
-  .filters("title").eq("one")
-  .filters("createdAt").containsi("2021")
+  .eq("title", "one")
+  .containsi("createdAt", "2021")
   .build();
 ```
 
@@ -168,8 +156,8 @@ const query = new SQBuilder()
 ```ts
 const query = new SQBuilder()
   .or() // Set root logical as or
-  .filters("title").eq("one")
-  .filters("createdAt").containsi("2021")
+  .eq("title", "one")
+  .containsi("createdAt", "2021")
   .build();
 ```
 
@@ -192,14 +180,14 @@ const query = {
 
 #### .not()
 
-Logical `$not` can negate all root or any of attribute filter. For example, to negate root filter, just add not on top level.
+Logical `$not` can negate all root. For example.
 
 ```ts
 const query = new SQBuilder()
   .not() // Negates all root filter
   .or() // Set root logical operator as or
-  .filters("title").eq("one")
-  .filters("createdAt").containsi("2021")
+  .eq("title", "one")
+  .containsi("createdAt", "2021")
   .build();
 ```
 
@@ -222,11 +210,11 @@ const query = {
 };
 ```
 
-To negate an attribute, just set a `.not()` before the filter of that attribute.
+To negate an attribute, just call `.notEq()` etc. or use `.filterNot("key", "$operator", "value")`
 
 ```ts
 const query = new SQBuilder()
-  .filters("title", (b) => b.not().eq("one"))
+  .notEq("title", "one")
   .build();
 ```
 
@@ -244,28 +232,23 @@ const query = {
 
 #### Nested filters
 
-To create a nested filter, use the `.with(callback)` operator.
-A nested filter can be either in the root filter structure or nested for an attribute.
+To create a nested filter, use the `.filterDeep` operator.
+To create a relation filter, use the `.filterRelation` operator.
 
 ```ts
 const builtQuery = new SQBuilder<ProductType>()
   // Just nested filter an same root level
-  .filters((b) =>
-    b.with((nestedBuilder) =>
-      nestedBuilder
-        .or()
-        .filters("createdAt", (b) => b.lte("date1"))
-        .filters("createdAt", (b) => b.gte("date2"))
-    )
+  .filterDeep(() => new SQBuilder<ProductType>()
+      .or()
+      .lte("createdAt", "date1")
+      .lte("createdAt", "date2")
   )
 
   // Filters by relations - with can acept type for typing nested builder
-  .filters("Category")
-  .with<CategoryType>((categoryBuilder) =>
-    categoryBuilder
-      .or()
-      .filters("name", (b) => b.contains("phones"))
-      .filters("createdAt", (b) => b.gte("date2"))
+  .filterRelation("Category", () => new SQBuilder<CategoryType>()
+    .or()
+    .contains("name", "phones")
+    .gte("createdAt", "date2")
   )
   .build();
 ```
@@ -282,68 +265,59 @@ Let's rewrite the example above
 ```ts
 // If query not built it can be used as a variable.
 const filterCategories = new SQBuilder<CategoryType>()
-  .filters("name", (b) => b.contains("phones"))
-  .filters("createdAt", (b) => b.gte("date"));
+  .contains("name", "phones")
+  .gte("createdAt", "date");
 
 const builtQuery = new SQBuilder<ProductType>()
   // ...Other filters, population etc.
-
   // Now we can join filters from other builder to any of nested or root builder
-  .filters("Category")
-  .with<CategoryType>((categoryBuilder) =>
-    categoryBuilder.joinFilters(filterCategories)
-  )
+  .filterRelation("Category", () => filterCategories)
+  // or
+  .filterRelation("Category", () => new SQBuilder<CategoryType>().joinFilters(filterCategories))
   .build();
 ```
 
-> JoinFilters has second boolean param `mergeRootLogical` to indicate whether the root logic filter needs to be overwritten by joined query
+## Populate
 
-> Join function: `builder.joinFilters(otherBuilder)`
-
-## Population
-
-The population can be simple or really complex. For the population of everything as in Strapi you can use `*`
+The population can be simple or really complex. For the population of everything as in Strapi you can use `.populateAll()`
 
 ```ts
-const filterCategories = new SQBuilder().populate("*").build();
+const populateAll = new SQBuilder().populateAll().build();
 ```
 
 Or use the key list to populate.
 
 ```ts
-const filterCategories = new SQBuilder().populate(["Category", "Seo"]).build();
+const populateSpecific = new SQBuilder().populates(["Category", "Seo"]).build();
 ```
 
-> If a type with attached data is provided, only the keys of these attached data will be displayed for the population
+```ts
+const populateSpecific = new SQBuilder().populate("Category").populate("Seo").build();
+```
 
-> Join function: `builder.joinPopulation(otherBuilder)`
+> Join function: `builder.joinPopulate(otherBuilder)`
 
 ### Complex population
 
 Strapi allows filtering, sorting, selecting fields from the populating data, or do population at even deeper levels.
-To do this, it is enough to specify one key and with the second parameter get a new builder callback where we can perform filtering, sorting etc.
+There are `.populateRelation()` and `.populateDynamic()` operators for this purpose.
 
 ```ts
-const filterCategories = new SQBuilder()
-  .populate<CategoryType>("Category", (categoryBuilder) =>
-    categoryBuilder.filters("name").eq("phones")
+const populateCategoriesWithFilter = new SQBuilder()
+  .populateRelation("Category", () =>
+    new SQBuilder<CategoryType>().eq("name", "phones")
   )
   .build();
 ```
 
 ### Populate fragments (Dynamic Zones)
 
-Strapi has a powerful solution in the form of dynamic zones. SQBuilder also supports this by `.on` operator. [Strapi populate fragment](https://docs.strapi.io/dev-docs/api/entity-service/populate#populate-fragments)
+Strapi has a powerful solution in the form of dynamic zones. SQBuilder also supports this by `.populateDynamic()` operator. [Strapi populate fragment](https://docs-v4.strapi.io/dev-docs/api/entity-service/components-dynamic-zones)
 
 ```ts
-const filterCategories = new SQBuilder()
-  // Dynamic zone can contains morph types
-  .populate("DynamicZone", (zoneBuilder) =>
-    // With "on" filter we can define key of component
-    // and get component builder to create filtering, field selection or etc.
-    zoneBuilder.on<Type>("zone.component", (zoneComponent) => {
-      zoneComponent.fields(["title", "other"]);
-    })
+const populateDynamicZone = new SQBuilder()
+  .populateDynamic("DynamicZone",  "zone.component", () =>
+    new SQBuilder<Type>().fields(["title", "other"])
   )
   .build();
 ```
@@ -352,19 +326,14 @@ const filterCategories = new SQBuilder()
 
 ### Sorting
 
-You can sort by key, by array of keys, by array of objects with direction, as well as add `.asc()` `.des()` operators to it all. [Strapi Ordering](https://docs.strapi.io/dev-docs/api/entity-service/order-pagination#ordering)
+You can sort by key, by array of keys, as well as add `.asc()` `.des()` operators to it all. [Strapi Ordering](https://docs-v4.strapi.io/dev-docs/api/entity-service/order-pagination#ordering)
 
 ```ts
-const filterCategories = new SQBuilder({ defaultSort: "asc" }) // Set gloval default sort
-  .sort("key1") // Sort by one key
-  .sort(["key2", "key3"]) // Sort by array of keys
-  .sort("key4")
-  .asc() // Set "key4" as asc
-  .sort({ key: "key5", type: "asc" }) // Sort by raw object
-  .sort([{ key: "key6", type: "asc" }, [{ key: "key7", type: "asc" }]]) // Sort by array of raw object
-  .sort("key8.subkey") // Sort by object path notation
-  .desc() // Set "key8.subkey" as desc
-  .desc(true) // ".asc()" and ".desc()" can get one parametr to set all sort to one direction
+const filterCategories = new SQBuilder() 
+  .sortAsc("key1") // Sort by one key
+  .sortsAsc(["key2", "key3"]) // Sort by array of keys
+  .sortDesc("key8.subkey") // Set "key8.subkey" as desc
+  .sort("key4", "$asc") // Set sorting explicitly
   .build();
 ```
 
@@ -374,30 +343,47 @@ const filterCategories = new SQBuilder({ defaultSort: "asc" }) // Set gloval def
 
 ### Fields
 
-[Select the fields to be obtained](https://docs.strapi.io/dev-docs/api/rest/populate-select#field-selection), in the case of typing only simple attributes will be displayed,
+[Select the fields to be obtained](https://docs-v4.strapi.io/dev-docs/api/rest/populate-select#field-selection), in the case of typing only simple attributes will be displayed,
 as well, as the same keys are merged.
 
 ```ts
 const filterCategories = new SQBuilder()
-  .fields("key1") // Just key
-  .fields(["key2", "key3"]) // Array of keys
+  .field("key1") // Single attribute
+  .fields(["key2", "key3"]) // Array of attributes
   .build();
 ```
+> Same keys will be merged.
 
 > Join function: `builder.joinFields(otherBuilder)`
 
 ### Pagination
 
-Strapi has a high-level pagination API which is available only to [StrapiService and RestAPI](https://docs.strapi.io/dev-docs/api/rest/sort-pagination#pagination-by-page) and offset pagination for [EntityService and Query Engine](https://docs.strapi.io/dev-docs/api/entity-service/order-pagination#pagination)
+Strapi has a high-level pagination API which is available only to Entity Service and REST-API and offset pagination for all query types.
 
-> If pagination is specified for a page, it will be built only for the strapiService build. Offset pagination is built for all types of queries.
+> If pagination is specified for a page, it will be built only for the strapiService build. Offset pagination is available for all types of queries.
 
 ```ts
 const filterCategories = new SQBuilder()
-  .page(1, true) // Page pagination, second parameter is "withCount" that works only for strapiService.
+  .page(1) // Page pagination
   .pageSize(24) // Change page size
-  .pageStart(1) // Offest pagination
-  .pageLimit(10) // Offset limit
+  .start(1) // Offest pagination
+  .limit(10) // Offset limit
+  .build();
+```
+
+```ts
+const filterCategories = new QQBuilder()
+  .start(1) // Offest pagination only for Query Engine
+  .limit(10) // Offset limit only for Query Engine
+  .build();
+```
+
+```ts
+const filterCategories = new RQBuilder()
+  .page(1, true) // Page pagination, and withCount parameter
+  .pageSize(24) // Change page size
+  .start(1, true) // Offest pagination, and withCount parameter
+  .limit(10) // Offset limit
   .build();
 ```
 
@@ -405,7 +391,7 @@ const filterCategories = new SQBuilder()
 
 ### PublicationState
 
-Strapi has a [Publication state](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#publication-state) which can be specified, but will only work for the strapiService.
+Strapi has a [Publication state](https://docs-v4.strapi.io/dev-docs/api/rest/filters-locale-publication#publication-state) which can be specified, but will only work for the SQBuilder and RQBuilder.
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -416,7 +402,7 @@ const filterCategories = new SQBuilder()
 
 ### Locale
 
-Strapi has a [Locale](https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#locale) which can be specified, but will only work for the strapiService.
+Strapi has a [Locale](https://docs-v4.strapi.io/dev-docs/api/rest/filters-locale-publication#locale) which can be specified, but will only work for the SQBuilder and RQBuilder.
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -434,12 +420,6 @@ const filterCategories = new SQBuilder().data<DataType>(data).build();
 
 > PublicationState, Locale, Data don't merge and have no merge functions.
 
-## Readonly
-
-Some queries are inherently constants and do not change while the application is running.
-For this, there is a `.readonly(boolen)` operator that merely blocks all operators.
-
-> Readonly doesn't freeze the object, so you can turn it off at any time, only if you haven't already built a query.
 
 ## Applications and performance
 
@@ -452,67 +432,115 @@ That's basically what it was designed to do. Here are a few points:
 - Create already built queries constants while running the application.
 - Create a separate factory method for a specific API or a set of generalized queries. It's up to you.
 
-If the queries are simple enough, you can do them with the standard syntax.
-But, Here is an example of a real query to get certain fields from a dynamic zone
+If the queries are simple enough, you can do them with the standard object literals.
+But, Here is an example of a real query to populate certain fields from a dynamic zone
 
 ```ts
-const dynamicLayoutPopulate = new SQBuilder().populate(
-  "Layout",
-  (layoutBuilder) => {
-    layoutBuilder
-      .on<IAlert>("layout.alert", (alertBuilder) => {
-        alertBuilder.fields(["type", "message"]);
-      })
-      .on<IArticle>("layout.article", (articleBuilder) => {
-        articleBuilder.fields(["Article"]);
-      })
-      .on<ISlider>("layout.slider", (sliderBuilder) => {
-        sliderBuilder
-          .fields([
-            "SliderTimeoutSeconds",
-            "EnableDots",
-            "Arrows",
-            "AutoScroll",
-            "SideImages",
-          ])
-          .populate<ILinkImage>("Slides", (photoBuilder) =>
-            photoBuilder
-              .fields(["Link"])
-              .populate<IPhoto>("Image", (imgBuilder) =>
-                imgBuilder.joinFields(imageFields)
-              )
-          );
-      })
-      .on<IServerCardList>("layout.cardlist", (serverCardBuilder) => {
-        serverCardBuilder.populate<IServerCard>("Cards", (cardBuilder) =>
-          cardBuilder
-            .fields(["Title", "Description"])
-            .populate<IPhoto>("Image", (photoBuilder) =>
-              photoBuilder.joinFields(imageFields)
-            )
-        );
-      })
-      .on<IFaq>("layout.faq", (faqBuilder) =>
-        faqBuilder.fields(["Question", "Answer"])
-      )
-      .on<ISocialLinks>("layout.social-links", (socialLinksBuilder) => {
-        socialLinksBuilder.populate<IIconLink>("Links", (b) => {
-          b.fields(["Link", "Alt"]).populate<IPhoto>("Icon", (imgb) =>
-            imgb.joinFields(imageFields)
-          );
-        });
-      });
-  }
-);
+const dynamicLayoutPopulate = new SQBuilder()
+  .populateDynamic("Layout", "layout.alert", () => new SQBuilder<IAlert>()
+    .fields(["type", "message"])
+  )
+  .populateDynamic("Layout", "layout.article", () => new SQBuilder<IArticle>().field("Article"))
+  .populateDynamic("Layout", "layout.slider", () => new SQBuilder<ISlider>()
+    .fields([
+      "SliderTimeoutSeconds",
+      "EnableDots",
+      "Arrows",
+      "AutoScroll",
+      "SideImages",
+    ])
+    .populateRelation("Slides", () => new SQBuilder<ILinkImage>()
+      .field("Link")
+      .populateRelation("Image", () => GenericBuilder.imgBuilder())
+    )
+  )
+  .populateDynamic("Layout", "layout.faq", () => new SQBuilder<IFaq>()
+    .fields(["Question", "Answer"])
+  )
+  .populateDynamic("Layout", "layout.cardlist", () => new SQBuilder<IServerCard>()
+    .populateRelation("Cards", () => new SQBuilder<IServerCard>()
+      .fields(["Title", "Description"])
+      .populateRelation("Image", () => GenericBuilder.imgBuilder())
+    )
+  );
 ```
+
+### Query Compilation
+
+If you still prefer object literal syntax, as it is by far the fastest. 
+You can still use the convenient query builder syntax with TS checks. 
+Since such queries can be generated into a string template and saved as a ts/js file.
+
+There is a function compileStrapiQuery for this purpose.
+The function accepts any builder and returns serialized data.
+
+```ts
+import { compileStrapiQuery } from "strapi-query-builder";
+
+const serialized = compileStrapiQuery(new SQBuilder(), { compileSource: "typescript" });
+
+// Returns
+type SerializeOutput = {
+  query: string; // Serialized as object literal with additional as const casting for compatibility with type checks of Strapi Service.
+  constants: string; // compileStrapiQuery can find the same fields and sorts and put them into separate variables. This also slightly increases the speed of queries creation.
+}
+```
+
+> This is a more difficult idea to implement, as you will have to figure out separately how to store SQBuilder queries and how to store object literals.
+
+To give an example as an idea.
+
+```ts
+// src/api/blog/query/static-queries.ts
+import { SQBuilder } from "./sq-builder";
+
+export default {
+  getBlogPostSitemap: () => new SQBuilder(),
+  getBlogPostPreview: () => new SQBuilder()
+  // ...
+}
+
+// src/utils/compile-static.ts
+import blogQueries from "../../";
+import { compileStrapiQuery } from "strapi-query-builder";
+
+const compileQuery = () => {
+  const compiledQuery = getCompiledQuery("blogQuery", blogQueries);
+  
+  // Save compiledQuery as file for example src/api/blog/query/static-queries.query.ts
+  // Then we can add package script to run compile and for example call prettier to format *.query.ts files
+  // After compile inside services we can now use generated static-queries.query.ts file.
+}
+
+// Parse object as new object string template with functions that returns query as literals
+const getCompiledQuery = (queryName: string, query: QueryObject) => {
+  const entries = Object.entries(query)
+    .map(([key, queryFabric]) => `${key}:${getQueryString(queryFabric())}`)
+    .join(",");
+
+  return `const ${queryName} = {${entries}};export default ${queryName};`;
+};
+
+const getQueryString = (builder: any) => {
+  const compiled = compileStrapiQuery(builder);
+
+  // Create function string template
+  return `() => {
+  ${compiled.constants}
+  return ${compiled.query};
+  }`;
+};
+```
+
+
 
 ### Backend part of Frontend (Next, Remix etc.)
 
 If there are complex queries on the server side of your frontend, this builder can also be used with [qs](https://www.npmjs.com/package/qs)
 
 ```ts
-const query = qs.stringify(
-  new SQBuilder().publicationState("live").publicationState("preview").build(),
+const serializedQuery = qs.stringify(
+  new RQBuilder().publicationState("preview").build(),
   {
     encodeValuesOnly: true,
   }
@@ -523,8 +551,8 @@ const query = qs.stringify(
 
 Since these builders are often used to get static data for the frontend, it has no effect on the Strapi backend.
 
-> The project has a simple speed check for 100 iterations, constructing and parsing queries.
-> The average build and parsing time takes 0.18ms.
+> The project has a simple speed check for 500 iterations, constructing and parsing queries.
+> The average build and parsing time takes 0.032ms.
 
 > All functions are covered by tests on 96%
 
