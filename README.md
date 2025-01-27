@@ -277,8 +277,6 @@ const populateWithList = new SQBuilder().populates(["Category", "Seo"] as const)
 const populateSpecific = new SQBuilder().populate("Category").populate("Seo").build();
 ```
 
-> Join function: `builder.joinPopulate(otherBuilder)`
-
 ### Complex population
 
 Strapi allows filtering, sorting, selecting fields from the populating data, or do population at even deeper levels.
@@ -303,10 +301,13 @@ const populateDynamicZone = new SQBuilder()
   )
   .build();
 ```
+> Same keys will be overridden.
+
+> Join function: `builder.joinPopulate(otherBuilder)`
 
 ## Sort, Fields, Pagination, PublicationState, Locale, Data
 
-### Sorting
+### Sort
 
 You can sort by key or by array of keys. [Strapi Ordering](https://docs-v4.strapi.io/dev-docs/api/entity-service/order-pagination#ordering)
 
@@ -340,7 +341,7 @@ const filterCategories = new SQBuilder()
 
 ### Pagination
 
-Strapi has a high-level pagination API which is available only to Entity Service and REST-API and offset pagination for all query types.
+`Strapi` has a high-level pagination API which is available only to `Entity Service` and `REST-API` and offset pagination for all query types.
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -371,7 +372,7 @@ const filterCategories = new RQBuilder()
 
 ### PublicationState
 
-Strapi has a [Publication state](https://docs-v4.strapi.io/dev-docs/api/rest/filters-locale-publication#publication-state) which can be specified, but will only work for the SQBuilder and RQBuilder.
+Strapi has a [Publication state](https://docs-v4.strapi.io/dev-docs/api/rest/filters-locale-publication#publication-state) which can be specified, but will only work for the `SQBuilder` and `RQBuilder`.
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -382,7 +383,7 @@ const filterCategories = new SQBuilder()
 
 ### Locale
 
-Strapi has a [Locale](https://docs-v4.strapi.io/dev-docs/api/rest/filters-locale-publication#locale) which can be specified, but will only work for the SQBuilder and RQBuilder.
+Strapi has a [Locale](https://docs-v4.strapi.io/dev-docs/api/rest/filters-locale-publication#locale) which can be specified, but will only work for the `SQBuilder` and `RQBuilder`.
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -409,7 +410,7 @@ That's basically what it was designed to do. Here are a few points:
 
 - Create queries on the fly in the services.
 - Combine them on the fly from multiple queries.
-- Create already built queries constants while running the application.
+- Create already compiled queries constants while running the application.
 - Create a separate factory method for a specific API or a set of generalized queries. It's up to you.
 
 If the queries are simple enough, you can do them with the standard object literals.
@@ -454,13 +455,27 @@ Since these builders are often used to get static data for the frontend, it has 
 
 > All functions are covered by tests on 96%
 
+#### Typescript performance
+
+To ensure that your `IDEA` and `Typescript` engine does not start to slow down for large queries using complex data, `Strapi Query Builder` limits the depth of key scanning for `.sort()` and `.filter()` operators. 
+By standard this depth is two, which means that you can write filtering and sorting with hints like `parent.child`. 
+To increase the depth you can override this parameter using `declare global`.
+
+```ts
+declare global {
+  namespace QueryBuilderConfig {
+    type DefaultScanDepth = 3; // Max is 5
+  }
+}
+```
+
 ### Query Compilation
 
-If you still prefer object literal syntax, as it is by far the fastest. 
-You can still use the convenient query builder syntax with TS checks. 
-Since such queries can be generated into a string template and saved as a ts/js file.
+If you still prefer `object literal` syntax, as it is by far the fastest. 
+You can still use the convenient query builder syntax with `Typescript` checks. 
+Since such queries can be generated into a `string template` and saved as a `*.ts/js` file.
 
-There is a function compileStrapiQuery for this purpose.
+There is a function `compileStrapiQuery` for this purpose.
 The function accepts any builder and returns serialized data.
 
 ```ts
@@ -490,7 +505,7 @@ export default {
 }
 
 // src/utils/compile-static.ts
-import blogQueries from "../../";
+import blogQueries from "./src/api/blog/query/static-queries.ts";
 import { compileStrapiQuery } from "strapi-query-builder";
 
 const compileQuery = () => {
