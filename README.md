@@ -8,7 +8,7 @@ npm install strapi-query-builder // Old version not-recomended and will be updat
 npm install strapi-query-builder@v4 // Strapi v4 version
 ```
 
-Import with:
+Import with
 
 ```js
 const { SQBuilder } = require("strapi-query-builder");
@@ -24,19 +24,18 @@ Strapi has flexible syntax for building queries, as the project grows the logic 
 
 ## Features
 
-- Advanced typescript autocompletion. When passing the model type to the queried builder, it will give precise hints on which keys to use.
-- Builder has two validation modes. Strict and non-strict. Strict mode works if there is `id` property in the model.
-- Builder creates the exact type of query on the output. This makes it easy to integrate with the internal typing of Strapi services themselves.
+- Advanced typescript autocompletion. When passing the model type to the query builder, it will give precise hints on which keys to use.
+- Builder has two validation modes. Strict and non-strict. Strict mode works if there is `id` property in the model type.
+- Builder creates the exact type of query on the output. This makes it easy to integrate with the internal typing of `Strapi` services themselves.
 - The ability to attach query. You can write separate parts of a queries and then prepare complex query on the fly.
 - Query compilation. Queries can be serialized into a TS/JS template and saved in the desired location. This way we can get complex and correct queries as if written by hand.
 
-## Basic example
-
-### Naming
+## Builder types
 - `SQBuilder`: Main entity service. For Strapi v4 it's [Entity Service](https://docs-v4.strapi.io/dev-docs/api/entity-service).
-- `QQBuilder`: [Strapi Query Engine](https://docs-v4.strapi.io/dev-docs/api/query-engine).
-- `RQBuilder`: [REST API](https://docs-v4.strapi.io/dev-docs/api/rest).
+- `QQBuilder`: [Strapi Query Engine](https://docs-v4.strapi.io/dev-docs/api/query-engine). Contains functions that are available only for Query Engine.
+- `RQBuilder`: [REST API](https://docs-v4.strapi.io/dev-docs/api/rest). Contains functions and differences that are specific to the REST API.
 
+## Basic example
 
 ```ts
 import { SQBuilder } from "strapi-query-builder";
@@ -45,12 +44,9 @@ const query = new SQBuilder()
   .eq("title", "Hello World")
   .gte("createdAt", "2021-11-17T14:28:25.843Z")
   .build();
-```
 
-Creates next query.
-
-```ts
-const query = {
+// Creates
+const builtQuery = {
   filters: {
     $and: [
       {
@@ -114,8 +110,6 @@ type Entity = {
 };
 ```
 
-> A distinction is made between simple types for attribute values, objects and arrays of objects for populations. In order to give handy autocompletion.
-
 ## Filtering
 
 Builder contains all filter operators like .`eq()`, `notEq()`, `contains()`, etc. Besides, there are special operators for adding deep filtering for the current model `filterDeep()` or filtering for Relation, `filterRelation()`.
@@ -137,9 +131,8 @@ All attributes from the Strapi docs are supported. [Strapi filters](https://docs
 
 ### Logical filter
 
-There are 3 logical filters in Strapi, `$and` `$or` `$not`. SQBuilder supports these filters.
-
-By standard, as in Strapi root filter is `$and`
+There are three logical filters in Strapi, `$and` `$or` `$not`. SQBuilder supports these filters. 
+By default, as in Strapi root filter is `$and`
 
 #### .and()
 
@@ -155,16 +148,13 @@ const query = new SQBuilder()
 
 ```ts
 const query = new SQBuilder()
-  .or() // Set root logical as or
+  .or() // Set root logical as $or
   .eq("title", "one")
   .containsi("createdAt", "2021")
   .build();
-```
 
-This is equivalent to writing.
-
-```ts
-const query = {
+// Creates
+const builtQuery = {
   filters: {
     $or: [
       {
@@ -189,12 +179,9 @@ const query = new SQBuilder()
   .eq("title", "one")
   .containsi("createdAt", "2021")
   .build();
-```
 
-This is equivalent to writing.
-
-```ts
-const query = {
+// Creates
+const builtQuery = {
   filters: {
     $not: {
       $or: [
@@ -216,12 +203,9 @@ To negate an attribute, just call `.notEq()` etc. or use `.filterNot("key", "$op
 const query = new SQBuilder()
   .notEq("title", "one")
   .build();
-```
 
-This is equivalent to writing.
-
-```ts
-const query = {
+// Creates
+const builtQuery = {
   filters: {
     title: { $not: { $eq: "one" } },
   },
@@ -288,10 +272,8 @@ const populateAll = new SQBuilder().populateAll().build();
 Or use the key list to populate.
 
 ```ts
-const populateSpecific = new SQBuilder().populates(["Category", "Seo"]).build();
-```
-
-```ts
+const populateWithList = new SQBuilder().populates(["Category", "Seo"]).build();
+// Or
 const populateSpecific = new SQBuilder().populate("Category").populate("Seo").build();
 ```
 
@@ -326,7 +308,7 @@ const populateDynamicZone = new SQBuilder()
 
 ### Sorting
 
-You can sort by key, by array of keys, as well as add `.asc()` `.des()` operators to it all. [Strapi Ordering](https://docs-v4.strapi.io/dev-docs/api/entity-service/order-pagination#ordering)
+You can sort by key or by array of keys. [Strapi Ordering](https://docs-v4.strapi.io/dev-docs/api/entity-service/order-pagination#ordering)
 
 ```ts
 const filterCategories = new SQBuilder() 
@@ -359,8 +341,6 @@ const filterCategories = new SQBuilder()
 ### Pagination
 
 Strapi has a high-level pagination API which is available only to Entity Service and REST-API and offset pagination for all query types.
-
-> If pagination is specified for a page, it will be built only for the strapiService build. Offset pagination is available for all types of queries.
 
 ```ts
 const filterCategories = new SQBuilder()
@@ -465,6 +445,15 @@ const dynamicLayoutPopulate = new SQBuilder()
   );
 ```
 
+### Performance
+
+Since these builders are often used to get static data for the frontend, it has little or no effect on the Strapi backend.
+
+> The project has a simple speed check for 500 iterations, constructing and parsing queries.
+> The average build and parsing time takes 0.032ms.
+
+> All functions are covered by tests on 96%
+
 ### Query Compilation
 
 If you still prefer object literal syntax, as it is by far the fastest. 
@@ -521,17 +510,16 @@ const getCompiledQuery = (queryName: string, query: QueryObject) => {
   return `const ${queryName} = {${entries}};export default ${queryName};`;
 };
 
+// Create function string template
 const getQueryString = (builder: any) => {
   const compiled = compileStrapiQuery(builder);
-
-  // Create function string template
+  
   return `() => {
   ${compiled.constants}
   return ${compiled.query};
   }`;
 };
 ```
-
 
 
 ### Backend part of Frontend (Next, Remix etc.)
@@ -546,15 +534,6 @@ const serializedQuery = qs.stringify(
   }
 );
 ```
-
-### Performance
-
-Since these builders are often used to get static data for the frontend, it has no effect on the Strapi backend.
-
-> The project has a simple speed check for 500 iterations, constructing and parsing queries.
-> The average build and parsing time takes 0.032ms.
-
-> All functions are covered by tests on 96%
 
 ## Improvements
 
