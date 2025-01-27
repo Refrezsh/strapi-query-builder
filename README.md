@@ -221,7 +221,7 @@ To create a relation filter, use the `.filterRelation` operator.
 
 ```ts
 const builtQuery = new SQBuilder<ProductType>()
-  // Just nested filter an same root level
+  // Nested filter at same model level
   .filterDeep(() => new SQBuilder<ProductType>()
       .or()
       .lte("createdAt", "date1")
