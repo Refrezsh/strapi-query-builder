@@ -10,6 +10,7 @@ describe("Rest API Query Builder", () => {
       .startsWithi("name", "value")
       .build();
 
+    // @ts-expect-error
     const queryTyped: {
       filters: { $and: [{ name: { $startsWithi: "value" } }] };
     } = query;
@@ -22,6 +23,7 @@ describe("Rest API Query Builder", () => {
       .notStartsWithi("name", "value")
       .build();
 
+    // @ts-expect-error
     const queryTyped: {
       filters: { $and: [{ name: { $not: { $startsWithi: "value" } } }] };
     } = queryWithNot;
@@ -32,6 +34,7 @@ describe("Rest API Query Builder", () => {
   it("should create endsWithi and notStartsWithi", () => {
     const query = new RQBuilder<TestModel>().endsWithi("name", "value").build();
 
+    // @ts-expect-error
     const queryTyped: {
       filters: { $and: [{ name: { $endsWithi: "value" } }] };
     } = query;
@@ -44,6 +47,7 @@ describe("Rest API Query Builder", () => {
       .notEndsWithi("name", "value")
       .build();
 
+    // @ts-expect-error
     const queryTyped: {
       filters: { $and: [{ name: { $not: { $endsWithi: "value" } } }] };
     } = queryWithNot;
@@ -53,6 +57,7 @@ describe("Rest API Query Builder", () => {
 
   it("should create pagination withCount by default", () => {
     const query = new RQBuilder<TestModel>().page(1).build();
+    // @ts-expect-error
     const queryTyped: { pagination: { page: 1; withCount: true } } = query;
     expect(queryTyped.pagination.page).toBe(1);
     expect(queryTyped.pagination.withCount).toBe(true);
@@ -64,6 +69,7 @@ describe("Rest API Query Builder", () => {
       .pageSize(40)
       .build();
 
+    // @ts-expect-error
     const queryTyped: {
       pagination: { page: 1; withCount: false; pageSize: 40 };
     } = query;
@@ -74,6 +80,7 @@ describe("Rest API Query Builder", () => {
 
   it("should create offset pagination withCount by default", () => {
     const query = new RQBuilder<TestModel>().start(1).build();
+    // @ts-expect-error
     const queryTyped: { pagination: { start: 1; withCount: true } } = query;
     expect(queryTyped.pagination.start).toBe(1);
     expect(queryTyped.pagination.withCount).toBe(true);
@@ -82,6 +89,7 @@ describe("Rest API Query Builder", () => {
   it("should create offset pagination withCount as false", () => {
     const query = new RQBuilder<TestModel>().start(1, false).limit(40).build();
 
+    // @ts-expect-error
     const queryTyped: {
       pagination: { start: 1; withCount: false; limit: 40 };
     } = query;
@@ -97,6 +105,7 @@ describe("Rest API Query Builder", () => {
       .sortsAsc(["options", "nested.id"] as const)
       .build();
 
+    // @ts-expect-error
     const queryTyped: {
       sort: ["id:desc", "name:asc", "options:asc", "nested.id:asc"];
     } = query;

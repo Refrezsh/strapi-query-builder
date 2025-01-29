@@ -31,6 +31,7 @@ describe("Join functions", () => {
       .joinSort(secondBuilder)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       orderBy: [{ name: "asc" }, { nested: { id: "asc" } }];
     } = query;
@@ -53,6 +54,7 @@ describe("Join functions", () => {
       .joinFilters(secondBuilder)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       where: {
         $and: [
@@ -80,6 +82,7 @@ describe("Join functions", () => {
       .joinFilters(secondBuilder, true, true)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       where: {
         $not: {
@@ -151,8 +154,8 @@ describe("Join functions", () => {
 
     const typedQuery: {
       select: ["id"];
-      offset: 1;
-      limit: 26;
+      offset: number | undefined;
+      limit: number | undefined;
     } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.select[0]).toEqual("id");
@@ -169,7 +172,11 @@ describe("Join functions", () => {
       .joinPagination(secondQuery)
       .build();
 
-    const typedQuery: { select: ["id"]; offset: 1; limit: 26 } = query;
+    const typedQuery: {
+      select: ["id"];
+      offset: number | undefined;
+      limit: number | undefined;
+    } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.select[0]).toEqual("id");
     expect(typedQuery.offset).toBe(1);
@@ -201,6 +208,7 @@ describe("Join functions", () => {
       .joinQuery(joinQuery)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       select: ["description", "id"];
       orderBy: [{ options: "asc" }, { id: "asc" }];

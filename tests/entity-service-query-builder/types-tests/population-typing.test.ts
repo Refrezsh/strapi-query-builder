@@ -14,6 +14,7 @@ describe("SQBuilder populate", () => {
 
     expect(population).toBeDefined();
 
+    // @ts-expect-error
     const populateWithType: {
       populate: {
         nested: {
@@ -97,6 +98,7 @@ describe("SQBuilder populate", () => {
       )
       .build();
 
+    // @ts-expect-error
     const populateWithType: {
       populate: {
         nested: { filters: { $and: [{ name: { $not: { $eq: "value2" } } }] } };
@@ -122,6 +124,7 @@ describe("SQBuilder populate", () => {
       )
       .build();
 
+    // @ts-expect-error
     const typedTest: {
       populate: {
         nested: {

@@ -42,6 +42,7 @@ describe("type snapshot", () => {
       .pageSize(30)
       .build();
 
+    // @ts-expect-error
     const assignedQuery: {
       fields: ["name", "id", "options", "description"];
       sort: ["name:asc", "options:asc"];

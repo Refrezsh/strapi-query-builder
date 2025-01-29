@@ -39,6 +39,7 @@ describe("SQBuilder type snapshot", () => {
       .pageSize(30)
       .build();
 
+    // @ts-expect-error
     const assignedQuery: {
       fields: ["name", "id", "options", "description"];
       sort: [{ name: "asc" }, { options: "asc" }];
@@ -93,7 +94,6 @@ describe("SQBuilder type snapshot", () => {
 
     expect(assignedQuery.sort[0].name).toBe("asc");
     expect(assignedQuery.sort[1].options).toBe("asc");
-
     expect(assignedQuery.filters.$and[0].name.$eq).toBe("test");
     expect(assignedQuery.filters.$and[1].$and[0].name.$eq).toBe("value");
     expect(assignedQuery.filters.$and[1].$and[1].options.$not.$eq).toBe(

@@ -1,10 +1,10 @@
 declare global {
-  namespace QueryBuilderConfig {
+  interface QueryBuilderConfig {
     /**
-     * Default recursion depth for the "key.subKey" type. Default is 2 levels max is 5 levels
-     * The larger the number, the greater the load on the Typescript engine.
+     * @description Default recursion depth for the "key.subKey" type. Default is 2 levels max is 5 levels
+     * @description The larger the number, the greater the load on the Typescript engine.
      */
-    type DefaultScanDepth = 2;
+    DefaultScanDepth: 2;
   }
 }
 
@@ -205,8 +205,8 @@ type PathImpl<
 
 type Path<
   Model,
-  Depth extends number = QueryBuilderConfig.DefaultScanDepth extends number
-    ? QueryBuilderConfig.DefaultScanDepth
+  Depth extends number = QueryBuilderConfig["DefaultScanDepth"] extends number
+    ? QueryBuilderConfig["DefaultScanDepth"]
     : 2
 > = Model extends ReadonlyArray<infer Value>
   ? IsTuple<Model> extends true
@@ -278,33 +278,9 @@ type GetRelations<Model extends object> = {
 // </editor-fold>
 
 // <editor-fold desc="Output type utils">
-export type TransformNestedKeys<Keys extends readonly string[], V> = {
-  [K in keyof Keys]: Keys[K] extends string
-    ? TransformNestedKey<Keys[K], V>
-    : never;
-};
-
-export type TransformNestedKey<
-  K extends string,
-  V
-> = K extends `${infer Key}.${infer Rest}`
-  ? { [P in Key]: TransformNestedKey<Rest, V> }
-  : { [P in K]: V };
-
 export type OnType<T> = T extends { on: infer O } ? O : {};
 
 export type ParseList<F extends readonly unknown[]> = F["length"] extends 0
-  ? never
+  ? undefined
   : F;
-
-export type ParseFilters<
-  Filters extends unknown[],
-  RootLogical extends "$and" | "$or",
-  Negate extends boolean
-> = Filters["length"] extends 0
-  ? never
-  : Negate extends true
-  ? { $not: { [K in RootLogical]: Filters } }
-  : { [K in RootLogical]: Filters };
-
 // </editor-fold>

@@ -4,6 +4,7 @@ import { TestModel } from "../../entity-service-query-builder/types-tests/fields
 describe("RQBuilder pagination", () => {
   it("should crate page query", () => {
     const query = new RQBuilder<TestModel>().page(1).build();
+    // @ts-expect-error
     const typedQuery: { pagination: { page: 1 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.page).toEqual(1);
@@ -14,6 +15,7 @@ describe("RQBuilder pagination", () => {
 
   it("should crate pageSize query", () => {
     const query = new RQBuilder<TestModel>().pageSize(26).build();
+    // @ts-expect-error
     const typedQuery: { pagination: { pageSize: 26 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.pageSize).toEqual(26);
@@ -24,6 +26,7 @@ describe("RQBuilder pagination", () => {
 
   it("should crate page and pageSize query", () => {
     const query = new RQBuilder<TestModel>().page(1).pageSize(26).build();
+    // @ts-expect-error
     const typedQuery: { pagination: { page: 1; pageSize: 26 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.page).toEqual(1);
@@ -32,6 +35,7 @@ describe("RQBuilder pagination", () => {
 
   it("should create start query", () => {
     const query = new RQBuilder<TestModel>().start(1).build();
+    // @ts-expect-error
     const typedQuery: { pagination: { start: 1 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.start).toEqual(1);
@@ -42,6 +46,7 @@ describe("RQBuilder pagination", () => {
 
   it("should create limit query", () => {
     const query = new RQBuilder<TestModel>().limit(10).build();
+    // @ts-expect-error
     const typedQuery: { pagination: { limit: 10 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.limit).toEqual(10);
@@ -52,6 +57,7 @@ describe("RQBuilder pagination", () => {
 
   it("should create start and limit query", () => {
     const query = new RQBuilder<TestModel>().start(1).limit(10).build();
+    // @ts-expect-error
     const typedQuery: { pagination: { start: 1; limit: 10 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.start).toEqual(1);
@@ -65,6 +71,7 @@ describe("RQBuilder pagination", () => {
       .start(1)
       .limit(26)
       .build();
+    // @ts-expect-error
     const typedQuery: { pagination: { start: 1; limit: 26 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.start).toEqual(1);
@@ -78,6 +85,7 @@ describe("RQBuilder pagination", () => {
       .page(2)
       .pageSize(25)
       .build();
+    // @ts-expect-error
     const typedQuery: { pagination: { page: 2; pageSize: 25 } } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.pagination.page).toEqual(2);

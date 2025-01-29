@@ -77,7 +77,6 @@ describe("SQBuilder fields", () => {
   it("should work with primitive arrays", () => {
     const primitiveFilters: {
       fields: ["notNestedEnumeration"];
-      filters: { $and: [{ notNestedEnumeration: { $eq: "value" } }] };
     } = new SQBuilder<TestModel>()
       .field("notNestedEnumeration")
       .eq("notNestedEnumeration", "value")
@@ -85,6 +84,8 @@ describe("SQBuilder fields", () => {
 
     expect(primitiveFilters).toBeDefined();
     expect(primitiveFilters.fields[0]).toEqual("notNestedEnumeration");
+
+    // @ts-expect-error
     expect(primitiveFilters.filters.$and[0].notNestedEnumeration.$eq).toEqual(
       "value"
     );

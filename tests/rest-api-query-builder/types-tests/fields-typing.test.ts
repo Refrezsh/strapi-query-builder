@@ -41,6 +41,7 @@ describe("RQBuilder fields", () => {
   });
 
   it("should work with primitive arrays", () => {
+    // @ts-expect-error
     const primitiveFilters: {
       fields: ["notNestedEnumeration"];
       filters: { $and: [{ notNestedEnumeration: { $eq: "value" } }] };

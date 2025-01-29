@@ -7,6 +7,7 @@ describe("Sort types", () => {
       .sortAsc("nested.name")
       .build();
 
+    // @ts-expect-error
     const nestedTypeAscending: "nested.name:asc" = nestedType.sort[0];
     expect(nestedTypeAscending).toBe("nested.name:asc");
   });
@@ -18,11 +19,17 @@ describe("Sort types", () => {
       .sortDesc("options")
       .build();
 
+    // @ts-expect-error
     const combinedWithOtherSortAscendingNested: "nested.name:asc" =
+      // @ts-expect-error
       combinedWithOtherSort.sort[0];
+    // @ts-expect-error
     const combinedWithOtherSortAscendingName: "name:asc" =
+      // @ts-expect-error
       combinedWithOtherSort.sort[1];
+    // @ts-expect-error
     const combinedWithOtherSortAscendingOptions: "options:desc" =
+      // @ts-expect-error
       combinedWithOtherSort.sort[2];
 
     expect(combinedWithOtherSortAscendingNested).toBe("nested.name:asc");
@@ -36,11 +43,17 @@ describe("Sort types", () => {
       .sortDesc("options")
       .build();
 
+    // @ts-expect-error
     const combinedWithOtherSortAscendingNested: "nested.name:asc" =
+      // @ts-expect-error
       nestedSortWithKeys.sort[0];
+    // @ts-expect-error
     const combinedWithOtherSortAscendingName: "name:asc" =
+      // @ts-expect-error
       nestedSortWithKeys.sort[1];
+    // @ts-expect-error
     const combinedWithOtherSortAscendingOptions: "options:desc" =
+      // @ts-expect-error
       nestedSortWithKeys.sort[2];
 
     expect(combinedWithOtherSortAscendingNested).toBe("nested.name:asc");
@@ -54,6 +67,7 @@ describe("Sort types", () => {
       .field("options")
       .build();
     const withFieldsOptions: "options" = withFields.fields[0];
+    // @ts-expect-error
     const withFieldSort: "name:desc" = withFields.sort[0];
     expect(withFieldsOptions).toBe("options");
     expect(withFieldSort).toBe("name:desc");

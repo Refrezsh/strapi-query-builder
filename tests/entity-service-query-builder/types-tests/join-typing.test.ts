@@ -28,6 +28,7 @@ describe("SQBuilder join functions", () => {
       .joinSort(secondBuilder)
       .build();
 
+    // @ts-expect-error
     const typedQuery: { sort: [{ name: "asc" }, { nested: { id: "asc" } }] } =
       query;
 
@@ -49,6 +50,7 @@ describe("SQBuilder join functions", () => {
       .joinFilters(secondBuilder)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       filters: {
         $and: [
@@ -76,6 +78,7 @@ describe("SQBuilder join functions", () => {
       .joinFilters(secondBuilder, true, true)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       filters: {
         $not: {
@@ -147,7 +150,11 @@ describe("SQBuilder join functions", () => {
       .joinPagination(secondQuery)
       .build();
 
-    const typedQuery: { fields: ["id"]; page: 1; pageSize: 26 } = query;
+    const typedQuery: {
+      fields: ["id"];
+      page: number | undefined;
+      pageSize: number | undefined;
+    } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.fields[0]).toEqual("id");
     expect(typedQuery.page).toBe(1);
@@ -163,7 +170,11 @@ describe("SQBuilder join functions", () => {
       .joinPagination(secondQuery)
       .build();
 
-    const typedQuery: { fields: ["id"]; start: 1; limit: 26 } = query;
+    const typedQuery: {
+      fields: ["id"];
+      start: number | undefined;
+      limit: number | undefined;
+    } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.fields[0]).toEqual("id");
     expect(typedQuery.start).toBe(1);
@@ -195,6 +206,7 @@ describe("SQBuilder join functions", () => {
       .joinQuery(joinQuery)
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       fields: ["description", "id"];
       sort: [{ options: "asc" }, { id: "asc" }];

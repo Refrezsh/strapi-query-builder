@@ -20,10 +20,12 @@ describe("SQBuilder filters", () => {
       .eq("nested.id", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$or;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { nested: { id: { $eq: "1" } } } = eqFilter.filters.$or[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.id.$eq).toBe("1");
@@ -36,11 +38,13 @@ describe("SQBuilder filters", () => {
       .eq("nested.name", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$not.$or;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { name: { $eq: "1" } } } =
+      // @ts-expect-error
       eqFilter.filters.$not.$or[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.name.$eq).toBe("1");
@@ -55,11 +59,13 @@ describe("SQBuilder filters", () => {
       .eq("nested.id", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$not.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $eq: "1" } } } =
+      // @ts-expect-error
       eqFilter.filters.$not.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.id.$eq).toBe("1");
@@ -68,6 +74,7 @@ describe("SQBuilder filters", () => {
   it("should produce multiple filters with $or, $not and nested keys", () => {
     const dynamic: string = "nice";
 
+    // @ts-expect-error
     const eqFilter: {
       filters: {
         $not: {
@@ -121,6 +128,7 @@ describe("SQBuilder filters", () => {
       )
       .build();
 
+    // @ts-expect-error
     const filters: {
       $or: [
         { options: { $eq: "1" } },
@@ -154,6 +162,7 @@ describe("SQBuilder filters", () => {
       )
       .build();
 
+    // @ts-expect-error
     const filters: {
       $and: [{ nested: { $and: [{ id: { $eq: "value" } }] } }];
     } = nestedFilter.filters;
@@ -170,11 +179,13 @@ describe("SQBuilder filters", () => {
   it("should create single eq", () => {
     const eqFilter = new SQBuilder<TestModel>().eq("nested.name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { name: { $eq: "1" } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.name.$eq).toBe("1");
@@ -183,11 +194,13 @@ describe("SQBuilder filters", () => {
   it("should create single not eq", () => {
     const eqFilter = new SQBuilder<TestModel>().notEq("nested.id", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $eq: "1" } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.id.$not.$eq).toBe("1");
@@ -196,11 +209,13 @@ describe("SQBuilder filters", () => {
   it("should create single eqi", () => {
     const eqFilter = new SQBuilder<TestModel>().eqi("nested.name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { name: { $eqi: "1" } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.name.$eqi).toBe("1");
@@ -211,11 +226,13 @@ describe("SQBuilder filters", () => {
       .notEqi("nested.id", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $eqi: "1" } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.nested.id.$not.$eqi).toBe("1");
@@ -224,10 +241,12 @@ describe("SQBuilder filters", () => {
   it("should create single ne", () => {
     const eqFilter = new SQBuilder<TestModel>().ne("name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $ne: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$ne).toBe("1");
@@ -236,10 +255,12 @@ describe("SQBuilder filters", () => {
   it("should create single nei", () => {
     const eqFilter = new SQBuilder<TestModel>().nei("name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $nei: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$nei).toBe("1");
@@ -250,11 +271,13 @@ describe("SQBuilder filters", () => {
       .in("nested.id", [1, 2, 3])
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $in: number[] } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -266,10 +289,12 @@ describe("SQBuilder filters", () => {
   it("should create single notIn", () => {
     const eqFilter = new SQBuilder<TestModel>().notIn("id", [1, 2, 3]).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { id: { $notIn: number[] } } = eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -281,10 +306,12 @@ describe("SQBuilder filters", () => {
   it("should create single lt", () => {
     const eqFilter = new SQBuilder<TestModel>().lt("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { nested: { id: { $lt: 1 } } } = eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -294,11 +321,13 @@ describe("SQBuilder filters", () => {
   it("should create single not lt", () => {
     const eqFilter = new SQBuilder<TestModel>().notLt("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $lt: 1 } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -308,10 +337,12 @@ describe("SQBuilder filters", () => {
   it("should create single lt", () => {
     const eqFilter = new SQBuilder<TestModel>().lte("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { nested: { id: { $lte: 1 } } } = eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -321,11 +352,13 @@ describe("SQBuilder filters", () => {
   it("should create single not lte", () => {
     const eqFilter = new SQBuilder<TestModel>().notLte("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $lte: 1 } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -335,10 +368,12 @@ describe("SQBuilder filters", () => {
   it("should create single gt", () => {
     const eqFilter = new SQBuilder<TestModel>().gt("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { nested: { id: { $gt: 1 } } } = eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -348,11 +383,13 @@ describe("SQBuilder filters", () => {
   it("should create single not gt", () => {
     const eqFilter = new SQBuilder<TestModel>().notGt("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $gt: 1 } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -362,10 +399,12 @@ describe("SQBuilder filters", () => {
   it("should create single gte", () => {
     const eqFilter = new SQBuilder<TestModel>().gte("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { nested: { id: { $gte: 1 } } } = eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -375,11 +414,13 @@ describe("SQBuilder filters", () => {
   it("should create single not gte", () => {
     const eqFilter = new SQBuilder<TestModel>().notGte("nested.id", 1).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $gte: 1 } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -391,11 +432,13 @@ describe("SQBuilder filters", () => {
       .between("nested.id", [1, 2])
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $between: number[] } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -408,11 +451,13 @@ describe("SQBuilder filters", () => {
       .notBetween("nested.id", [1, 2])
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { nested: { id: { $not: { $between: number[] } } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
 
     expect(idFilter).toBeDefined();
@@ -423,10 +468,12 @@ describe("SQBuilder filters", () => {
   it("should create single contains", () => {
     const eqFilter = new SQBuilder<TestModel>().contains("name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $contains: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$contains).toBe("1");
@@ -437,10 +484,12 @@ describe("SQBuilder filters", () => {
       .notContains("name", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $notContains: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$notContains).toBe("1");
@@ -449,10 +498,12 @@ describe("SQBuilder filters", () => {
   it("should create single containsi", () => {
     const eqFilter = new SQBuilder<TestModel>().containsi("name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $containsi: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$containsi).toBe("1");
@@ -463,10 +514,12 @@ describe("SQBuilder filters", () => {
       .notContainsi("name", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $notContainsi: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$notContainsi).toBe("1");
@@ -475,10 +528,12 @@ describe("SQBuilder filters", () => {
   it("should create single startsWith", () => {
     const eqFilter = new SQBuilder<TestModel>().startsWith("name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $startsWith: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$startsWith).toBe("1");
@@ -489,12 +544,15 @@ describe("SQBuilder filters", () => {
       .notStartsWith("name", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { name: { $not: { $startsWith: "1" } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
+
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$not.$startsWith).toBe("1");
   });
@@ -502,10 +560,12 @@ describe("SQBuilder filters", () => {
   it("should create single endsWith", () => {
     const eqFilter = new SQBuilder<TestModel>().endsWith("name", "1").build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $endsWith: "1" } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$endsWith).toBe("1");
@@ -516,12 +576,15 @@ describe("SQBuilder filters", () => {
       .notEndsWith("name", "1")
       .build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
     const idFilter: { name: { $not: { $endsWith: "1" } } } =
+      // @ts-expect-error
       eqFilter.filters.$and[0];
+
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$not.$endsWith).toBe("1");
   });
@@ -529,10 +592,12 @@ describe("SQBuilder filters", () => {
   it("should create single null", () => {
     const eqFilter = new SQBuilder<TestModel>().null("name", true).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $null: true } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$null).toBe(true);
@@ -541,10 +606,12 @@ describe("SQBuilder filters", () => {
   it("should create single not null", () => {
     const eqFilter = new SQBuilder<TestModel>().notNull("name", false).build();
 
+    // @ts-expect-error
     const filters = eqFilter.filters.$and;
     expect(filters).toBeDefined();
     expect(filters.length).toBe(1);
 
+    // @ts-expect-error
     const idFilter: { name: { $notNull: false } } = eqFilter.filters.$and[0];
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$notNull).toBe(false);

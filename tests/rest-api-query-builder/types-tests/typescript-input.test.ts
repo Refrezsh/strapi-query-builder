@@ -1,12 +1,12 @@
-import { QQBuilder } from "../../../lib/cjs";
+import { RQBuilder } from "../../../lib/cjs";
 import {
   NestedModel,
   TestModel,
 } from "../../entity-service-query-builder/types-tests/fields-typing.test";
 
-describe("QQBuilder Type-script input check", () => {
+describe("RQBuilder type-script input check", () => {
   it("should autocomplete fields selection only for primitive attributes includes string[] and optional (null | undefined) primitive values", () => {
-    const query = new QQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .field("id")
       .field("name")
       .field("description")
@@ -23,7 +23,7 @@ describe("QQBuilder Type-script input check", () => {
 
     // @ts-expect-error
     const typedQuery: {
-      select: [
+      fields: [
         "id",
         "name",
         "description",
@@ -37,11 +37,11 @@ describe("QQBuilder Type-script input check", () => {
       ];
     } = query;
 
-    expect(typedQuery.select.length).toBe(11);
+    expect(typedQuery.fields.length).toBe(11);
   });
 
   it("should autocomplete relation keys for relation models populate, includes optionality (undefined | null) on first level", () => {
-    const query = new QQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .populate("nested")
       .populate("nestedList")
       .populate("nestedOptional")
@@ -58,16 +58,16 @@ describe("QQBuilder Type-script input check", () => {
 
     const typedQuery: {
       populate: {
-        nested: true;
-        nestedList: true;
-        nestedOptional: true;
-        nestedOptionalList: true;
-        cyclicRelationList: true;
-        cyclicRelation: true;
-        nestedOptionalNullable: true;
-        nestedOptionalNullableUndefined: true;
-        nestedNullableUndefined: true;
-        nestedListOptionalNullableUndefined: true;
+        nested: { populate: "*" };
+        nestedList: { populate: "*" };
+        nestedOptional: { populate: "*" };
+        nestedOptionalList: { populate: "*" };
+        cyclicRelationList: { populate: "*" };
+        cyclicRelation: { populate: "*" };
+        nestedOptionalNullable: { populate: "*" };
+        nestedOptionalNullableUndefined: { populate: "*" };
+        nestedNullableUndefined: { populate: "*" };
+        nestedListOptionalNullableUndefined: { populate: "*" };
       };
     } = query;
 
@@ -75,11 +75,11 @@ describe("QQBuilder Type-script input check", () => {
   });
 
   it("should autocomplete relation keys for relation models populate, includes optionality (undefined | null) on deep levels", () => {
-    const query = new QQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .populateRelation(
         "nested",
         () =>
-          new QQBuilder<NestedModel>()
+          new RQBuilder<NestedModel>()
             .populate("deepNested")
             .populate("deepNestedList")
             // @ts-expect-error
@@ -89,18 +89,26 @@ describe("QQBuilder Type-script input check", () => {
       )
       .build();
 
+    // @ts-expect-error
     const typedQuery: {
       populate: {
-        nested: { populate: { deepNested: true; deepNestedList: true } };
+        nested: {
+          populate: {
+            deepNested: { populate: "*" };
+            deepNestedList: { populate: "*" };
+          };
+        };
       };
     } = query;
 
-    expect(typedQuery.populate.nested.populate.deepNested).toBe(true);
-    expect(typedQuery.populate.nested.populate.deepNestedList).toBe(true);
+    expect(typedQuery.populate.nested.populate.deepNested.populate).toBe("*");
+    expect(typedQuery.populate.nested.populate.deepNestedList.populate).toBe(
+      "*"
+    );
   });
 
   it("should autocomplete filters operator with dot notation, on this level and Relation levels except Relation own keys, scan only for 2 levels for stability", () => {
-    const query = new QQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .eq("id", "v")
       .eq("name", "v")
       .eq("description", "v")
@@ -117,7 +125,7 @@ describe("QQBuilder Type-script input check", () => {
       .filterRelation(
         "nested",
         () =>
-          new QQBuilder<NestedModel>()
+          new RQBuilder<NestedModel>()
             .eq("deepNested.deepProp", "v")
             .eq("deepNested.id", "v")
             .eq("deepNestedList.deepProp", "v")
@@ -129,11 +137,12 @@ describe("QQBuilder Type-script input check", () => {
       )
       .build();
 
-    expect(query.where.$and.length).toBe(13);
+    // @ts-expect-error
+    expect(query.filters.$and.length).toBe(13);
   });
 
   it("should autocomplete sorts operator with dot notation, on this level and Relation levels except Relation own keys, scan only for 2 levels for stability", () => {
-    const query = new QQBuilder<TestModel>()
+    const query = new RQBuilder<TestModel>()
       .sortAsc("id")
       .sortAsc("nestedList.id")
       .sortAsc("cyclicRelationList.notNestedEnumerationOptional")
@@ -143,6 +152,7 @@ describe("QQBuilder Type-script input check", () => {
       .sortAsc("nested.deepNested.id") // Must be TS error, default depth is 2, so we can't get so, so deep =)
       .build();
 
-    expect(query.orderBy.length).toBe(5);
+    // @ts-expect-error
+    expect(query.sort.length).toBe(5);
   });
 });

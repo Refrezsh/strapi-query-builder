@@ -17,6 +17,7 @@ describe("population types", () => {
 
     expect(population).toBeDefined();
 
+    // @ts-expect-error
     const populateWithType: {
       populate: {
         nested: {
@@ -102,6 +103,7 @@ describe("population types", () => {
       )
       .build();
 
+    // @ts-expect-error
     const populateWithType: {
       populate: {
         nested: { filters: { $and: [{ name: { $not: { $eq: "value2" } } }] } };
@@ -127,6 +129,7 @@ describe("population types", () => {
       )
       .build();
 
+    // @ts-expect-error
     const typedTest: {
       populate: {
         nested: {

@@ -6,7 +6,6 @@ import {
   GetAttributeType,
   MultipleAttributeType,
   OnType,
-  ParseFilters,
   ParseList,
   QueryRawInfo,
   SingleAttributeType,
@@ -21,8 +20,6 @@ import {
   StrapiSortOptions,
   StrapiSorts,
   StrapiUnionPagination,
-  TransformNestedKey,
-  TransformNestedKeys,
 } from "./query-types-util";
 
 export class QQBuilder<
@@ -63,15 +60,8 @@ export class QQBuilder<
       Data,
       {
         fields: [...Config["fields"], ...F];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -91,15 +81,8 @@ export class QQBuilder<
       Data,
       {
         fields: [...Config["fields"], F];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -184,15 +167,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], TransformNestedKey<K, D>];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -224,15 +200,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...TransformNestedKeys<K, D>];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -253,15 +222,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: "$or";
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -280,15 +242,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: "$and";
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -307,15 +262,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: true;
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -353,22 +301,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [
-          ...Config["filters"],
-          ParseFilters<
-            DeepConfig["filters"],
-            DeepConfig["rootLogical"],
-            DeepConfig["negate"]
-          >
-        ];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -408,24 +342,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [
-          ...Config["filters"],
-          {
-            [R in K]: ParseFilters<
-              RelationConfig["filters"],
-              RelationConfig["rootLogical"],
-              RelationConfig["negate"]
-            >;
-          }
-        ];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -934,15 +852,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [...Config["filters"], TransformNestedKey<K, { [D in F]: V }>];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -975,18 +886,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [
-          ...Config["filters"],
-          TransformNestedKey<K, { $not: { [D in F]: V } }>
-        ];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1007,15 +908,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: true;
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1035,10 +929,6 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
@@ -1047,9 +937,6 @@ export class QQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1078,10 +965,6 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K[number]]: P extends K[number]
@@ -1090,9 +973,6 @@ export class QQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1140,21 +1020,20 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
-            ? BuildQQCallback<RelationConfig>
+            ? {
+                select: ParseList<RelationConfig["fields"]>;
+                populate: ParseQQBuilderPopulates<
+                  RelationConfig["populates"],
+                  RelationConfig["populateAll"]
+                >;
+              }
             : P extends keyof Config["populates"]
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1218,17 +1097,19 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
             ? {
                 on: {
                   [D in keyof OnType<Config["populates"][P]> | C]: D extends C
-                    ? BuildQQCallback<RelationConfig>
+                    ? {
+                        select: ParseList<RelationConfig["fields"]>;
+                        populate: ParseQQBuilderPopulates<
+                          RelationConfig["populates"],
+                          RelationConfig["populateAll"]
+                        >;
+                      }
                     : D extends keyof OnType<Config["populates"][P]>
                     ? OnType<Config["populates"][P]>[D]
                     : never;
@@ -1238,9 +1119,6 @@ export class QQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1270,15 +1148,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Start; pageSize: Config["pagination"]["pageSize"] };
-        paginationType: "limit";
-        data: Config["data"];
       }
     >;
   }
@@ -1306,15 +1177,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: { page: Config["pagination"]["page"]; pageSize: Limit };
-        paginationType: "limit";
-        data: Config["data"];
       }
     >;
   }
@@ -1335,15 +1199,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: D;
       }
     >;
   }
@@ -1370,15 +1227,8 @@ export class QQBuilder<
       Data,
       {
         fields: [...Config["fields"], ...DeepConfig["fields"]];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1403,15 +1253,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...DeepConfig["sort"]];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1451,19 +1294,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [...Config["filters"], ...DeepConfig["filters"]];
-        rootLogical: JoinRootLogical extends true
-          ? DeepConfig["rootLogical"]
-          : Config["rootLogical"];
-        negate: JoinRootNegate extends true
-          ? DeepConfig["negate"]
-          : Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1491,10 +1323,6 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: DeepConfig["populateAll"];
         populates: {
           [P in
@@ -1505,9 +1333,6 @@ export class QQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1530,15 +1355,8 @@ export class QQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: DeepConfig["pagination"];
-        paginationType: DeepConfig["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1561,10 +1379,6 @@ export class QQBuilder<
       Data,
       {
         fields: [...Config["fields"], ...DeepConfig["fields"]];
-        sort: [...Config["sort"], ...DeepConfig["sort"]];
-        filters: [...Config["filters"], ...DeepConfig["filters"]];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: DeepConfig["populateAll"];
         populates: {
           [P in
@@ -1575,9 +1389,6 @@ export class QQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: DeepConfig["pagination"];
-        paginationType: DeepConfig["paginationType"];
-        data: Config["data"];
       }
     >;
   }
@@ -1589,7 +1400,23 @@ export class QQBuilder<
    * @return Query with dynamically generated query type
    */
   public build() {
-    return QQBuilder._buildQuery(this._query) as BuildQQOutput<Config>;
+    return QQBuilder._buildQuery(this._query) as {
+      select: ParseList<Config["fields"]>;
+      populate: ParseQQBuilderPopulates<
+        Config["populates"],
+        Config["populateAll"]
+      >;
+      orderBy: object[] | undefined;
+      where:
+        | { $and: object[] }
+        | { $or: object[] }
+        | { $not: { $and: object[] } }
+        | { $not: { $or: object[] } }
+        | undefined;
+      offset: number | undefined;
+      limit: number | undefined;
+      data: Data | undefined;
+    };
   }
 
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -1777,28 +1604,14 @@ export class QQBuilder<
 // <editor-fold desc="Specific query type utils">
 type QueryEngineBuilderConfig = {
   fields: unknown[];
-  sort: unknown[];
-  filters: unknown[];
-  rootLogical: "$and" | "$or";
-  negate: boolean;
   populateAll: boolean;
   populates: Record<string, any>;
-  pagination: { page?: number; pageSize?: number };
-  paginationType: "limit";
-  data: unknown;
 };
 
 type InitialBuildConfig = {
   fields: [];
-  sort: [];
-  filters: [];
-  rootLogical: "$and";
-  negate: false;
   populateAll: false;
   populates: {};
-  pagination: { page: never; pageSize: never };
-  paginationType: never;
-  data: never;
 };
 
 type QQBuilderCallback<
@@ -1810,42 +1623,5 @@ type QQBuilderCallback<
 type ParseQQBuilderPopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
-> = PopulateAll extends true ? true : keyof P extends never ? never : P;
-
-type BuildQQCallback<Config extends QueryEngineBuilderConfig> = {
-  select: ParseList<Config["fields"]>;
-  orderBy: ParseList<Config["sort"]>;
-  where: ParseFilters<
-    Config["filters"],
-    Config["rootLogical"],
-    Config["negate"]
-  >;
-  populate: ParseQQBuilderPopulates<Config["populates"], Config["populateAll"]>;
-} extends infer Result
-  ? {
-      [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-    }
-  : never;
-
-type BuildQQOutput<Config extends QueryEngineBuilderConfig> = {
-  select: ParseList<Config["fields"]>;
-  orderBy: ParseList<Config["sort"]>;
-  where: ParseFilters<
-    Config["filters"],
-    Config["rootLogical"],
-    Config["negate"]
-  >;
-  populate: ParseQQBuilderPopulates<Config["populates"], Config["populateAll"]>;
-  offset: Config["paginationType"] extends "limit"
-    ? Config["pagination"]["page"]
-    : never;
-  limit: Config["paginationType"] extends "limit"
-    ? Config["pagination"]["pageSize"]
-    : never;
-  data: Config["data"];
-} extends infer Result
-  ? {
-      [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-    }
-  : never;
+> = PopulateAll extends true ? true : keyof P extends never ? undefined : P;
 // </editor-fold>

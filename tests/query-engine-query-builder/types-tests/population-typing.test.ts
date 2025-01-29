@@ -21,21 +21,21 @@ describe("population types", () => {
       populate: {
         nested: {
           select: ["id"];
-          where: { $and: [{ id: { $eq: "value" } }] };
         };
         nestedList: {
           select: ["name"];
-          where: { $and: [{ name: { $eq: "value2" } }] };
         };
       };
     } = population;
 
     expect(populateWithType.populate.nested).toBeDefined();
     expect(populateWithType.populate.nested.select[0]).toBe("id");
+    // @ts-expect-error
     expect(populateWithType.populate.nested.where.$and[0].id.$eq).toBe("value");
 
     expect(populateWithType.populate.nestedList).toBeDefined();
     expect(populateWithType.populate.nestedList.select[0]).toBe("name");
+    // @ts-expect-error
     expect(populateWithType.populate.nestedList.where.$and[0].name.$eq).toBe(
       "value2"
     );
@@ -102,11 +102,12 @@ describe("population types", () => {
 
     const populateWithType: {
       populate: {
-        nested: { where: { $and: [{ name: { $not: { $eq: "value2" } } }] } };
+        nested: {};
       };
     } = populate;
 
     expect(populateWithType).toBeDefined();
+    // @ts-expect-error
     expect(populateWithType.populate.nested.where.$and[0].name.$not.$eq).toBe(
       "value2"
     );
@@ -125,6 +126,7 @@ describe("population types", () => {
       )
       .build();
 
+    // @ts-expect-error
     const typedTest: {
       populate: {
         nested: {

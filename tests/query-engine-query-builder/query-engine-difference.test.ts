@@ -24,6 +24,7 @@ describe("Query Engine Query Builder", () => {
       .sortDesc("description")
       .build();
 
+    // @ts-expect-error
     const typedQuery: { orderBy: [{ name: "asc" }, { description: "desc" }] } =
       query;
 
@@ -32,6 +33,7 @@ describe("Query Engine Query Builder", () => {
   });
 
   it("should create where filters", () => {
+    // @ts-expect-error
     const query: {
       where: {
         $and: [
@@ -59,7 +61,7 @@ describe("Query Engine Query Builder", () => {
 
   it("should create offset", () => {
     const query = new QQBuilder<TestModel>().start(10).build();
-    const typedQuery: { offset: 10 } = query;
+    const typedQuery: { offset: number | undefined } = query;
     expect(typedQuery.offset).toBe(10);
 
     // @ts-ignore
@@ -68,7 +70,7 @@ describe("Query Engine Query Builder", () => {
 
   it("should create limit", () => {
     const query = new QQBuilder<TestModel>().limit(40).build();
-    const typedQuery: { limit: 40 } = query;
+    const typedQuery: { limit: number | undefined } = query;
     expect(typedQuery.limit).toBe(40);
 
     // @ts-ignore
@@ -83,12 +85,18 @@ describe("Query Engine Query Builder", () => {
 
   it("should combine limit and offset in any direction", () => {
     const limitOffset = new QQBuilder<TestModel>().limit(20).start(5).build();
-    const typedLimitOffset: { offset: 5; limit: 20 } = limitOffset;
+    const typedLimitOffset: {
+      offset: number | undefined;
+      limit: number | undefined;
+    } = limitOffset;
     expect(typedLimitOffset.offset).toBe(5);
     expect(typedLimitOffset.limit).toBe(20);
 
     const offsetLimit = new QQBuilder<TestModel>().start(5).limit(20).build();
-    const typedOffsetLimit: { offset: 5; limit: 20 } = offsetLimit;
+    const typedOffsetLimit: {
+      offset: number | undefined;
+      limit: number | undefined;
+    } = offsetLimit;
     expect(typedOffsetLimit.offset).toBe(5);
     expect(typedOffsetLimit.limit).toBe(20);
   });

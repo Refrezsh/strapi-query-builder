@@ -7,6 +7,7 @@ describe("QQBuilder orderBy", () => {
       .sortAsc("nested.name")
       .build();
 
+    // @ts-expect-error
     const nestedTypeAscending: "asc" = nestedType.orderBy[0].nested.name;
     expect(nestedTypeAscending).toBe("asc");
   });
@@ -19,10 +20,13 @@ describe("QQBuilder orderBy", () => {
       .build();
 
     const combinedWithOtherSortAscendingNested: "asc" =
+      // @ts-expect-error
       combinedWithOtherSort.orderBy[0].nested.name;
     const combinedWithOtherSortAscendingName: "asc" =
+      // @ts-expect-error
       combinedWithOtherSort.orderBy[1].name;
     const combinedWithOtherSortAscendingOptions: "desc" =
+      // @ts-expect-error
       combinedWithOtherSort.orderBy[2].options;
 
     expect(combinedWithOtherSortAscendingNested).toBe("asc");
@@ -37,10 +41,13 @@ describe("QQBuilder orderBy", () => {
       .build();
 
     const combinedWithOtherSortAscendingNested: "asc" =
+      // @ts-expect-error
       nestedSortWithKeys.orderBy[0].nested.name;
     const combinedWithOtherSortAscendingName: "asc" =
+      // @ts-expect-error
       nestedSortWithKeys.orderBy[1].name;
     const combinedWithOtherSortAscendingOptions: "desc" =
+      // @ts-expect-error
       nestedSortWithKeys.orderBy[2].options;
 
     expect(combinedWithOtherSortAscendingNested).toBe("asc");
@@ -54,6 +61,7 @@ describe("QQBuilder orderBy", () => {
       .field("options")
       .build();
     const withFieldsOptions: "options" = withFields.select[0];
+    // @ts-expect-error
     const withFieldSort: "desc" = withFields.orderBy[0].name;
     expect(withFieldsOptions).toBe("options");
     expect(withFieldSort).toBe("desc");

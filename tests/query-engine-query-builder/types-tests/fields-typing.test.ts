@@ -41,6 +41,7 @@ describe("QQBuilder select", () => {
   });
 
   it("should work with primitive arrays", () => {
+    // @ts-expect-error
     const primitiveFilters: {
       select: ["notNestedEnumeration"];
       where: { $and: [{ notNestedEnumeration: { $eq: "value" } }] };

@@ -7,7 +7,7 @@ describe("QQBuilder data", () => {
       .data({ id: "2" })
       .build();
 
-    const dataTyped: Partial<TestModel> = query.data;
-    expect(dataTyped.id).toEqual("2");
+    const dataTyped: Partial<TestModel> | undefined = query.data;
+    expect(dataTyped?.id).toEqual("2");
   });
 });

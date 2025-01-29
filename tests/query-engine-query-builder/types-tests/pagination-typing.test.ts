@@ -4,7 +4,7 @@ import { TestModel } from "../../entity-service-query-builder/types-tests/fields
 describe("QQBuilder pagination", () => {
   it("should create start query", () => {
     const query = new QQBuilder<TestModel>().start(1).build();
-    const typedQuery: { offset: 1 } = query;
+    const typedQuery: { offset: number | undefined } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.offset).toEqual(1);
 
@@ -14,7 +14,7 @@ describe("QQBuilder pagination", () => {
 
   it("should create limit query", () => {
     const query = new QQBuilder<TestModel>().limit(10).build();
-    const typedQuery: { limit: 10 } = query;
+    const typedQuery: { limit: number | undefined } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.limit).toEqual(10);
 
@@ -24,7 +24,10 @@ describe("QQBuilder pagination", () => {
 
   it("should create start and limit query", () => {
     const query = new QQBuilder<TestModel>().start(1).limit(10).build();
-    const typedQuery: { offset: 1; limit: 10 } = query;
+    const typedQuery: {
+      offset: number | undefined;
+      limit: number | undefined;
+    } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.offset).toEqual(1);
     expect(typedQuery.limit).toEqual(10);
@@ -37,7 +40,10 @@ describe("QQBuilder pagination", () => {
       .start(1)
       .limit(26)
       .build();
-    const typedQuery: { offset: 1; limit: 26 } = query;
+    const typedQuery: {
+      offset: number | undefined;
+      limit: number | undefined;
+    } = query;
     expect(typedQuery).toBeDefined();
     expect(typedQuery.offset).toEqual(1);
     expect(typedQuery.limit).toEqual(26);

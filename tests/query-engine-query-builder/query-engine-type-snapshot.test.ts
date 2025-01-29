@@ -40,6 +40,7 @@ describe("Query engine type snapshot", () => {
       .limit(30)
       .build();
 
+    // @ts-expect-error
     const assignedQuery: {
       select: ["name", "id", "options", "description"];
       orderBy: [{ name: "asc" }, { options: "asc" }];

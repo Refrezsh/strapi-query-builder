@@ -126,6 +126,7 @@ describe("SQBuilder Type-script input check", () => {
       )
       .build();
 
+    // @ts-expect-error
     expect(query.filters.$and.length).toBe(13);
   });
 
@@ -140,6 +141,7 @@ describe("SQBuilder Type-script input check", () => {
       .sortAsc("nested.deepNested.id") // Must be TS error, default depth is 2, so we can't get so, so deep =)
       .build();
 
+    // @ts-expect-error
     expect(query.sort.length).toBe(5);
   });
 });

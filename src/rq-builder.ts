@@ -6,7 +6,6 @@ import {
   GetAttributeType,
   MultipleAttributeType,
   OnType,
-  ParseFilters,
   ParseList,
   PublicationStates,
   QueryRawInfo,
@@ -22,13 +21,12 @@ import {
   StrapiSortOptions,
   StrapiSorts,
   StrapiUnionPagination,
-  TransformNestedKey,
 } from "./query-types-util";
 
 export class RQBuilder<
   Model extends object,
   Data extends object = {},
-  Config extends EntityBuilderConfig = InitialBuildConfig
+  Config extends RestAPIBuilderConfig = InitialBuildConfig
 > {
   private _query: QueryRawInfo<Model, Data> = {
     sort: new Map(),
@@ -63,17 +61,8 @@ export class RQBuilder<
       Data,
       {
         fields: [...Config["fields"], ...F];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -93,17 +82,8 @@ export class RQBuilder<
       Data,
       {
         fields: [...Config["fields"], F];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -183,17 +163,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], `${K}:${D}`];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -225,17 +196,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...GetSortKeys<K, D>];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -256,17 +218,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: "$or";
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -285,17 +238,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: "$and";
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -314,17 +258,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: true;
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -349,7 +284,7 @@ export class RQBuilder<
    * // Reads like model.options === "value" && (model.name === "value1" || model.name === "value2")
    * @param {RQBuilderCallback} builderFactory Fabric function that returns builder with filters for current model
    */
-  public filterDeep<DeepConfig extends EntityBuilderConfig>(
+  public filterDeep<DeepConfig extends RestAPIBuilderConfig>(
     builderFactory: RQBuilderCallback<Model, {}, DeepConfig>
   ) {
     const deepBuilder = builderFactory();
@@ -362,24 +297,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [
-          ...Config["filters"],
-          ParseFilters<
-            DeepConfig["filters"],
-            DeepConfig["rootLogical"],
-            DeepConfig["negate"]
-          >
-        ];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -402,7 +321,7 @@ export class RQBuilder<
   public filterRelation<
     RelationModel extends object,
     K extends FilterRelationKey<Model>,
-    RelationConfig extends EntityBuilderConfig
+    RelationConfig extends RestAPIBuilderConfig
   >(
     attribute: K,
     builderFactory: RQBuilderCallback<RelationModel, {}, RelationConfig>
@@ -419,26 +338,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [
-          ...Config["filters"],
-          {
-            [R in K]: ParseFilters<
-              RelationConfig["filters"],
-              RelationConfig["rootLogical"],
-              RelationConfig["negate"]
-            >;
-          }
-        ];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1015,17 +916,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [...Config["filters"], TransformNestedKey<K, { [D in F]: V }>];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1058,20 +950,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [
-          ...Config["filters"],
-          TransformNestedKey<K, { $not: { [D in F]: V } }>
-        ];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1092,17 +972,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: true;
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1123,10 +994,6 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
@@ -1135,11 +1002,6 @@ export class RQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1169,10 +1031,6 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K[number]]: P extends K[number]
@@ -1181,11 +1039,6 @@ export class RQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1210,7 +1063,7 @@ export class RQBuilder<
   public populateRelation<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
-    RelationConfig extends EntityBuilderConfig
+    RelationConfig extends RestAPIBuilderConfig
   >(
     attribute: K,
     builderFactory: RQBuilderCallback<PopulateModel, {}, RelationConfig>
@@ -1233,23 +1086,20 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
-            ? BuildRQCallback<RelationConfig>
+            ? {
+                fields: ParseList<RelationConfig["fields"]>;
+                populate: ParseRQBuilderPopulates<
+                  Config["populates"],
+                  Config["populateAll"]
+                >;
+              }
             : P extends keyof Config["populates"]
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1284,7 +1134,7 @@ export class RQBuilder<
     PopulateModel extends object,
     K extends StrapiInputPopulateKey<Model>,
     C extends string,
-    RelationConfig extends EntityBuilderConfig
+    RelationConfig extends RestAPIBuilderConfig
   >(
     attribute: K,
     componentKey: C,
@@ -1313,17 +1163,19 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: {
           [P in keyof Config["populates"] | K]: P extends K
             ? {
                 on: {
                   [D in keyof OnType<Config["populates"][P]> | C]: D extends C
-                    ? BuildRQCallback<RelationConfig>
+                    ? {
+                        fields: ParseList<RelationConfig["fields"]>;
+                        populate: ParseRQBuilderPopulates<
+                          Config["populates"],
+                          Config["populateAll"]
+                        >;
+                      }
                     : D extends keyof OnType<Config["populates"][P]>
                     ? OnType<Config["populates"][P]>[D]
                     : never;
@@ -1333,11 +1185,6 @@ export class RQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1373,21 +1220,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: {
-          page: Page;
-          pageSize: Config["pagination"]["pageSize"];
-          withCount: WithCount;
-        };
-        paginationType: "page";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1416,21 +1250,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: {
-          page: Config["pagination"]["page"];
-          pageSize: PageSize;
-          withCount: Config["pagination"]["withCount"];
-        };
-        paginationType: "page";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1464,21 +1285,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: {
-          page: Start;
-          pageSize: Config["pagination"]["pageSize"];
-          withCount: WithCount;
-        };
-        paginationType: "limit";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1506,21 +1314,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: {
-          page: Config["pagination"]["page"];
-          pageSize: Limit;
-          withCount: Config["pagination"]["withCount"];
-        };
-        paginationType: "limit";
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1541,17 +1336,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: D;
       }
     >;
   }
@@ -1563,7 +1349,7 @@ export class RQBuilder<
    * @description Same keys will be merged
    * @param {RQBuilder} builder Embedded builder
    */
-  public joinFields<DeepConfig extends EntityBuilderConfig>(
+  public joinFields<DeepConfig extends RestAPIBuilderConfig>(
     builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const currentFields = this._query.fields;
@@ -1578,17 +1364,8 @@ export class RQBuilder<
       Data,
       {
         fields: [...Config["fields"], ...DeepConfig["fields"]];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1598,7 +1375,7 @@ export class RQBuilder<
    * @description Same keys will be merged
    * @param {RQBuilder} builder Embedded builder
    */
-  public joinSort<DeepConfig extends EntityBuilderConfig>(
+  public joinSort<DeepConfig extends RestAPIBuilderConfig>(
     builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const currentSorts = this._query.sort;
@@ -1613,17 +1390,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: [...Config["sort"], ...DeepConfig["sort"]];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1635,7 +1403,7 @@ export class RQBuilder<
    * @param {boolean} joinRootNegate Override root negate ?
    */
   public joinFilters<
-    DeepConfig extends EntityBuilderConfig,
+    DeepConfig extends RestAPIBuilderConfig,
     JoinRootLogical extends boolean = false,
     JoinRootNegate extends boolean = false
   >(
@@ -1663,21 +1431,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: [...Config["filters"], ...DeepConfig["filters"]];
-        rootLogical: JoinRootLogical extends true
-          ? DeepConfig["rootLogical"]
-          : Config["rootLogical"];
-        negate: JoinRootNegate extends true
-          ? DeepConfig["negate"]
-          : Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1687,7 +1442,7 @@ export class RQBuilder<
    * @description Same keys will be overwritten
    * @param {RQBuilder} builder Embedded builder
    */
-  public joinPopulate<DeepConfig extends EntityBuilderConfig>(
+  public joinPopulate<DeepConfig extends RestAPIBuilderConfig>(
     builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const currentPopulate = this._query.population;
@@ -1705,10 +1460,6 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: DeepConfig["populateAll"];
         populates: {
           [P in
@@ -1719,11 +1470,6 @@ export class RQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1732,7 +1478,7 @@ export class RQBuilder<
    * @description Attach pagination from other query builder
    * @param {RQBuilder} builder Embedded builder
    */
-  public joinPagination<DeepConfig extends EntityBuilderConfig>(
+  public joinPagination<DeepConfig extends RestAPIBuilderConfig>(
     builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     const externalPagination = builder.getRawPagination();
@@ -1746,17 +1492,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: DeepConfig["pagination"];
-        paginationType: DeepConfig["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1765,7 +1502,7 @@ export class RQBuilder<
    * @description Join query from other query builder to current query builder
    * @param {RQBuilder} builder Embedded builder
    */
-  public joinQuery<DeepConfig extends EntityBuilderConfig>(
+  public joinQuery<DeepConfig extends RestAPIBuilderConfig>(
     builder: RQBuilder<Model, {}, DeepConfig>
   ) {
     this.joinPopulate(builder);
@@ -1779,10 +1516,6 @@ export class RQBuilder<
       Data,
       {
         fields: [...Config["fields"], ...DeepConfig["fields"]];
-        sort: [...Config["sort"], ...DeepConfig["sort"]];
-        filters: [...Config["filters"], ...DeepConfig["filters"]];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: DeepConfig["populateAll"];
         populates: {
           [P in
@@ -1793,11 +1526,6 @@ export class RQBuilder<
             ? Config["populates"][P]
             : never;
         };
-        pagination: DeepConfig["pagination"];
-        paginationType: DeepConfig["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1819,17 +1547,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: Config["publicationState"];
-        locale: L;
-        data: Config["data"];
       }
     >;
   }
@@ -1849,17 +1568,8 @@ export class RQBuilder<
       Data,
       {
         fields: Config["fields"];
-        sort: Config["sort"];
-        filters: Config["filters"];
-        rootLogical: Config["rootLogical"];
-        negate: Config["negate"];
         populateAll: Config["populateAll"];
         populates: Config["populates"];
-        pagination: Config["pagination"];
-        paginationType: Config["paginationType"];
-        publicationState: P;
-        locale: Config["locale"];
-        data: Config["data"];
       }
     >;
   }
@@ -1871,7 +1581,32 @@ export class RQBuilder<
    * @return Query with dynamically generated query type
    */
   public build() {
-    return RQBuilder._buildQuery(this._query) as BuildRQOutput<Config>;
+    return RQBuilder._buildQuery(this._query) as {
+      fields: ParseList<Config["fields"]>;
+      populate: ParseRQBuilderPopulates<
+        Config["populates"],
+        Config["populateAll"]
+      >;
+      sort: string[] | undefined;
+      filters:
+        | { $and: object[] }
+        | { $or: object[] }
+        | { $not: { $and: object[] } }
+        | { $not: { $or: object[] } }
+        | undefined;
+      pagination:
+        | {
+            page: number | undefined;
+            pageSize: number | undefined;
+            start: number | undefined;
+            limit: number | undefined;
+            withCount: boolean | undefined;
+          }
+        | undefined;
+      publicationState: PublicationStates | undefined;
+      locale: string | undefined;
+      data: Data | undefined;
+    };
   }
 
   private static _buildQuery<Md extends object, Dt extends object>(
@@ -2078,106 +1813,26 @@ export class RQBuilder<
 }
 
 // <editor-fold desc="Specific query types utils">
-export type GetSortKeys<Keys extends readonly string[], V extends string> = {
-  [K in keyof Keys]: `${Keys[K]}:${V}`;
-};
-
-type EntityBuilderConfig = {
+type RestAPIBuilderConfig = {
   fields: unknown[];
-  sort: unknown[];
-  filters: unknown[];
-  rootLogical: "$and" | "$or";
-  negate: boolean;
   populateAll: boolean;
   populates: Record<string, any>;
-  pagination: { page?: number; pageSize?: number; withCount?: boolean };
-  paginationType: "page" | "limit";
-  publicationState: PublicationStates;
-  locale: string;
-  data: unknown;
 };
 
 type InitialBuildConfig = {
   fields: [];
-  sort: [];
-  filters: [];
-  rootLogical: "$and";
-  negate: false;
   populateAll: false;
   populates: {};
-  pagination: { page: never; pageSize: never; withCount: never };
-  paginationType: never;
-  publicationState: never;
-  locale: never;
-  data: never;
 };
 
 type RQBuilderCallback<
   Model extends object,
   Data extends object,
-  Config extends EntityBuilderConfig
+  Config extends RestAPIBuilderConfig
 > = () => RQBuilder<Model, Data, Config>;
 
 type ParseRQBuilderPopulates<
   P extends Record<string, any>,
   PopulateAll extends boolean
-> = PopulateAll extends true ? "*" : keyof P extends never ? never : P;
-
-type BuildRQCallback<Config extends EntityBuilderConfig> = {
-  fields: ParseList<Config["fields"]>;
-  sort: ParseList<Config["sort"]>;
-  filters: ParseFilters<
-    Config["filters"],
-    Config["rootLogical"],
-    Config["negate"]
-  >;
-  populate: ParseRQBuilderPopulates<Config["populates"], Config["populateAll"]>;
-} extends infer Result
-  ? {
-      [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-    }
-  : never;
-
-type BuildRQOutput<Config extends EntityBuilderConfig> = {
-  fields: ParseList<Config["fields"]>;
-  sort: ParseList<Config["sort"]>;
-  filters: ParseFilters<
-    Config["filters"],
-    Config["rootLogical"],
-    Config["negate"]
-  >;
-  populate: ParseRQBuilderPopulates<Config["populates"], Config["populateAll"]>;
-  pagination: Config["paginationType"] extends never
-    ? never
-    : {
-        page: Config["paginationType"] extends "page"
-          ? Config["pagination"]["page"]
-          : never;
-        pageSize: Config["paginationType"] extends "page"
-          ? Config["pagination"]["pageSize"]
-          : never;
-        start: Config["paginationType"] extends "limit"
-          ? Config["pagination"]["page"]
-          : never;
-        limit: Config["paginationType"] extends "limit"
-          ? Config["pagination"]["pageSize"]
-          : never;
-        withCount: Config["pagination"]["withCount"] extends never
-          ? never
-          : Config["pagination"]["withCount"];
-      } extends infer Result
-    ? {
-        [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-      }
-    : never;
-  publicationState: Config["publicationState"] extends PublicationStates
-    ? Config["publicationState"]
-    : never;
-  locale: Config["locale"] extends string ? Config["locale"] : never;
-  data: Config["data"];
-} extends infer Result
-  ? {
-      [K in keyof Result as Result[K] extends never ? never : K]: Result[K];
-    }
-  : never;
+> = PopulateAll extends true ? "*" : keyof P extends never ? undefined : P;
 // </editor-fold>
