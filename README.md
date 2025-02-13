@@ -18,7 +18,7 @@ import { SQBuilder } from "strapi-query-builder";
 
 ## Why?
 
-Strapi has flexible syntax for building queries, as the project grows the logic of the queries becomes complex it becomes difficult to keep track of errors in syntax.
+Strapi has flexible syntax for building queries, as the project grows the logic of the queries becomes complex, it becomes difficult to keep track of errors in syntax.
 
 > For get the most out of the library use it with Typescript.
 
@@ -26,7 +26,7 @@ Strapi has flexible syntax for building queries, as the project grows the logic 
 
 - Advanced typescript autocompletion. When passing the model type to the query builder, it will give precise hints on which keys to use.
 - Builder has two validation modes. Strict and non-strict. Strict mode works if there is `id` property in the model type.
-- Builder creates the exact type of query on the output. This makes it easy to integrate with the internal typing of `Strapi` services themselves.
+- Builder creates a query type where it specifies the fields and populate keys exactly. This makes it easy to integrate with the internal typing of `Strapi` services themselves.
 - The ability to attach query. You can write separate parts of a queries and then prepare complex query on the fly.
 - Query compilation. Queries can be serialized into a TS/JS template and saved in the desired location. This way we can get complex and correct queries as if written by hand.
 
@@ -57,7 +57,7 @@ const builtQuery = {
       },
     ],
   },
-}; // Query has exact type so Entity Service can return correct return type.
+}; // For filters, the builder creates a generalized type.
 ```
 
 We can improve readability through IDE autocompletion if we provide the type for which the query is executed.
@@ -263,7 +263,7 @@ const builtQuery = new SQBuilder<ProductType>()
 
 ## Populate
 
-The population can be simple or really complex. For the population of everything as in Strapi you can use `.populateAll()`
+The population can be simple or really complex. For the populate of everything as in Strapi you can use `.populateAll()`
 
 ```ts
 const populateAll = new SQBuilder().populateAll().build();
@@ -279,7 +279,7 @@ const populateSpecific = new SQBuilder().populate("Category").populate("Seo").bu
 
 ### Complex population
 
-Strapi allows filtering, sorting, selecting fields from the populating data, or do population at even deeper levels.
+Strapi allows filtering, sorting, selecting fields from the populating data, or do populate at even deeper levels.
 There are `.populateRelation()` and `.populateDynamic()` operators for this purpose.
 
 ```ts
@@ -463,8 +463,8 @@ To increase the depth you can override this parameter using `declare global`.
 
 ```ts
 declare global {
-  namespace QueryBuilderConfig {
-    type DefaultScanDepth = 3; // Max is 5
+  interface QueryBuilderConfig {
+    DefaultScanDepth: 2;
   }
 }
 ```

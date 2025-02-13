@@ -616,4 +616,19 @@ describe("SQBuilder filters", () => {
     expect(idFilter).toBeDefined();
     expect(idFilter.name.$notNull).toBe(false);
   });
+
+  it("should use default root logical when merging $or to deep level", () => {
+    const topBuilder = new SQBuilder<TestModel>();
+    const nestedBuilder = new SQBuilder<TestModel>()
+      .or()
+      .eq("name", "test")
+      .eq("name", "test2");
+
+    const query = topBuilder.filterDeep(() => nestedBuilder).build();
+
+    // @ts-expect-error
+    expect(query.filters.$and).toBeDefined();
+    // @ts-expect-error
+    expect(query.filters.$or).toBeUndefined();
+  });
 });
