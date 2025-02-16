@@ -5,7 +5,7 @@ Utility for type safe queries for [Strapi Headless CMS](https://strapi.io/)
 ```bash
 # via npm
 npm install strapi-query-builder // Old version not-recomended and will be updated to v5 soon
-npm install strapi-query-builder@v4 // Strapi v4 version
+npm install strapi-query-builder@strapi4 // Strapi v4 version
 ```
 
 Import with
