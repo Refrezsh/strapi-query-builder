@@ -2,6 +2,10 @@
 
 Utility for type safe queries for [Strapi Headless CMS](https://strapi.io/)
 
+> A new version of the library is available with `strapi4` npm tag. Clearer syntax, exact type return for integration with `Strapi` typing, compilable queries.
+> [NPM Page](https://www.npmjs.com/package/strapi-query-builder/v/4.0.1), [migration](https://github.com/Refrezsh/strapi-query-builder/blob/v4/migration/V4Migration.md).
+> This version will not be removed or changed so as not to create unpleasant surprises.
+
 ```bash
 # via npm
 npm install strapi-query-builder
